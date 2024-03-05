@@ -8,6 +8,7 @@ class VRPInstance:
         self.distance = instance['edge_weight']
         self.dimension = instance['dimension']
         self.routes = []
+        self.sol = False
 
     def get_cost(self):
         """Calculate the total cost of a solution to an instance"""
@@ -18,6 +19,12 @@ class VRPInstance:
                 costs += self.edge_weight[i][j]
         self.cost = costs
 
-def compare_cost(instance, solution, routes):
-    route_cost = get_cost(instance, routes)
-    return (route_cost-solution['cost'])/solution['cost']
+    def add_sol(self, solution):
+        """Add solution data for the instance"""
+        self.sol = True
+        self.sol_cost = solution['cost']
+
+    def compare_cost(self):
+        """Compare the current solution to the optimum"""
+        self.get_cost()
+        self.perc = (self.cost-self.sol_cost)/self.sol_cost
