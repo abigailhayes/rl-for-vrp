@@ -37,6 +37,8 @@ class CWSavings(VRPInstance):
         return sum([self.demand[i] for i in new_route])
 
     def routing(self):
+        """Running the main part of the algorithm to provide a final route.
+        Consider each node pair in turn, and join the routes if appropriate."""
         for i, j, c in self.savings:
             node_pair = NodePair(i, j, self.routes)
 
