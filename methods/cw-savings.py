@@ -48,6 +48,8 @@ def cw_savings(instance):
     for i,j,c in savings:
         if pos_check(i)==2 or pos_check(j)==2:
             continue
+        if i in get_route(j):
+            continue
         new_route = merge_routes(i,j)
         if cap_check(new_route)>instance['capacity']:
             continue
