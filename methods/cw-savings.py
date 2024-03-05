@@ -8,7 +8,12 @@ class CWSavings(VRPInstance):
     """A class for implementing Clarke-Wright Savings on a VRP instance."""
 
     def route_init(self):
+        """Initialise routes specific to CW Savings"""
         self.routes = [[i] for i in range(1,self.dimension)]
+
+    def saving(self, i, j):
+        # Calculate saving for a specific node pair
+        return self.edge_weight[i][0]+self.edge_weight[0][j]-self.edge_weight[i][j]
 
 
 def cw_savings(instance):
