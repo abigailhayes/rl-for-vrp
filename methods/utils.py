@@ -8,3 +8,7 @@ def get_cost(instance, routes):
         for i,j in pairs:
             costs += instance['edge_weight'][i][j]
     return costs
+
+def compare_cost(instance, solution, routes):
+    route_cost = get_cost(instance, routes)
+    return (route_cost-solution['cost'])/solution['cost']
