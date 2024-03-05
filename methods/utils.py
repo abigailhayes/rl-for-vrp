@@ -16,13 +16,14 @@ class VRPInstance:
         for r in self.routes:
             pairs = list(pairwise([0]+r+[0]))
             for i,j in pairs:
-                costs += self.edge_weight[i][j]
+                costs += self.distance[i][j]
         self.cost = costs
 
     def add_sol(self, solution):
         """Add solution data for the instance"""
         self.sol = True
         self.sol_cost = solution['cost']
+        self.sol_routes = solution['routes']
 
     def compare_cost(self):
         """Compare the current solution to the optimum"""
