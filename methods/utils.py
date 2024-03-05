@@ -1,5 +1,14 @@
 from itertools import pairwise
 
+class VRPInstance:
+    """A class for storing a VRP instance."""
+    def __init__(self, instance):
+        self.capacity = instance['capacity']
+        self.demand = instance['demand']
+        self.distance = instance['edge_weight']
+        self.dimension = instance['dimension']
+        self.routes = []
+
 def get_cost(instance, routes):
     # Calculate the total cost of a solution to an instance
     costs = 0

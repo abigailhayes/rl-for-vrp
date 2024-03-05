@@ -1,9 +1,18 @@
 import vrplib
 from operator import itemgetter
+from utils import VRPInstance
 
 data = vrplib.read_instance('instances/A/A-n32-k5.vrp')
 
+class CWSavings(VRPInstance):
+    """A class for implementing Clarke-Wright Savings on a VRP instance."""
+
+    def route_init(self):
+        self.routes = [[i] for i in range(1,self.dimension)]
+
+
 def cw_savings(instance):
+    """Function to implement Clarke-Wright Savings on a VRP instance"""
     # Initialise to a single node in each route
     routes = [[i] for i in range(1,instance['dimension'])]
 
@@ -20,11 +29,11 @@ def cw_savings(instance):
 
     # Run through list of savings and merge routes where appropriate
     def get_route(i):
-        # Get the current route a node is in
+        """Get the current route a node is in"""
         return [r for r in routes if i in r][0]
 
     def pos_check(i):
-        # Check where in a route a node appears
+        """Check where in a route a node appears"""
         route = get_route(i)
         if route[0]==i:
             return 0
@@ -34,7 +43,7 @@ def cw_savings(instance):
             return 2
 
     def merge_routes(i,j):
-        # Merge routes based on positioning of nodes
+        """Merge routes based on positioning of nodes"""
         if pos_check(i)<pos_check(j):
             return get_route(j)+get_route(i)
         elif pos_check(i)<pos_check(j):
@@ -43,6 +52,7 @@ def cw_savings(instance):
             return get_route(i) + list(reversed(get_route(j)))
 
     def cap_check(new_route):
+        """Check that the new proposed route fits within the capacity demand"""
         return sum([instance['demand'][i] for i in new_route])
 
     for i,j,c in savings:
