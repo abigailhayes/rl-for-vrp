@@ -23,14 +23,14 @@ class CWSavings(VRPInstance):
                 self.savings.append((i, j, self._calc_saving(i, j)))
         self.savings.sort(key=itemgetter(2), reverse=True)
 
-    def _merge_routes(self):
+    def _merge_routes(self, node_pair):
         """Merge routes based on positioning of nodes"""
-        if self.node_pair.pos_i<self.node_pair.pos_j:
-            return self.node_pair.route_j+self.node_pair.route_i
-        elif self.node_pair.pos_i<self.node_pair.pos_j:
-            return self.node_pair.route_i + self.node_pair.route_j
+        if node_pair.pos_i<node_pair.pos_j:
+            return node_pair.route_j+node_pair.route_i
+        elif node_pair.pos_i<node_pair.pos_j:
+            return node_pair.route_i + node_pair.route_j
         else:
-            return self.node_pair.route_i + list(reversed(self.node_pair.route_j))
+            return node_pair.route_i + list(reversed(node_pair.route_j))
 
     def _cap_check(self, new_route):
         """Check that the new proposed route fits within the capacity demand"""
@@ -38,13 +38,13 @@ class CWSavings(VRPInstance):
 
     def routing(self):
         for i, j, c in self.savings:
-            self.node_pair = NodePair(i, j, self.routes)
+            node_pair = NodePair(i, j, self.routes)
 
-            if self.node_pair.pos_i == 2 or self.node_pair.pos_j == 2:
+            if node_pair.pos_i == 2 or node_pair.pos_j == 2:
                 continue
-            if i in self.node_pair.route_j:
+            if i in node_pair.route_j:
                 continue
-            new_route = self._merge_routes()
+            new_route = self._merge_routes(node_pair)
             if self._cap_check(new_route) > self.capacity:
                 continue
             self.routes = [r for r in self.routes if i not in r and j not in r]
@@ -54,7 +54,6 @@ class CWSavings(VRPInstance):
         self.route_init()
         self.get_savings()
         self.routing()
-        del self.node_pair
         self.get_cost()
         if self.sol==True:
             self.compare_cost()
