@@ -1,6 +1,6 @@
 import vrplib
 from operator import itemgetter
-from utils import VRPInstance
+from utils import VRPInstance, NodePair
 
 data = vrplib.read_instance('instances/A/A-n32-k5.vrp')
 solution = vrplib.read_solution('instances/A/A-n32-k5.sol')
@@ -23,28 +23,14 @@ class CWSavings(VRPInstance):
                 self.savings.append((i, j, self._calc_saving(i, j)))
         self.savings.sort(key=itemgetter(2), reverse=True)
 
-    def _get_route(self, i):
-        """Get the current route the nodes of interest is in"""
-        return [r for r in self.routes if i in r][0]
-
-    def _pos_check(self, i):
-        """Check where in a route a node appears"""
-        route = self._get_route(i)
-        if route[0]==i:
-            return 0
-        elif route[-1]==i:
-            return 1
-        else:
-            return 2
-
-    def _merge_routes(self, i, j):
+    def _merge_routes(self):
         """Merge routes based on positioning of nodes"""
-        if self._pos_check(i)<self._pos_check(j):
-            return self._get_route(j)+self._get_route(i)
-        elif self._pos_check(i)<self._pos_check(j):
-            return self._get_route(i) + self._get_route(j)
+        if self.node_pair.pos_i<self.node_pair.pos_j:
+            return self.node_pair.route_j+self.node_pair.route_i
+        elif self.node_pair.pos_i<self.node_pair.pos_j:
+            return self.node_pair.route_i + self.node_pair.route_j
         else:
-            return self._get_route(i) + list(reversed(self._get_route(j)))
+            return self.node_pair.route_i + list(reversed(self.node_pair.route_j))
 
     def _cap_check(self, new_route):
         """Check that the new proposed route fits within the capacity demand"""
@@ -52,11 +38,13 @@ class CWSavings(VRPInstance):
 
     def routing(self):
         for i, j, c in self.savings:
-            if self._pos_check(i) == 2 or self._pos_check(j) == 2:
+            self.node_pair = NodePair(i, j, self.routes)
+
+            if self.node_pair.pos_i == 2 or self.node_pair.pos_j == 2:
                 continue
-            if i in self._get_route(j):
+            if i in self.node_pair.route_j:
                 continue
-            new_route = self._merge_routes(i, j)
+            new_route = self._merge_routes()
             if self._cap_check(new_route) > self.capacity:
                 continue
             self.routes = [r for r in self.routes if i not in r and j not in r]
@@ -66,6 +54,7 @@ class CWSavings(VRPInstance):
         self.route_init()
         self.get_savings()
         self.routing()
+        del self.node_pair
         self.get_cost()
         if self.sol==True:
             self.compare_cost()
