@@ -1,5 +1,5 @@
 from operator import itemgetter
-import utils
+import methods.utils as utils
 
 class CWSavings(utils.VRPInstance):
     """A class for implementing Clarke-Wright Savings on a VRP instance."""
