@@ -1,11 +1,7 @@
-import vrplib
 from operator import itemgetter
-from utils import VRPInstance, NodePair
+import methods.utils as utils
 
-data = vrplib.read_instance('instances/A/A-n32-k5.vrp')
-solution = vrplib.read_solution('instances/A/A-n32-k5.sol')
-
-class CWSavings(VRPInstance):
+class CWSavings(utils.VRPInstance):
     """A class for implementing Clarke-Wright Savings on a VRP instance."""
 
     def route_init(self):
@@ -40,7 +36,7 @@ class CWSavings(VRPInstance):
         """Running the main part of the algorithm to provide a final route.
         Consider each node pair in turn, and join the routes if appropriate."""
         for i, j, c in self.savings:
-            node_pair = NodePair(i, j, self.routes)
+            node_pair = utils.NodePair(i, j, self.routes)
 
             if node_pair.pos_i == 2 or node_pair.pos_j == 2:
                 continue
