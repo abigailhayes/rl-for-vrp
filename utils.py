@@ -25,6 +25,11 @@ def apply_method(method, instance):
     output.run_all()
     return output
 
+def NestedDictValues(d):
+  for v1 in d.values():
+    for v2 in v1.values():
+        yield v2
+
 def avg_perf(task, method):
     """Function to run over all available instances and get the average percentage that the algorithm
     is worse by
@@ -41,6 +46,7 @@ def avg_perf(task, method):
             run = apply_method(method, instance)
             results[subdir][example] = run.perc
         averages[subdir] = Series([*results[subdir].values()]).mean()
+    averages['all'] = mean(NestedDictValues(results))
 
     # Save all results in a file
     os.makedirs(f'results/{task}', exist_ok=True)
