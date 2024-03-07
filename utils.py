@@ -30,7 +30,7 @@ def NestedDictValues(d):
     for v2 in v1.values():
         yield v2
 
-def avg_perf(task, method):
+def avg_perf(task, method, small=True):
     """Function to run over all available instances and get the average percentage that the algorithm
     is worse by
     Specify:
@@ -42,6 +42,10 @@ def avg_perf(task, method):
     results = {}
     averages = {}
     for subdir in next(os.walk(directory))[1]:
+        print('Running:', subdir)
+        if (small==True) & (subdir in["XML100", "XXL", "X", "Golden"]):
+            continue
+        results[subdir] = {}
         perc_results[subdir] = {}
         for example in [example[:-4] for example in next(os.walk(f'{directory}/{subdir}'))[2] if example.endswith('vrp')]:
             instance = instances_utils.import_instance(f'{directory}/{subdir}', example)
