@@ -32,7 +32,7 @@ class CWSavings(utils.VRPInstance):
         """Check that the new proposed route fits within the capacity demand"""
         return sum([self.demand[i] for i in new_route])
 
-    def routing(self):
+    def routing(self, talk=False):
         """Running the main part of the algorithm to provide a final route.
         Consider each node pair in turn, and join the routes if appropriate."""
         for i, j, c in self.savings:
@@ -45,13 +45,15 @@ class CWSavings(utils.VRPInstance):
             new_route = self._merge_routes(node_pair)
             if self._cap_check(new_route) > self.capacity:
                 continue
+            if talk==True:
+                print("Current routes:", self.routes, "Join:", i, ", ", j, " Save: ", c)
             self.routes = [r for r in self.routes if i not in r and j not in r]
             self.routes.append(new_route)
 
-    def run_all(self):
+    def run_all(self, talk=False):
         self.route_init()
         self.get_savings()
-        self.routing()
+        self.routing(talk)
         self.get_cost()
         if self.sol==True:
             self.compare_cost()
