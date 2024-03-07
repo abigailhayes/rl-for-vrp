@@ -43,7 +43,7 @@ def avg_perf(task, method, small=True):
     averages = {}
     for subdir in next(os.walk(directory))[1]:
         print('Running:', subdir)
-        if (small==True) & (subdir in["XML100", "XXL", "X", "Golden"]):
+        if (small==True) & (subdir in["XML100", "XXL", "X", "Li"]):
             continue
         results[subdir] = {}
         perc_results[subdir] = {}
