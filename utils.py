@@ -1,5 +1,6 @@
 import os
 import instances.utils as instances_utils
+import methods.cw_savings as cw_savings
 
 def get_dir(task):
     """Specifies the directory to run through, based on the task."""
@@ -26,7 +27,13 @@ def avg_perf(task, method):
     - task; CVRP or other
     - method; the algorithm being tested"""
     directory = get_dir(task)
+    results = {}
     for subdir in next(os.walk(directory))[1]:
+        results[subdir] = {}
         for example in [example[:-4] for example in next(os.walk(f'{directory}/{subdir}'))[2] if example.endswith('vrp')]:
-            instance = instances_utils.import_instance(subdir, example)
+            instance = instances_utils.import_instance(f'{directory}/{subdir}', example)
             run = apply_method(method, instance)
+            results[subdir][example] = run.perc
+    print(results)
+
+avg_perf('CVRP', 'CWSavings')
