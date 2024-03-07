@@ -1,6 +1,9 @@
 import os
 import json
 
+from statistics import mean
+from pandas import Series
+
 import instances.utils as instances_utils
 import methods.cw_savings as cw_savings
 
@@ -30,16 +33,23 @@ def avg_perf(task, method):
     - method; the algorithm being tested"""
     directory = get_dir(task)
     results = {}
+    averages = {}
     for subdir in next(os.walk(directory))[1]:
         results[subdir] = {}
         for example in [example[:-4] for example in next(os.walk(f'{directory}/{subdir}'))[2] if example.endswith('vrp')]:
             instance = instances_utils.import_instance(f'{directory}/{subdir}', example)
             run = apply_method(method, instance)
             results[subdir][example] = run.perc
+        averages[subdir] = Series([*results[subdir].values()]).mean()
 
+    # Save all results in a file
     os.makedirs(f'results/{task}', exist_ok=True)
     os.makedirs(f'results/{task}/{method}', exist_ok=True)
     with open(f'results/{task}/{method}/all_instances.json', 'w') as f:
         json.dump(results, f, indent=2)
+
+    # Save averages
+    with open(f'results/{task}/{method}/averages.json', 'w') as f:
+        json.dump(averages, f, indent=2)
 
 avg_perf('CVRP', 'CWSavings')
