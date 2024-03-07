@@ -58,4 +58,3 @@ def avg_perf(task, method):
     with open(f'results/{task}/{method}/averages.json', 'w') as f:
         json.dump(averages, f, indent=2)
 
-avg_perf('CVRP', 'CWSavings')
