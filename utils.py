@@ -1,4 +1,6 @@
 import os
+import json
+
 import instances.utils as instances_utils
 import methods.cw_savings as cw_savings
 
@@ -34,6 +36,10 @@ def avg_perf(task, method):
             instance = instances_utils.import_instance(f'{directory}/{subdir}', example)
             run = apply_method(method, instance)
             results[subdir][example] = run.perc
-    print(results)
+
+    os.makedirs(f'results/{task}', exist_ok=True)
+    os.makedirs(f'results/{task}/{method}', exist_ok=True)
+    with open(f'results/{task}/{method}/all_instances.json', 'w') as f:
+        json.dump(results, f, indent=2)
 
 avg_perf('CVRP', 'CWSavings')
