@@ -13,6 +13,7 @@ class CWSavings(utils.VRPInstance):
         return self.distance[i][0]+self.distance[0][j]-self.distance[i][j]
 
     def get_savings(self):
+        """Calculated all savings"""
         self.savings = []
         for i in range(2, self.dimension):
             for j in range(1, i):

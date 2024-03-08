@@ -22,8 +22,9 @@ class Sweep(utils.VRPInstance):
                 continue
             new_route.append(int(id))
             if self._cap_check(new_route) > self.capacity:
+                # When capacity is exceeded, start new cluster
                 self.clusters.append(new_route[:-1])
                 new_route = [int(id)]
-        self.clusters.append(new_route)
+        self.clusters.append(new_route) # Save final cluster when no more nodes
 
 
