@@ -11,6 +11,10 @@ class VRPInstance:
         self.routes = []
         self.sol = False
 
+    def _cap_check(self, new_route):
+        """Check that the new proposed route fits within the capacity demand"""
+        return sum([self.demand[i] for i in new_route])
+
     def get_cost(self):
         """Calculate the total cost of a solution to an instance"""
         costs = 0

@@ -28,10 +28,6 @@ class CWSavings(utils.VRPInstance):
         else:
             return node_pair.route_i + list(reversed(node_pair.route_j))
 
-    def _cap_check(self, new_route):
-        """Check that the new proposed route fits within the capacity demand"""
-        return sum([self.demand[i] for i in new_route])
-
     def routing(self, talk=False):
         """Running the main part of the algorithm to provide a final route.
         Consider each node pair in turn, and join the routes if appropriate."""
