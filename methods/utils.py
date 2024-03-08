@@ -7,6 +7,7 @@ class VRPInstance:
         self.demand = instance['demand']
         self.distance = instance['edge_weight']
         self.dimension = instance['dimension']
+        self.coords = instance['node_coord_section']
         self.routes = []
         self.sol = False
 
