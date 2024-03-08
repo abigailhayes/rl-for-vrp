@@ -6,7 +6,7 @@ class Sweep(utils.VRPInstance):
     """A class for implementing Sweep on a VRP instance."""
 
     def polar_coord(self):
-        """Calculates the polar co-ordinate, and sorts with a reference to the node id."""
+        """Calculate the polar co-ordinate, and sort with a reference to the node id."""
         depot = self.coords[0]
         polars = np.append(0,np.arctan((self.coords[1:,1]-depot[1])/(self.coords[1:,0]-depot[0])))
         index = np.arange(polars.shape[0])  # create index array for indexing
