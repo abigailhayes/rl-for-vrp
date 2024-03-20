@@ -30,9 +30,18 @@ class Sweep(utils.VRPInstance):
 
     def routing(self, method):
         """Carry out routing for specified method"""
+        self.routes = []
         for cluster in self.clusters:
             instance = self._gen_tsp_instance(cluster)
             getattr(instance, method)()
             self.routes.append(instance.route)
+
+    def run_all(self, tsp_method):
+        self.polar_coord()
+        self.build_clusters()
+        self.routing(tsp_method)
+        self.get_cost()
+        if self.sol==True:
+            self.compare_cost()
 
 
