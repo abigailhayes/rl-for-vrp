@@ -24,17 +24,18 @@ class TSPInstance:
 
     def nearest_insertion(self):
         """Constructs a route based on the nearest insertion to the existing tour"""
-        route, indices = [0], [0]
-        index = 0
         distance = self.distance.copy().view(np.ma.MaskedArray)
-        distance[:, index] = np.ma.masked
+        route, indices = [0, 0], [0, 0]
+
+        index = 0                          # Track latest node under consideration
+        distance[:, index] = np.ma.masked  # Mask the column for node that has been added to route
+
         # Add first non-depot node, also store index, and mask in distances
         index = distance[route].argmin()
-        route.append(self.cluster[index])
-        indices.append(index)
-        route.append(0)
-        indices.append(0)
+        route.insert(1, self.cluster[index])
+        indices.insert(1, index)
         distance[:, index] = np.ma.masked
+
         # Loop to add in all other nodes
         while len(route) < self.dimension+1:
             index = np.unravel_index(distance[indices].argmin(), distance.shape)[1]
@@ -45,6 +46,7 @@ class TSPInstance:
             route.insert(np.argmin(test_list)+1, self.cluster[index])
             indices.insert(np.argmin(test_list)+1, index)
             distance[:, index] = np.ma.masked
+
         route.remove(0)
         route.remove(0)
         self.route = route
