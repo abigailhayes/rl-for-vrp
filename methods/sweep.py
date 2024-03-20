@@ -1,5 +1,6 @@
 from operator import itemgetter
 import methods.utils as utils
+from methods.TSP.utils import TSPInstance
 import numpy as np
 
 class Sweep(utils.VRPInstance):
@@ -26,5 +27,12 @@ class Sweep(utils.VRPInstance):
                 self.clusters.append(new_route[:-1])
                 new_route = [int(id)]
         self.clusters.append(new_route) # Save final cluster when no more nodes
+
+    def routing(self, method):
+        """Carry out routing for specified method"""
+        for cluster in self.clusters:
+            instance = self._gen_tsp_instance(cluster)
+            getattr(instance, method)()
+            self.routes.append(instance.route)
 
 
