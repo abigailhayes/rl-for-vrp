@@ -1,7 +1,8 @@
 from itertools import pairwise
 
 class VRPInstance:
-    """A class for storing a VRP instance."""
+    """A class for storing a VRP instance.
+    - instance: need to provide an instance as input when creating"""
     def __init__(self, instance):
         self.capacity = instance['capacity']
         self.demand = instance['demand']
