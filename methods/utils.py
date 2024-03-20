@@ -1,6 +1,7 @@
 from itertools import pairwise
-
 import numpy as np
+
+from TSP.utils import TSPInstance
 
 
 class VRPInstance:
@@ -46,7 +47,7 @@ class VRPInstance:
         instance['dimension'] = len(cluster)
         instance['distance'] = self.distance[np.ix_(cluster, cluster)]
         instance['coords'] = self.coords[cluster]
-
+        return TSPInstance(instance)
 
 class NodePair:
     """Class for holding information about the current node pair"""
