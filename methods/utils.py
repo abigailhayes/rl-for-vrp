@@ -1,7 +1,7 @@
 from itertools import pairwise
 import numpy as np
 
-from TSP.utils import TSPInstance
+from methods.TSP.utils import TSPInstance
 
 
 class VRPInstance:
@@ -42,7 +42,7 @@ class VRPInstance:
 
     def _gen_tsp_instance(self, cluster):
         """Takes a list of nodes and prepares an instance for giving to TSPInstance"""
-        cluster.insert(0, 0)
+        cluster = [0] + cluster
         instance = {}
         instance['cluster'] = cluster
         instance['dimension'] = len(cluster)
