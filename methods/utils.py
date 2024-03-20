@@ -1,5 +1,8 @@
 from itertools import pairwise
 
+import numpy as np
+
+
 class VRPInstance:
     """A class for storing a VRP instance.
     - instance: need to provide an instance as input when creating"""
@@ -35,6 +38,15 @@ class VRPInstance:
         """Compare the current solution to the optimum"""
         self.get_cost()
         self.perc = (self.cost-self.sol_cost)/self.sol_cost
+
+    def _gen_tsp_instance(self, cluster):
+        """Takes a list of nodes and prepares an instance for giving to TSPInstance"""
+        instance = {}
+        instance['cluster'] = cluster
+        instance['dimension'] = len(cluster)
+        instance['distance'] = self.distance[np.ix_(cluster, cluster)]
+        instance['coords'] = self.coords[cluster]
+
 
 class NodePair:
     """Class for holding information about the current node pair"""
