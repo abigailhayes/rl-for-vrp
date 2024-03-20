@@ -13,6 +13,7 @@ class CWSavings(utils.VRPInstance):
         return self.distance[i][0]+self.distance[0][j]-self.distance[i][j]
 
     def get_savings(self):
+        """Calculated all savings"""
         self.savings = []
         for i in range(2, self.dimension):
             for j in range(1, i):
@@ -27,10 +28,6 @@ class CWSavings(utils.VRPInstance):
             return node_pair.route_i + node_pair.route_j
         else:
             return node_pair.route_i + list(reversed(node_pair.route_j))
-
-    def _cap_check(self, new_route):
-        """Check that the new proposed route fits within the capacity demand"""
-        return sum([self.demand[i] for i in new_route])
 
     def routing(self, talk=False):
         """Running the main part of the algorithm to provide a final route.
