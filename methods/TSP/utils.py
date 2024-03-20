@@ -13,16 +13,14 @@ class TSPInstance:
     def nearest_neighbour(self):
         """Constructs a route based on the nearest neighbour of the previous node"""
         self.route = []
-        curr_ind = 0
-        rem_nodes = self.cluster.copy()
-        rem_nodes.remove(rem_nodes[curr_ind])
-        distance = np.delete(self.distance.copy(), rem_nodes[curr_ind], axis=1)
-        # Continue to find the nearest node to the previous node, whilst nodes remain
+        index = 0
+        distance = self.distance.copy().view(np.ma.MaskedArray)
+        distance[:,index] = np.ma.masked
+        # Continue to find the nearest node to the previous node, until all are included
         while len(self.route)<self.dimension-1:
-            curr_ind = distance[curr_ind].argmin()
-            self.route.append(rem_nodes[curr_ind])
-            rem_nodes.remove(rem_nodes[curr_ind])
-            distance = np.delete(distance, curr_ind, axis=1)
+            index = distance[index].argmin()
+            self.route.append(self.cluster[index])
+            distance[:,index] = np.ma.masked
 
     def nearest_insertion(self):
         """Constructs a route based on the nearest insertion to the existing tour"""
