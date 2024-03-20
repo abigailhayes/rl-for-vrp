@@ -8,3 +8,4 @@ class TSPInstance:
         self.dimension = instance['dimension']
         self.coords = instance['coords']
         self.route = []
+

@@ -42,6 +42,7 @@ class VRPInstance:
 
     def _gen_tsp_instance(self, cluster):
         """Takes a list of nodes and prepares an instance for giving to TSPInstance"""
+        cluster.insert(0, 0)
         instance = {}
         instance['cluster'] = cluster
         instance['dimension'] = len(cluster)
