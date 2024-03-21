@@ -1,5 +1,5 @@
 import numpy as np
-from itertools import pairwise
+from itertools import pairwise, combinations
 
 
 class TSPInstance:
@@ -81,6 +81,16 @@ class TSPInstance:
     def furthest_insertion(self):
         self._insertion('furthest')
 
+    def _comp_2opt(self, first, second):
+        test_route = (self.route[:self.route.index(first[1])] +
+                      list(reversed(self.route[len(self.route) - self.route[::-1].index(first[1])-1: self.route.index(second[0])+1])) +
+                      self.route[self.route.index(second[0])+1:])
+        if self._get_cost(test_route) < self.cost:
+            self.route = test_route
+
     def imp_2opt(self):
         self.get_cost()
         pairs = list(pairwise([0] + self.route + [0]))
+        comparisons = list(combinations(pairs, 2))
+        for first, second in comparisons:
+            self._comp_2opt(first, second)
