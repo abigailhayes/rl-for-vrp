@@ -1,15 +1,29 @@
 import numpy as np
+from itertools import pairwise
 
 
 class TSPInstance:
     """A class for storing TSP instances
     - instance: need to provide an instance as input at creation"""
     def __init__(self, instance):
+        self.cost = None
         self.cluster = instance['cluster']
         self.distance = instance['distance']
         self.dimension = instance['dimension']
         self.coords = instance['coords']
         self.route = []
+
+    def _get_cost(self, route):
+        """Calculate the total cost of a solution to an instance"""
+        costs = 0
+        pairs = list(pairwise([0]+route+[0]))
+        for i, j in pairs:
+            costs += self.distance[i][j]
+        return costs
+
+    def get_cost(self):
+        """Calculate the total cost of the current solution to an instance"""
+        self.cost = self._get_cost(self.route)
 
     def nearest_neighbour(self):
         """Constructs a route based on the nearest neighbour of the previous node"""
@@ -66,3 +80,6 @@ class TSPInstance:
 
     def furthest_insertion(self):
         self._insertion('furthest')
+
+    def imp_2opt(self):
+

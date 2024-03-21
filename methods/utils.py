@@ -24,14 +24,18 @@ class VRPInstance:
         """Check that the new proposed route fits within the capacity demand"""
         return sum([self.demand[i] for i in new_route])
 
-    def get_cost(self):
+    def _get_cost(self, routes):
         """Calculate the total cost of a solution to an instance"""
         costs = 0
-        for r in self.routes:
+        for r in routes:
             pairs = list(pairwise([0]+r+[0]))
             for i, j in pairs:
                 costs += self.distance[i][j]
-        self.cost = costs
+        return costs
+
+    def get_cost(self):
+        """Calculate the total cost of the current solution to an instance"""
+        self.cost = self._get_cost(self.routes)
 
     def add_sol(self, solution):
         """Add solution data for the instance"""
