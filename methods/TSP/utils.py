@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class TSPInstance:
     """A class for storing TSP instances
     - instance: need to provide an instance as input at creation"""
@@ -15,15 +16,15 @@ class TSPInstance:
         self.route = []
         index = 0
         distance = self.distance.copy().view(np.ma.MaskedArray)
-        distance[:,index] = np.ma.masked
+        distance[:, index] = np.ma.masked
         # Continue to find the nearest node to the previous node, until all are included
-        while len(self.route)<self.dimension-1:
+        while len(self.route) < self.dimension-1:
             index = distance[index].argmin()
             self.route.append(self.cluster[index])
-            distance[:,index] = np.ma.masked
+            distance[:, index] = np.ma.masked
 
-    def nearest_insertion(self):
-        """Constructs a route based on the nearest insertion to the existing tour"""
+    def _insertion(self, method):
+        """Constructs a route based on the nearest of furthest insertion to the existing tour"""
         distance = self.distance.copy().view(np.ma.MaskedArray)
         route, indices = [0, 0], [0, 0]
 
@@ -31,15 +32,24 @@ class TSPInstance:
         distance[:, index] = np.ma.masked  # Mask the column for node that has been added to route
 
         # Add first non-depot node, also store index, and mask in distances
-        index = distance[route].argmin()
+        if method == 'nearest':
+            index = distance[route].argmin()
+        elif method == 'furthest':
+            index = distance[route].argmax()
+        else:
+            raise ValueError('Unsupported method.')
         route.insert(1, self.cluster[index])
         indices.insert(1, index)
         distance[:, index] = np.ma.masked
 
         # Loop to add in all other nodes
         while len(route) < self.dimension+1:
-            index = np.unravel_index(distance[indices].argmin(), distance.shape)[1]
-            # Calculate the cost for adding between each pair of nodes in the current route, and add in the optimal place
+            if method == 'nearest':
+                index = np.unravel_index(distance[indices].argmin(), distance.shape)[1]
+            elif method == 'furthest':
+                index = np.unravel_index(distance[indices].argmax(), distance.shape)[1]
+            # Calculate the cost for adding between each pair of nodes in the current route, and add in the optimal
+            # place
             test_list = [
                 self.distance[indices[i], index] + self.distance[index, indices[i + 1]] -
                 self.distance[indices[i], indices[i + 1]] for i in range(len(route) - 2)]
@@ -51,7 +61,8 @@ class TSPInstance:
         route.remove(0)
         self.route = route
 
+    def nearest_insertion(self):
+        self._insertion('nearest')
 
-
-
-
+    def furthest_insertion(self):
+        self._insertion('furthest')
