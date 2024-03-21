@@ -18,7 +18,7 @@ class TSPInstance:
         costs = 0
         pairs = list(pairwise([0]+route+[0]))
         for i, j in pairs:
-            costs += self.distance[i][j]
+            costs += self.distance[self.cluster.index(i)+1][self.cluster.index(j)+1]
         return costs
 
     def get_cost(self):
@@ -66,7 +66,7 @@ class TSPInstance:
             # place
             test_list = [
                 self.distance[indices[i], index] + self.distance[index, indices[i + 1]] -
-                self.distance[indices[i], indices[i + 1]] for i in range(len(route) - 2)]
+                self.distance[indices[i], indices[i + 1]] for i in range(len(route) - 1)]
             route.insert(np.argmin(test_list)+1, self.cluster[index])
             indices.insert(np.argmin(test_list)+1, index)
             distance[:, index] = np.ma.masked
@@ -82,4 +82,5 @@ class TSPInstance:
         self._insertion('furthest')
 
     def imp_2opt(self):
-
+        self.get_cost()
+        pairs = list(pairwise([0] + self.route + [0]))
