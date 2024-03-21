@@ -18,7 +18,7 @@ class TSPInstance:
         costs = 0
         pairs = list(pairwise([0]+route+[0]))
         for i, j in pairs:
-            costs += self.distance[self.cluster.index(i)+1][self.cluster.index(j)+1]
+            costs += self.distance[self.cluster.index(i)][self.cluster.index(j)]
         return costs
 
     def get_cost(self):

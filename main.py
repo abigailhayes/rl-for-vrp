@@ -12,3 +12,12 @@ print(test.cost, " Perc worse: ", '{:.1%}'.format(test.perc))
 
 # Run over all test sets
 utils.avg_perf('CVRP', 'CWSavings')
+
+# Create TSP instance
+import numpy as np
+from methods.TSP.utils import TSPInstance
+instance = {'cluster': [0] + test.clusters[0],
+            'dimension': len([0] + test.clusters[0]),
+            'distance': test.distance[np.ix_([0] + test.clusters[0], [0] + test.clusters[0])],
+            'coords': test.coords[[0] + test.clusters[0]]}
+tsp_test = TSPInstance(instance)
