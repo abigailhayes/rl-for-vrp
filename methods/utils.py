@@ -29,8 +29,7 @@ class VRPInstance:
         """Calculate the total cost of a solution to an instance"""
         costs = 0
         for r in routes:
-            pairs = list(pairwise([0]+r+[0]))
-            for i, j in pairs:
+            for i, j in pairwise([0]+r+[0]):
                 costs += self.distance[i][j]
         return costs
 
