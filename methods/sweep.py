@@ -1,5 +1,4 @@
 import methods.utils as utils
-import numpy as np
 
 
 class Sweep(utils.VRPInstance):
@@ -7,16 +6,8 @@ class Sweep(utils.VRPInstance):
 
     def __init__(self, instance):
         super().__init__(instance)
-        self.clusters = None
-        self.polars = None
-
-    def polar_coord(self):
-        """Calculate the polar co-ordinate, and sort with a reference to the node id."""
-        depot = self.coords[0]
-        polars = np.append(0, np.arctan((self.coords[1:, 1] - depot[1]) / (self.coords[1:, 0] - depot[0])))
-        index = np.arange(polars.shape[0])  # create index array for indexing
-        polars2 = np.c_[polars, index]
-        self.polars = polars2[polars2[:, 0].argsort()]
+        self.build_clusters()
+        self.polar_coord()
 
     def build_clusters(self):
         """Build the clusters via a sweep"""
@@ -43,8 +34,6 @@ class Sweep(utils.VRPInstance):
             self.routes.append(instance.route)
 
     def run_all(self, tsp_method, tsp_improve=None):
-        self.polar_coord()
-        self.build_clusters()
         self.routing(tsp_method, tsp_improve)
         self.get_cost()
         if self.sol:

@@ -12,6 +12,7 @@ class VRPInstance:
         self.sol_routes = None
         self.sol_cost = None
         self.cost = None
+        self.polars = None
         self.capacity = instance['capacity']
         self.demand = instance['demand']
         self.distance = instance['edge_weight']
@@ -56,6 +57,14 @@ class VRPInstance:
                     'distance': self.distance[np.ix_(cluster, cluster)],
                     'coords': self.coords[cluster]}
         return TSPInstance(instance)
+
+    def polar_coord(self):
+        """Calculate the polar co-ordinate, and sort with a reference to the node id."""
+        depot = self.coords[0]
+        polars = np.append(0, np.arctan((self.coords[1:, 1] - depot[1]) / (self.coords[1:, 0] - depot[0])))
+        index = np.arange(polars.shape[0])  # create index array for indexing
+        polars2 = np.c_[polars, index]
+        self.polars = polars2[polars2[:, 0].argsort()]
 
 
 class NodePair:
