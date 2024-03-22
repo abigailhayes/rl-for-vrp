@@ -23,3 +23,12 @@ class GENI(TSPInstance):
         else:
             self.p_hoods[node] = [self.route[i] for i in np.argsort(self.distance[self.cluster.index(node)][[
                 self.cluster.index(i) for i in self.route]])[1:self.p+1]]
+
+    def _calc_p_hoods_route(self):
+        """Calculate the p neighbourhoods for all nodes in the route"""
+        for node in self.route:
+            self._calc_p_hood(node)
+
+    def run_all(self):
+        """Running the whole algorithm"""
+        self._calc_p_hoods_route()
