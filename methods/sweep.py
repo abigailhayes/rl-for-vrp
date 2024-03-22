@@ -6,8 +6,8 @@ class Sweep(utils.VRPInstance):
 
     def __init__(self, instance):
         super().__init__(instance)
-        self.build_clusters()
         self.polar_coord()
+        self.build_clusters()
 
     def build_clusters(self):
         """Build the clusters via a sweep"""
