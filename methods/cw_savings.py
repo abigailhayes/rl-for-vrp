@@ -1,12 +1,17 @@
 from operator import itemgetter
 import methods.utils as utils
 
+
 class CWSavings(utils.VRPInstance):
     """A class for implementing Clarke-Wright Savings on a VRP instance."""
 
+    def __init__(self, instance):
+        super().__init__(instance)
+        self.savings = []
+
     def route_init(self):
         """Initialise routes specific to CW Savings"""
-        self.routes = [[i] for i in range(1,self.dimension)]
+        self.routes = [[i] for i in range(1, self.dimension)]
 
     def _calc_saving(self, i, j):
         """Calculate saving for a specific node pair"""
@@ -14,17 +19,17 @@ class CWSavings(utils.VRPInstance):
 
     def get_savings(self):
         """Calculated all savings"""
-        self.savings = []
         for i in range(2, self.dimension):
             for j in range(1, i):
                 self.savings.append((i, j, self._calc_saving(i, j)))
         self.savings.sort(key=itemgetter(2), reverse=True)
 
-    def _merge_routes(self, node_pair):
+    @staticmethod
+    def _merge_routes(node_pair):
         """Merge routes based on positioning of nodes"""
-        if node_pair.pos_i<node_pair.pos_j:
+        if node_pair.pos_i < node_pair.pos_j:
             return node_pair.route_j+node_pair.route_i
-        elif node_pair.pos_i<node_pair.pos_j:
+        elif node_pair.pos_i < node_pair.pos_j:
             return node_pair.route_i + node_pair.route_j
         else:
             return node_pair.route_i + list(reversed(node_pair.route_j))
@@ -42,7 +47,7 @@ class CWSavings(utils.VRPInstance):
             new_route = self._merge_routes(node_pair)
             if self._cap_check(new_route) > self.capacity:
                 continue
-            if talk==True:
+            if talk:
                 print("Current routes:", self.routes, "Join:", i, ", ", j, " Save: ", c)
             self.routes = [r for r in self.routes if i not in r and j not in r]
             self.routes.append(new_route)
@@ -52,6 +57,5 @@ class CWSavings(utils.VRPInstance):
         self.get_savings()
         self.routing(talk)
         self.get_cost()
-        if self.sol==True:
+        if self.sol:
             self.compare_cost()
-

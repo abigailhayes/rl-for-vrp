@@ -1,8 +1,17 @@
 from itertools import pairwise
+import numpy as np
+
+from methods.TSP.utils import TSPInstance
+
 
 class VRPInstance:
-    """A class for storing a VRP instance."""
+    """A class for storing a VRP instance.
+    - instance: need to provide an instance as input when creating"""
     def __init__(self, instance):
+        self.perc = None
+        self.sol_routes = None
+        self.sol_cost = None
+        self.cost = None
         self.capacity = instance['capacity']
         self.demand = instance['demand']
         self.distance = instance['edge_weight']
@@ -15,14 +24,18 @@ class VRPInstance:
         """Check that the new proposed route fits within the capacity demand"""
         return sum([self.demand[i] for i in new_route])
 
-    def get_cost(self):
+    def _get_cost(self, routes):
         """Calculate the total cost of a solution to an instance"""
         costs = 0
-        for r in self.routes:
+        for r in routes:
             pairs = list(pairwise([0]+r+[0]))
-            for i,j in pairs:
+            for i, j in pairs:
                 costs += self.distance[i][j]
-        self.cost = costs
+        return costs
+
+    def get_cost(self):
+        """Calculate the total cost of the current solution to an instance"""
+        self.cost = self._get_cost(self.routes)
 
     def add_sol(self, solution):
         """Add solution data for the instance"""
@@ -34,6 +47,16 @@ class VRPInstance:
         """Compare the current solution to the optimum"""
         self.get_cost()
         self.perc = (self.cost-self.sol_cost)/self.sol_cost
+
+    def _gen_tsp_instance(self, cluster):
+        """Takes a list of nodes and prepares an instance for giving to TSPInstance"""
+        cluster = [0] + cluster
+        instance = {'cluster': cluster,
+                    'dimension': len(cluster),
+                    'distance': self.distance[np.ix_(cluster, cluster)],
+                    'coords': self.coords[cluster]}
+        return TSPInstance(instance)
+
 
 class NodePair:
     """Class for holding information about the current node pair"""
@@ -49,11 +72,12 @@ class NodePair:
         """Get the current route the nodes of interest are in"""
         return [r for r in self.routes if node in r][0]
 
-    def _pos_check(self, route, node):
+    @staticmethod
+    def _pos_check(route, node):
         """Check where in a route a node appears"""
-        if route[0]==node:
+        if route[0] == node:
             return 0
-        elif route[-1]==node:
+        elif route[-1] == node:
             return 1
         else:
             return 2
