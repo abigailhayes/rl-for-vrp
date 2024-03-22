@@ -1,7 +1,7 @@
 from methods.TSP.utils import TSPInstance
 import random
 import numpy as np
-from itertools import pairwise
+from itertools import pairwise, combinations
 
 
 class GENI(TSPInstance):
@@ -41,9 +41,24 @@ class GENI(TSPInstance):
                 if cost < best_insertion['cost']:
                     best_insertion['cost'] = cost
                     best_insertion['route'] = self.route[:n+1]+node+self.route[n+1:]
-        # Check Type I insertions
+        # Now check all more complex insertions
+        for i, j in combinations(p_hood, 2):
+            def next_index(route, item, up=True):
+                """Find the next item in a list, by default going as read, but can be reversed"""
+                if up:
+                    return route[(route.index(item) + 1) % len(route)]
+                else:
+                    return route[(route.index(item) - 1) % len(route)]
 
-        # Check Type II insertions
+            i_1, j_1 = next_index(self.route, i, True), next_index(self.route, j, True)
+            for k in self.p_hoods[i_1]:
+                if k not in [i, j]:
+                # Check Type I insertions
+
+                if k not in [j, j_1]:
+                    for l in self.p_hoods[j_1]:
+                        if l not in [i, i_1]:
+                        # Check Type II insertions
 
         # Actually add in the node
 
