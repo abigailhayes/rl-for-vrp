@@ -21,6 +21,5 @@ class GENI(TSPInstance):
         if len(self.route) <= self.p:
             self.p_hoods[node] = [i for i in self.route if i != node]
         else:
-            self.p_hoods[node] = [self.cluster[i] for i in np.argpartition(
-                self.distance[self.cluster.index(node)][[self.cluster.index(i) for i in self.route]], -self.p+1)[
-                                                           -self.p-1:-1].tolist()]
+            self.p_hoods[node] = [self.route[i] for i in np.argsort(self.distance[self.cluster.index(node)][[
+                self.cluster.index(i) for i in self.route]])[1:self.p+1]]
