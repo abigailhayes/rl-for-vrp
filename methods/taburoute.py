@@ -7,15 +7,17 @@ from methods.TSP.genius import GENI
 
 
 class Taburoute(utils.VRPInstance):
-    """A class for implementing Clarke-Wright Savings on a VRP instance."""
+    """A class for implementing Taburoute on a VRP instance."""
 
     def __init__(self, instance, p=4):
         super().__init__(instance)
         self.polar_coord()
         self.alpha = 1
-        self.beta = 1
         self.p = p
         self._init_sol()
+
+    def _f2(self):
+        return self.cost + self.alpha*sum([max(0, self._cap_check(route)-self.capacity) for route in self.routes])
 
     def _init_sol(self):
         """Create initial solution by following GENI for all nodes, and then splitting to meet capacity constraints"""
@@ -42,6 +44,7 @@ class Taburoute(utils.VRPInstance):
         # Saving all info to initialise variables
         self.get_cost()
         self.f1_best = self.cost       # Best solution so far to objective fn
+        self.f2_best = self._f2()      # Best solution so far with penalty for infeasibility
         if self._cap_check(self.routes[-1]) <= self.capacity:
             self.s_best = self.routes      # Best feasible route so far
         else:
