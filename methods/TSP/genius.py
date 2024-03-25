@@ -49,22 +49,15 @@ class GENI(TSPInstance):
         for k in self.p_hoods[i_1]:
             if k not in [i, j]:
                 k_1 = self._next_item(route, k, True)
-                cost = self._get_cost(route[:route.index(i_1)] +
-                                      [node] +
-                                      list(reversed(route[route.index(i_1):route.index(j_1)])) +
-                                      list(reversed(route[route.index(j_1):route.index(k_1)])) +
-                                      route[route.index(k_1):])
-                print("Route: ", route[:route.index(i_1)] +
-                                      [node] +
-                                      list(reversed(route[route.index(i_1):route.index(j_1)])) +
-                                      list(reversed(route[route.index(j_1):route.index(k_1)])) +
-                                      route[route.index(k_1):],
+                test_route = route[:route.index(i_1)] + [node] + list(reversed(route[route.index(i_1):route.index(j_1)])) + list(reversed(route[route.index(j_1):route.index(k_1)])) + route[route.index(k_1):]
+                if len(test_route) > len(self.route)+1:
+                    continue
+                cost = self._get_cost(test_route)
+                print("Route: ", test_route,
                       "Cost: ", cost)
                 if cost < best_insertion['cost']:
                     best_insertion['cost'] = cost
-                    best_insertion['route'] = route[:route.index(i) + 1] + [node] + list(
-                        reversed(route[route.index(i_1):route.index(j_1)])) + list(
-                        reversed(route[route.index(j_1):route.index(k_1)])) + route[route.index(k_1):]
+                    best_insertion['route'] = test_route
         return best_insertion
 
     def _type2(self, i, j, node, best_insertion, reverse):
@@ -78,24 +71,15 @@ class GENI(TSPInstance):
                 for l in self.p_hoods[j_1]:
                     if l not in [i, i_1]:
                         # Check Type II insertions
-                        cost = self._get_cost(route[:route.index(i_1)] +
-                                              [node] +
-                                              list(reversed(route[route.index(l):route.index(j_1)])) +
-                                              route[route.index(j_1):route.index(k)] +
-                                              list(reversed(route[route.index(i_1):route.index(l)])) +
-                                              route[route.index(k):])
-                        print("Route: ", route[:route.index(i_1)] +
-                                              [node] +
-                                              list(reversed(route[route.index(l):route.index(j_1)])) +
-                                              route[route.index(j_1):route.index(k)] +
-                                              list(reversed(route[route.index(i_1):route.index(l)])) +
-                                              route[route.index(k):],
+                        test_route = route[:route.index(i_1)] + [node] + list(reversed(route[route.index(l):route.index(j_1)])) + route[route.index(j_1):route.index(k)] + list(reversed(route[route.index(i_1):route.index(l)])) + route[route.index(k):]
+                        if len(test_route) > len(self.route) + 1:
+                            continue
+                        cost = self._get_cost(test_route)
+                        print("Route: ", test_route,
                               "Cost: ", cost)
                         if cost < best_insertion['cost']:
                             best_insertion['cost'] = cost
-                            best_insertion['route'] = route[:route.index(i_1)] + [node] + list(reversed(
-                                route[route.index(l):route.index(j_1)])) + route[route.index(j_1):route.index(k)] + list(
-                                reversed(route[route.index(i_1):route.index(l)])) + route[route.index(k):]
+                            best_insertion['route'] = test_route
 
         return best_insertion
 
@@ -104,29 +88,41 @@ class GENI(TSPInstance):
         p_hood = self._calc_p_hood(node)
         best_insertion = {'cost': np.sum(self.distance)}
         # Check all direct insertions to an edge with both nodes in neighbourhood
-        for n, (i, j) in enumerate(pairwise(self.route)):
-            if i and j in p_hood:
+        print("Direct insertions:")
+        for n, (i, j) in enumerate(pairwise(self.route + [self.route[0]])):
+            if i in p_hood and j in p_hood:
                 cost = self._get_cost(self.route[:n+1]+[node]+self.route[n+1:])
+                print("Route: ", self.route[:n+1]+[node]+self.route[n+1:], " Cost: ", cost)
                 if cost < best_insertion['cost']:
                     best_insertion['cost'] = cost
                     best_insertion['route'] = self.route[:n+1]+[node]+self.route[n+1:]
         # Now check all more complex insertions
         for i, j in combinations(p_hood, 2):
+            if self._next_item(self.route, i, True) == j or self._next_item(self.route, i, False) == j:
+                continue
             # Type I
+            print("Type I:")
             best_insertion = self._type1(i, j, node, best_insertion, False)
             best_insertion = self._type1(j, i, node, best_insertion, True)
             # Type II
+            print("Type II:")
             best_insertion = self._type2(i, j, node, best_insertion, False)
             best_insertion = self._type2(j, i, node, best_insertion, True)
         # Actually add in the node
         self.route = best_insertion['route']
+        print("New route: ", self.route, " Cost: ", best_insertion['cost'])
         self._calc_p_hoods_route()
 
     def run_all(self):
         """Running the whole algorithm"""
+        print("Start route: ", self.route)
         self._calc_p_hoods_route()
         for node in self.cluster:
             if node in self.route:
+                print("--------------------------")
+                print("SKIP: ", node)
                 continue
             else:
+                print("--------------------------")
+                print("Adding: ", node)
                 self._add_node(node)
