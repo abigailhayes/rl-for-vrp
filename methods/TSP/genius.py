@@ -53,16 +53,16 @@ class GENI(TSPInstance):
             i_1, j_1 = next_item(self.route, i, True), next_item(self.route, j, True)
             for k in self.p_hoods[i_1]:
                 if k not in [i, j]:
-                    # Check Type I insertions
+                    # Check Type I insertions - need to add in reverse
                     k_1 = next_item(self.route, k, True)
-                    cost = self._get_cost(self.route[:self.route.index(i)+1]+
+                    cost = self._get_cost(self.route[:self.route.index(i_1)]+
                                           [node]+
-                                          list(reversed(self.route[self.route.index(i_1):self.route.index(j)+1]))+
-                                          list(reversed(self.route[self.route.index(j_1):self.route.index(k)+1]))+
+                                          list(reversed(self.route[self.route.index(i_1):self.route.index(j_1)]))+
+                                          list(reversed(self.route[self.route.index(j_1):self.route.index(k_1)]))+
                                           self.route[self.route.index(k_1):])
                     if cost < best_insertion['cost']:
                         best_insertion['cost'] = cost
-                        best_insertion['route'] = self.route[:self.route.index(i)+1]+[node]+list(reversed(self.route[self.route.index(i_1):self.route.index(j)+1]))+list(reversed(self.route[self.route.index(j_1):self.route.index(k)+1]))+self.route[self.route.index(k_1):]
+                        best_insertion['route'] = self.route[:self.route.index(i)+1]+[node]+list(reversed(self.route[self.route.index(i_1):self.route.index(j_1)]))+list(reversed(self.route[self.route.index(j_1):self.route.index(k_1)]))+self.route[self.route.index(k_1):]
                 if k not in [j, j_1]:
                     for l in self.p_hoods[j_1]:
                         if l not in [i, i_1]:
