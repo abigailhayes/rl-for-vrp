@@ -89,7 +89,7 @@ class GENI(TSPInstance):
         best_insertion = {'cost': np.sum(self.distance)}
         # Check all direct insertions to an edge with a node in neighbourhood
         for n, (i, j) in enumerate(pairwise(self.route + [self.route[0]])):
-            if i in p_hood:
+            if i in p_hood or j in p_hood:
                 cost = self._get_cost(self.route[:n+1]+[node]+self.route[n+1:])
                 if cost < best_insertion['cost']:
                     best_insertion['cost'] = cost
