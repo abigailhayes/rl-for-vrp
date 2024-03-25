@@ -1,3 +1,5 @@
+import random
+
 import methods.utils as utils
 from math import inf
 import numpy as np
@@ -18,10 +20,12 @@ class Taburoute(utils.VRPInstance):
     def _init_sol(self):
         """Create initial solution by following GENI for all nodes, and then splitting to meet capacity constraints"""
         self.routes = []
-        instance = {'cluster': list(range(self.dimension)),
+        i = random.randint(1, self.dimension-1)
+        cluster = [0] + list(range(i, self.dimension)) + list(range(1,i))
+        instance = {'cluster': cluster,
                     'dimension': self.dimension,
-                    'distance': self.distance,
-                    'coords': self.coords}
+                    'distance': self.distance[np.ix_(cluster, cluster)],
+                    'coords': self.coords[cluster]}
         tsp_instance = GENI(instance)
         tsp_instance.run_all()
         single_route = tsp_instance.route
