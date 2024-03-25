@@ -1,7 +1,6 @@
 import random
 
 import methods.utils as utils
-from math import inf
 import numpy as np
 
 from methods.TSP.genius import GENI
@@ -15,7 +14,6 @@ class Taburoute(utils.VRPInstance):
         self.polar_coord()
         self.alpha = 1
         self.beta = 1
-        self.f1_best = inf
         self.p = p
         self._init_sol()
 
@@ -24,7 +22,7 @@ class Taburoute(utils.VRPInstance):
         # First use GENI to give an initial solution
         self.routes = []
         i = random.randint(1, self.dimension-1)
-        cluster = [0] + list(range(i, self.dimension)) + list(range(1,i))
+        cluster = [0] + list(range(i, self.dimension)) + list(range(1, i))
         instance = {'cluster': cluster,
                     'dimension': self.dimension,
                     'distance': self.distance[np.ix_(cluster, cluster)],
@@ -41,3 +39,11 @@ class Taburoute(utils.VRPInstance):
                 self.routes.append(new_route[:-1])
                 new_route = [item]
         self.routes.append(new_route)  # Save final route when no more nodes
+        # Saving all info to initialise variables
+        self.get_cost()
+        self.f1_best = self.cost       # Best solution so far to objective fn
+        if self._cap_check(self.routes[-1]) <= self.capacity:
+            self.s_best = self.routes      # Best feasible route so far
+        else:
+            self.s_best = None
+        self.s_best_all = self.routes  # Best route so far, feasible or infeasible
