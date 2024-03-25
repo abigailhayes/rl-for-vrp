@@ -7,7 +7,7 @@ from itertools import pairwise, combinations
 class GENI(TSPInstance):
     """Class to handle GENI procedure for TSP problems"""
 
-    def __init__(self, instance, p=4):
+    def __init__(self, instance, p=5):
         super().__init__(instance)
         self.full_route = False
         self.p = p

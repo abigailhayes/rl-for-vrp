@@ -1,20 +1,29 @@
 import random
+import numpy as np
+from math import inf
 
 import methods.utils as utils
-import numpy as np
-
 from methods.TSP.genius import GENI
 
 
 class Taburoute(utils.VRPInstance):
     """A class for implementing Taburoute on a VRP instance."""
 
-    def __init__(self, instance, p=4):
+    def __init__(self, instance, p=5):
         super().__init__(instance)
         self.polar_coord()
         self.alpha = 1
         self.p = p
-        self._init_sol()
+        self._init_sol(),
+        self.search_params = {'W': list(range(1,self.dimension)),
+                              'q': 5*len(self.routes),
+                              'p1': None,
+                              'p2': 5,
+                              'theta_min': 5,
+                              'theta_max': 5,
+                              'g': 0.01,
+                              'h': 10,
+                              'n_max': self.dimension-1}
 
     def _f2(self):
         return self.cost + self.alpha*sum([max(0, self._cap_check(route)-self.capacity) for route in self.routes])
@@ -43,10 +52,11 @@ class Taburoute(utils.VRPInstance):
         self.routes.append(new_route)  # Save final route when no more nodes
         # Saving all info to initialise variables
         self.get_cost()
-        self.f1_best = self.cost       # Best solution so far to objective fn
-        self.f2_best = self._f2()      # Best solution so far with penalty for infeasibility
         if self._cap_check(self.routes[-1]) <= self.capacity:
             self.s_best = self.routes      # Best feasible route so far
+            self.f1_best = self.cost  # Best solution so far to objective fn
         else:
             self.s_best = None
+            self.f1_best = inf
+        self.f2_best = self._f2()  # Best solution so far with penalty for infeasibility
         self.s_best_all = self.routes  # Best route so far, feasible or infeasible
