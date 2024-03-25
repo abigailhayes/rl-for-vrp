@@ -16,8 +16,9 @@ utils.avg_perf('CVRP', 'CWSavings')
 # Create TSP instance
 import numpy as np
 from methods.TSP.utils import TSPInstance
+from methods.TSP.genius import GENI
 instance = {'cluster': [0] + test.clusters[0],
             'dimension': len([0] + test.clusters[0]),
             'distance': test.distance[np.ix_([0] + test.clusters[0], [0] + test.clusters[0])],
             'coords': test.coords[[0] + test.clusters[0]]}
-tsp_test = TSPInstance(instance)
+tsp_test = GENI(instance)

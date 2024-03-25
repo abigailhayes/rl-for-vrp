@@ -17,13 +17,15 @@ class GENI(TSPInstance):
     def _calc_p_hood(self, node):
         """Calculate the nodes in a p neighbourhood of the specified node."""
         if node not in self.route:
-            raise ValueError(f'Node {node} not in current route.')
+            route = self.route + [node]
+        else:
+            route = self.route
 
         if len(self.route) <= self.p:
             return [i for i in self.route if i != node]
         else:
-            return [self.route[i] for i in np.argsort(self.distance[self.cluster.index(node)][[
-                self.cluster.index(i) for i in self.route]])[1:self.p+1]]
+            return [route[i] for i in np.argsort(self.distance[self.cluster.index(node)][[
+                self.cluster.index(i) for i in route]])[1:self.p+1]]
 
     def _calc_p_hoods_route(self):
         """Calculate the p neighbourhoods for all nodes in the route"""
@@ -52,6 +54,12 @@ class GENI(TSPInstance):
                                       list(reversed(route[route.index(i_1):route.index(j_1)])) +
                                       list(reversed(route[route.index(j_1):route.index(k_1)])) +
                                       route[route.index(k_1):])
+                print("Route: ", route[:route.index(i_1)] +
+                                      [node] +
+                                      list(reversed(route[route.index(i_1):route.index(j_1)])) +
+                                      list(reversed(route[route.index(j_1):route.index(k_1)])) +
+                                      route[route.index(k_1):],
+                      "Cost: ", cost)
                 if cost < best_insertion['cost']:
                     best_insertion['cost'] = cost
                     best_insertion['route'] = route[:route.index(i) + 1] + [node] + list(
@@ -76,6 +84,13 @@ class GENI(TSPInstance):
                                               route[route.index(j_1):route.index(k)] +
                                               list(reversed(route[route.index(i_1):route.index(l)])) +
                                               route[route.index(k):])
+                        print("Route: ", route[:route.index(i_1)] +
+                                              [node] +
+                                              list(reversed(route[route.index(l):route.index(j_1)])) +
+                                              route[route.index(j_1):route.index(k)] +
+                                              list(reversed(route[route.index(i_1):route.index(l)])) +
+                                              route[route.index(k):],
+                              "Cost: ", cost)
                         if cost < best_insertion['cost']:
                             best_insertion['cost'] = cost
                             best_insertion['route'] = route[:route.index(i_1)] + [node] + list(reversed(
@@ -87,14 +102,14 @@ class GENI(TSPInstance):
     def _add_node(self, node):
         """Carrying out one loop of Step 2 in the algorithm, adding a node"""
         p_hood = self._calc_p_hood(node)
-        best_insertion = {'cost': sum(self.distance)}
+        best_insertion = {'cost': np.sum(self.distance)}
         # Check all direct insertions to an edge with both nodes in neighbourhood
         for n, (i, j) in enumerate(pairwise(self.route)):
             if i and j in p_hood:
-                cost = self._get_cost(self.route[:n+1]+node+self.route[n+1:])
+                cost = self._get_cost(self.route[:n+1]+[node]+self.route[n+1:])
                 if cost < best_insertion['cost']:
                     best_insertion['cost'] = cost
-                    best_insertion['route'] = self.route[:n+1]+node+self.route[n+1:]
+                    best_insertion['route'] = self.route[:n+1]+[node]+self.route[n+1:]
         # Now check all more complex insertions
         for i, j in combinations(p_hood, 2):
             # Type I
