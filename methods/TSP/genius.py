@@ -55,10 +55,10 @@ class GENI(TSPInstance):
                 if k not in [i, j]:
                     # Check Type I insertions - need to add in reverse
                     k_1 = next_item(self.route, k, True)
-                    cost = self._get_cost(self.route[:self.route.index(i_1)]+
-                                          [node]+
-                                          list(reversed(self.route[self.route.index(i_1):self.route.index(j_1)]))+
-                                          list(reversed(self.route[self.route.index(j_1):self.route.index(k_1)]))+
+                    cost = self._get_cost(self.route[:self.route.index(i_1)] +
+                                          [node] +
+                                          list(reversed(self.route[self.route.index(i_1):self.route.index(j_1)])) +
+                                          list(reversed(self.route[self.route.index(j_1):self.route.index(k_1)])) +
                                           self.route[self.route.index(k_1):])
                     if cost < best_insertion['cost']:
                         best_insertion['cost'] = cost
@@ -67,6 +67,17 @@ class GENI(TSPInstance):
                     for l in self.p_hoods[j_1]:
                         if l not in [i, i_1]:
                             # Check Type II insertions
+                            cost = self._get_cost(self.route[:self.route.index(i_1)] +
+                                                  [node] +
+                                                  list(reversed(
+                                                      self.route[self.route.index(l):self.route.index(j_1)])) +
+                                                  self.route[self.route.index(j_1):self.route.index(k)] +
+                                                  list(reversed(
+                                                      self.route[self.route.index(i_1):self.route.index(l)])) +
+                                                  self.route[self.route.index(k):])
+                            if cost < best_insertion['cost']:
+                                best_insertion['cost'] = cost
+                                best_insertion['route'] = self.route[:self.route.index(i_1)] + [node] + list(reversed(self.route[self.route.index(l):self.route.index(j_1)])) + self.route[self.route.index(j_1):self.route.index(k)] + list(reversed(self.route[self.route.index(i_1):self.route.index(l)])) + self.route[self.route.index(k):]
 
         # Actually add in the node
 
