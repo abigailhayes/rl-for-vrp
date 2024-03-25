@@ -87,12 +87,10 @@ class GENI(TSPInstance):
         """Carrying out one loop of Step 2 in the algorithm, adding a node"""
         p_hood = self._calc_p_hood(node)
         best_insertion = {'cost': np.sum(self.distance)}
-        print(self.route, node)
         # Check all direct insertions to an edge with a node in neighbourhood
         for n, (i, j) in enumerate(pairwise(self.route + [self.route[0]])):
             if i in p_hood:
                 cost = self._get_cost(self.route[:n+1]+[node]+self.route[n+1:])
-                print(cost)
                 if cost < best_insertion['cost']:
                     best_insertion['cost'] = cost
                     best_insertion['route'] = self.route[:n+1]+[node]+self.route[n+1:]

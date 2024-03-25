@@ -21,6 +21,7 @@ class Taburoute(utils.VRPInstance):
 
     def _init_sol(self):
         """Create initial solution by following GENI for all nodes, and then splitting to meet capacity constraints"""
+        # First use GENI to give an initial solution
         self.routes = []
         i = random.randint(1, self.dimension-1)
         cluster = [0] + list(range(i, self.dimension)) + list(range(1,i))
@@ -31,7 +32,7 @@ class Taburoute(utils.VRPInstance):
         tsp_instance = GENI(instance, self.p)
         tsp_instance.run_all()
         single_route = tsp_instance.route
-
+        # Now split the solution into capacity respecting routes
         new_route = []
         for item in single_route:
             new_route.append(item)
