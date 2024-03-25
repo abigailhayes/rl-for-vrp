@@ -1,12 +1,15 @@
 import instances.utils as instances_utils
 import methods.cw_savings as cw_savings
 from methods.sweep import Sweep
+from methods.taburoute import Taburoute
 import utils
 
 data = instances_utils.import_instance('instances/CVRP/A', 'A-n80-k10')
 
-test = Sweep(data['instance'])
+test = Taburoute(data['instance'])
 test.add_sol(data['solution'])
+
+
 test.run_all('standard', 'nearest_insertion')
 print(test.cost, " Perc worse: ", '{:.1%}'.format(test.perc))
 test.run_all('standard', 'furthest_insertion')
