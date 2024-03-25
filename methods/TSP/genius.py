@@ -30,6 +30,58 @@ class GENI(TSPInstance):
         for node in self.route:
             self.p_hoods[node] = self._calc_p_hood(node)
 
+    @staticmethod
+    def _next_item(route, item, up=True):
+        """Find the next item in a list, by default going as read, but can be reversed"""
+        if up:
+            return route[(route.index(item) + 1) % len(route)]
+        else:
+            return route[(route.index(item) - 1) % len(route)]
+    
+    def _type1(self, i, j, node, best_insertion, reverse=False):
+        if reverse == True:
+            route = list(reversed(self.route))
+        else:
+            route = self.route
+        i_1, j_1 = self._next_item(route, i, True), self._next_item(route, j, True)
+        for k in self.p_hoods[i_1]:
+            if k not in [i, j]:
+                k_1 = self._next_item(route, k, True)
+                cost = self._get_cost(route[:route.index(i_1)] +
+                                      [node] +
+                                      list(reversed(route[route.index(i_1):route.index(j_1)])) +
+                                      list(reversed(route[route.index(j_1):route.index(k_1)])) +
+                                      route[route.index(k_1):])
+                if cost < best_insertion['cost']:
+                    best_insertion['cost'] = cost
+                    best_insertion['route'] = route[:route.index(i) + 1] + [node] + list(
+                        reversed(route[route.index(i_1):route.index(j_1)])) + list(
+                        reversed(route[route.index(j_1):route.index(k_1)])) + route[route.index(k_1):]
+        return best_insertion
+
+    def _type2(self, i, j, node, best_insertion, reverse=False):
+        if reverse == True:
+            route = list(reversed(self.route))
+        else:
+            route = self.route
+        i_1, j_1 = self._next_item(route, i, True), self._next_item(route, j, True)
+        for k in self.p_hoods[i_1]:
+            if k not in [j, j_1]:
+                for l in self.p_hoods[j_1]:
+                    if l not in [i, i_1]:
+                        # Check Type II insertions
+                        cost = self._get_cost(route[:route.index(i_1)] +
+                                              [node] +
+                                              list(reversed(route[route.index(l):route.index(j_1)])) +
+                                              route[route.index(j_1):route.index(k)] +
+                                              list(reversed(route[route.index(i_1):route.index(l)])) +
+                                              route[route.index(k):])
+                        if cost < best_insertion['cost']:
+                            best_insertion['cost'] = cost
+                            best_insertion['route'] = route[:route.index(i_1)] + [node] + list(reversed(route[route.index(l):route.index(j_1)])) + route[route.index(j_1):route.index(k)] + list(reversed(route[route.index(i_1):route.index(l)])) + route[route.index(k):]
+
+        return best_insertion
+
     def _add_node(self, node):
         """Carrying out one loop of Step 2 in the algorithm, adding a node"""
         p_hood = self._calc_p_hood(node)
@@ -43,44 +95,14 @@ class GENI(TSPInstance):
                     best_insertion['route'] = self.route[:n+1]+node+self.route[n+1:]
         # Now check all more complex insertions
         for i, j in combinations(p_hood, 2):
-            def next_item(route, item, up=True):
-                """Find the next item in a list, by default going as read, but can be reversed"""
-                if up:
-                    return route[(route.index(item) + 1) % len(route)]
-                else:
-                    return route[(route.index(item) - 1) % len(route)]
-
-            i_1, j_1 = next_item(self.route, i, True), next_item(self.route, j, True)
-            for k in self.p_hoods[i_1]:
-                if k not in [i, j]:
-                    # Check Type I insertions - need to add in reverse
-                    k_1 = next_item(self.route, k, True)
-                    cost = self._get_cost(self.route[:self.route.index(i_1)] +
-                                          [node] +
-                                          list(reversed(self.route[self.route.index(i_1):self.route.index(j_1)])) +
-                                          list(reversed(self.route[self.route.index(j_1):self.route.index(k_1)])) +
-                                          self.route[self.route.index(k_1):])
-                    if cost < best_insertion['cost']:
-                        best_insertion['cost'] = cost
-                        best_insertion['route'] = self.route[:self.route.index(i)+1]+[node]+list(reversed(self.route[self.route.index(i_1):self.route.index(j_1)]))+list(reversed(self.route[self.route.index(j_1):self.route.index(k_1)]))+self.route[self.route.index(k_1):]
-                if k not in [j, j_1]:
-                    for l in self.p_hoods[j_1]:
-                        if l not in [i, i_1]:
-                            # Check Type II insertions
-                            cost = self._get_cost(self.route[:self.route.index(i_1)] +
-                                                  [node] +
-                                                  list(reversed(
-                                                      self.route[self.route.index(l):self.route.index(j_1)])) +
-                                                  self.route[self.route.index(j_1):self.route.index(k)] +
-                                                  list(reversed(
-                                                      self.route[self.route.index(i_1):self.route.index(l)])) +
-                                                  self.route[self.route.index(k):])
-                            if cost < best_insertion['cost']:
-                                best_insertion['cost'] = cost
-                                best_insertion['route'] = self.route[:self.route.index(i_1)] + [node] + list(reversed(self.route[self.route.index(l):self.route.index(j_1)])) + self.route[self.route.index(j_1):self.route.index(k)] + list(reversed(self.route[self.route.index(i_1):self.route.index(l)])) + self.route[self.route.index(k):]
-
+            # Type I
+            best_insertion = self._type1(self, i, j, node, best_insertion, reverse=False)
+            best_insertion = self._type1(self, j, i, node, best_insertion, reverse=True)
+            # Type II
+            best_insertion = self._type2(self, i, j, node, best_insertion, reverse=False)
+            best_insertion = self._type2(self, j, i, node, best_insertion, reverse=True)
         # Actually add in the node
-
+        self.route = best_insertion['route']
         self._calc_p_hoods_route()
 
     def run_all(self):
