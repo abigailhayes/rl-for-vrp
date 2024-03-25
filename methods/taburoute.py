@@ -67,7 +67,7 @@ class Taburoute(utils.VRPInstance):
         self.s = routes
 
     def _calc_p_hood(self, node):
-        return [i for i in np.argsort(self.distance[node])[1:self.p + 1]]
+        return [i for i in np.argsort(self.distance[node])[1:self.search_params['p2'] + 1]]
 
     def _search(self):
         t = 1
