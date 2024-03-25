@@ -53,8 +53,6 @@ class GENI(TSPInstance):
                 if len(test_route) > len(self.route)+1:
                     continue
                 cost = self._get_cost(test_route)
-                print("Route: ", test_route,
-                      "Cost: ", cost)
                 if cost < best_insertion['cost']:
                     best_insertion['cost'] = cost
                     best_insertion['route'] = test_route
@@ -75,8 +73,6 @@ class GENI(TSPInstance):
                         if len(test_route) > len(self.route) + 1:
                             continue
                         cost = self._get_cost(test_route)
-                        print("Route: ", test_route,
-                              "Cost: ", cost)
                         if cost < best_insertion['cost']:
                             best_insertion['cost'] = cost
                             best_insertion['route'] = test_route
@@ -88,11 +84,9 @@ class GENI(TSPInstance):
         p_hood = self._calc_p_hood(node)
         best_insertion = {'cost': np.sum(self.distance)}
         # Check all direct insertions to an edge with both nodes in neighbourhood
-        print("Direct insertions:")
         for n, (i, j) in enumerate(pairwise(self.route + [self.route[0]])):
             if i in p_hood and j in p_hood:
                 cost = self._get_cost(self.route[:n+1]+[node]+self.route[n+1:])
-                print("Route: ", self.route[:n+1]+[node]+self.route[n+1:], " Cost: ", cost)
                 if cost < best_insertion['cost']:
                     best_insertion['cost'] = cost
                     best_insertion['route'] = self.route[:n+1]+[node]+self.route[n+1:]
@@ -101,28 +95,24 @@ class GENI(TSPInstance):
             if self._next_item(self.route, i, True) == j or self._next_item(self.route, i, False) == j:
                 continue
             # Type I
-            print("Type I:")
             best_insertion = self._type1(i, j, node, best_insertion, False)
             best_insertion = self._type1(j, i, node, best_insertion, True)
             # Type II
-            print("Type II:")
             best_insertion = self._type2(i, j, node, best_insertion, False)
             best_insertion = self._type2(j, i, node, best_insertion, True)
         # Actually add in the node
         self.route = best_insertion['route']
-        print("New route: ", self.route, " Cost: ", best_insertion['cost'])
         self._calc_p_hoods_route()
+
+    def _standardise(self):
+        self.route = self.route[self.route.index(0)+1:] + self.route[:self.route.index(0)]
 
     def run_all(self):
         """Running the whole algorithm"""
-        print("Start route: ", self.route)
         self._calc_p_hoods_route()
         for node in self.cluster:
             if node in self.route:
-                print("--------------------------")
-                print("SKIP: ", node)
                 continue
             else:
-                print("--------------------------")
-                print("Adding: ", node)
                 self._add_node(node)
+        self._standardise()

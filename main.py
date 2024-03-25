@@ -7,8 +7,14 @@ data = instances_utils.import_instance('instances/CVRP/A', 'A-n32-k5')
 
 test = Sweep(data['instance'])
 test.add_sol(data['solution'])
-test.run_all('nearest_insertion')
-#print(test.cost, " Perc worse: ", '{:.1%}'.format(test.perc))
+test.run_all('standard', 'nearest_insertion')
+print(test.cost, " Perc worse: ", '{:.1%}'.format(test.perc))
+test.run_all('standard', 'furthest_insertion')
+print(test.cost, " Perc worse: ", '{:.1%}'.format(test.perc))
+test.run_all('standard', 'nearest_neighbour')
+print(test.cost, " Perc worse: ", '{:.1%}'.format(test.perc))
+test.run_all('GENI', 'run_all')
+print(test.cost, " Perc worse: ", '{:.1%}'.format(test.perc))
 
 # Run over all test sets
 #utils.avg_perf('CVRP', 'CWSavings')

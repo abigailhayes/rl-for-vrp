@@ -1,6 +1,5 @@
 import methods.utils as utils
 
-
 class Sweep(utils.VRPInstance):
     """A class for implementing Sweep on a VRP instance."""
 
@@ -23,18 +22,18 @@ class Sweep(utils.VRPInstance):
                 new_route = [int(ident)]
         self.clusters.append(new_route)  # Save final cluster when no more nodes
 
-    def routing(self, method, improvement=None):
+    def routing(self, tsp_type, method, improvement=None):
         """Carry out routing for specified method"""
         self.routes = []
         for cluster in self.clusters:
-            instance = self._gen_tsp_instance(cluster)
+            instance = self._gen_tsp_instance(cluster, tsp_type)
             getattr(instance, method)()
             if improvement is not None:
                 getattr(instance, improvement)()
             self.routes.append(instance.route)
 
-    def run_all(self, tsp_method, tsp_improve=None):
-        self.routing(tsp_method, tsp_improve)
+    def run_all(self, tsp_type, tsp_method, tsp_improve=None):
+        self.routing(tsp_type, tsp_method, tsp_improve)
         self.get_cost()
         if self.sol:
             self.compare_cost()

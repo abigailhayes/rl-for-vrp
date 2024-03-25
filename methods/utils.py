@@ -2,6 +2,7 @@ from itertools import pairwise
 import numpy as np
 
 from methods.TSP.utils import TSPInstance
+from methods.TSP.genius import GENI
 
 
 class VRPInstance:
@@ -48,14 +49,17 @@ class VRPInstance:
         self.get_cost()
         self.perc = (self.cost-self.sol_cost)/self.sol_cost
 
-    def _gen_tsp_instance(self, cluster):
+    def _gen_tsp_instance(self, cluster, tsp_type):
         """Takes a list of nodes and prepares an instance for giving to TSPInstance"""
         cluster = [0] + cluster
         instance = {'cluster': cluster,
                     'dimension': len(cluster),
                     'distance': self.distance[np.ix_(cluster, cluster)],
                     'coords': self.coords[cluster]}
-        return TSPInstance(instance)
+        if tsp_type == 'standard':
+            return TSPInstance(instance)
+        if tsp_type == 'GENI':
+            return GENI(instance)
 
     def polar_coord(self):
         """Calculate the polar co-ordinate, and sort with a reference to the node id."""
