@@ -38,8 +38,8 @@ class GENI(TSPInstance):
         else:
             return route[(route.index(item) - 1) % len(route)]
     
-    def _type1(self, i, j, node, best_insertion, reverse=False):
-        if reverse == True:
+    def _type1(self, i, j, node, best_insertion, reverse):
+        if reverse:
             route = list(reversed(self.route))
         else:
             route = self.route
@@ -59,8 +59,8 @@ class GENI(TSPInstance):
                         reversed(route[route.index(j_1):route.index(k_1)])) + route[route.index(k_1):]
         return best_insertion
 
-    def _type2(self, i, j, node, best_insertion, reverse=False):
-        if reverse == True:
+    def _type2(self, i, j, node, best_insertion, reverse):
+        if reverse:
             route = list(reversed(self.route))
         else:
             route = self.route
@@ -78,7 +78,9 @@ class GENI(TSPInstance):
                                               route[route.index(k):])
                         if cost < best_insertion['cost']:
                             best_insertion['cost'] = cost
-                            best_insertion['route'] = route[:route.index(i_1)] + [node] + list(reversed(route[route.index(l):route.index(j_1)])) + route[route.index(j_1):route.index(k)] + list(reversed(route[route.index(i_1):route.index(l)])) + route[route.index(k):]
+                            best_insertion['route'] = route[:route.index(i_1)] + [node] + list(reversed(
+                                route[route.index(l):route.index(j_1)])) + route[route.index(j_1):route.index(k)] + list(
+                                reversed(route[route.index(i_1):route.index(l)])) + route[route.index(k):]
 
         return best_insertion
 
@@ -96,11 +98,11 @@ class GENI(TSPInstance):
         # Now check all more complex insertions
         for i, j in combinations(p_hood, 2):
             # Type I
-            best_insertion = self._type1(self, i, j, node, best_insertion, reverse=False)
-            best_insertion = self._type1(self, j, i, node, best_insertion, reverse=True)
+            best_insertion = self._type1(i, j, node, best_insertion, False)
+            best_insertion = self._type1(j, i, node, best_insertion, True)
             # Type II
-            best_insertion = self._type2(self, i, j, node, best_insertion, reverse=False)
-            best_insertion = self._type2(self, j, i, node, best_insertion, reverse=True)
+            best_insertion = self._type2(i, j, node, best_insertion, False)
+            best_insertion = self._type2(j, i, node, best_insertion, True)
         # Actually add in the node
         self.route = best_insertion['route']
         self._calc_p_hoods_route()
