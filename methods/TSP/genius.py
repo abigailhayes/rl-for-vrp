@@ -24,8 +24,10 @@ class GENI(TSPInstance):
         if len(self.route) <= self.p:
             return [i for i in self.route if i != node]
         else:
-            return [route[i] for i in np.argsort(self.distance[self.cluster.index(node)][[
-                self.cluster.index(i) for i in route]])[1:self.p+1]]
+            output = [route[i] for i in np.argsort(self.distance[self.cluster.index(node)][[
+                self.cluster.index(i) for i in route]])[:self.p+1]]
+            output.remove(node)
+            return output
 
     def _calc_p_hoods_route(self):
         """Calculate the p neighbourhoods for all nodes in the route"""
@@ -41,6 +43,7 @@ class GENI(TSPInstance):
             return route[(route.index(item) - 1) % len(route)]
     
     def _type1(self, i, j, node, best_insertion, reverse):
+        """Attempts all possible Type I insertions"""
         if reverse:
             route = list(reversed(self.route))
         else:
@@ -59,6 +62,7 @@ class GENI(TSPInstance):
         return best_insertion
 
     def _type2(self, i, j, node, best_insertion, reverse):
+        """Attempts all possible Type II insertions"""
         if reverse:
             route = list(reversed(self.route))
         else:

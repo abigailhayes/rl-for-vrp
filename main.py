@@ -3,7 +3,7 @@ import methods.cw_savings as cw_savings
 from methods.sweep import Sweep
 import utils
 
-data = instances_utils.import_instance('instances/CVRP/A', 'A-n32-k5')
+data = instances_utils.import_instance('instances/CVRP/A', 'A-n80-k10')
 
 test = Sweep(data['instance'])
 test.add_sol(data['solution'])
