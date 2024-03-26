@@ -37,10 +37,7 @@ class GENI(TSPInstance):
     @staticmethod
     def _next_item(route, item, up=True):
         """Find the next item in a list, by default going as read, but can be reversed"""
-        if up:
-            return route[(route.index(item) + 1) % len(route)]
-        else:
-            return route[(route.index(item) - 1) % len(route)]
+        return route[(route.index(item) + 2*up-1) % len(route)]
     
     def _type1(self, i, j, node, best_insertion, reverse):
         """Attempts all possible Type I insertions"""
