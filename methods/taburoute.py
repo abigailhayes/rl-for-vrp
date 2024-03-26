@@ -73,4 +73,6 @@ class Taburoute(utils.VRPInstance):
         t = 1
         candidates = random.sample(self.search_params['W'], self.search_params['q'])
         for cand in candidates:
-            p_hood = self._calc_p_hood()
+            p_hood = self._calc_p_hood(cand)
+
+
