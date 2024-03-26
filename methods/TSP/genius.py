@@ -67,26 +67,36 @@ class GENI(TSPInstance):
                 best_insertion['route'] = test_route
         return best_insertion
 
+    def _type2_routes(self, route, i, j, node):
+        """Generates all appropriate Type II insertion routes for a pair of nodes and a route of specific orientation"""
+        i_1, j_1 = self._next_item(route, i, True), self._next_item(route, j, True)
+        output = []
+        for k in self.p_hoods[i_1]:
+            if route.index(k) < route.index(i) or route.index(k) > route.index(j_1):
+                for l in self.p_hoods[j_1]:
+                    if route.index(l) > route.index(i_1) and route.index(l) < route.index(j):
+                        test_route = route[:route.index(i_1)] + [node] + list(
+                            reversed(route[route.index(l):route.index(j_1)])) + route[
+                                                                                route.index(j_1):route.index(k)] + list(
+                            reversed(route[route.index(i_1):route.index(l)])) + route[route.index(k):]
+                        if len(test_route) > len(self.route) + 1:
+                            continue
+                        else:
+                            output.append(test_route)
+        return output
+
     def _type2(self, i, j, node, best_insertion, reverse):
         """Attempts all possible Type II insertions"""
         if reverse:
             route = list(reversed(self.route))
         else:
             route = self.route
-        i_1, j_1 = self._next_item(route, i, True), self._next_item(route, j, True)
-        for k in self.p_hoods[i_1]:
-            if route.index(k) < route.index(i) or route.index(k) > route.index(j_1):
-                for l in self.p_hoods[j_1]:
-                    if route.index(l) > route.index(i_1) and route.index(l) < route.index(j):
-                        # Check Type II insertions
-                        test_route = route[:route.index(i_1)] + [node] + list(reversed(route[route.index(l):route.index(j_1)])) + route[route.index(j_1):route.index(k)] + list(reversed(route[route.index(i_1):route.index(l)])) + route[route.index(k):]
-                        if len(test_route) > len(self.route) + 1:
-                            continue
-                        cost = self._get_cost(test_route)
-                        if cost < best_insertion['cost']:
-                            best_insertion['cost'] = cost
-                            best_insertion['route'] = test_route
-
+        test_routes = self._type1_routes(route, i, j, node)
+        for test_route in test_routes:
+            cost = self._get_cost(test_route)
+            if cost < best_insertion['cost']:
+                best_insertion['cost'] = cost
+                best_insertion['route'] = test_route
         return best_insertion
 
     def _add_node(self, node):
