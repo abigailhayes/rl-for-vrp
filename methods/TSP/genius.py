@@ -73,12 +73,12 @@ class GENI(TSPInstance):
         output = []
         for k in self.p_hoods[i_1]:
             if route.index(k) < route.index(i) or route.index(k) > route.index(j_1):
-                for l in self.p_hoods[j_1]:
-                    if route.index(l) > route.index(i_1) and route.index(l) < route.index(j):
+                for m in self.p_hoods[j_1]:
+                    if route.index(i_1) < route.index(m) < route.index(j):
                         test_route = route[:route.index(i_1)] + [node] + list(
-                            reversed(route[route.index(l):route.index(j_1)])) + route[
+                            reversed(route[route.index(m):route.index(j_1)])) + route[
                                                                                 route.index(j_1):route.index(k)] + list(
-                            reversed(route[route.index(i_1):route.index(l)])) + route[route.index(k):]
+                            reversed(route[route.index(i_1):route.index(m)])) + route[route.index(k):]
                         if len(test_route) > len(self.route) + 1:
                             continue
                         else:
