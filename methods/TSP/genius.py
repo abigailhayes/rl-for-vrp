@@ -47,7 +47,7 @@ class GENI(TSPInstance):
             route = self.route
         i_1, j_1 = self._next_item(route, i, True), self._next_item(route, j, True)
         for k in self.p_hoods[i_1]:
-            if k not in [i, j]:
+            if route.index(k) < route.index(i) or route.index(k) > route.index(j):
                 k_1 = self._next_item(route, k, True)
                 test_route = route[:route.index(i_1)] + [node] + list(reversed(route[route.index(i_1):route.index(j_1)])) + list(reversed(route[route.index(j_1):route.index(k_1)])) + route[route.index(k_1):]
                 if len(test_route) > len(self.route)+1:
@@ -66,9 +66,9 @@ class GENI(TSPInstance):
             route = self.route
         i_1, j_1 = self._next_item(route, i, True), self._next_item(route, j, True)
         for k in self.p_hoods[i_1]:
-            if k not in [j, j_1]:
+            if route.index(k) < route.index(i) or route.index(k) > route.index(j_1):
                 for l in self.p_hoods[j_1]:
-                    if l not in [i, i_1]:
+                    if route.index(l) > route.index(i_1) and route.index(l) < route.index(j):
                         # Check Type II insertions
                         test_route = route[:route.index(i_1)] + [node] + list(reversed(route[route.index(l):route.index(j_1)])) + route[route.index(j_1):route.index(k)] + list(reversed(route[route.index(i_1):route.index(l)])) + route[route.index(k):]
                         if len(test_route) > len(self.route) + 1:
