@@ -39,6 +39,13 @@ class GENI(TSPInstance):
         """Find the next item in a list, by default going as read, but can be reversed"""
         return route[(route.index(item) + 2 * up - 1) % len(route)]
 
+    @staticmethod
+    def _type1_string(route, i_1, j_1, k_1, node):
+        """Type 1 stringing, need i+1, j+1 and k+1 nodes, and the node to be inserted"""
+        return route[:route.index(i_1)] + [node] + list(reversed(
+                    route[route.index(i_1):route.index(j_1)])) + list(reversed(
+                        route[route.index(j_1):route.index(k_1)])) + route[route.index(k_1):]
+
     def _type1_routes(self, route, i, j, node):
         """Generates all appropriate Type I insertion routes for a pair of nodes and a route of specific orientation"""
         i_1, j_1 = self._next_item(route, i, True), self._next_item(route, j, True)
@@ -46,9 +53,7 @@ class GENI(TSPInstance):
         for k in self.p_hoods[i_1]:
             if route.index(k) < route.index(i) or route.index(k) > route.index(j):
                 k_1 = self._next_item(route, k, True)
-                test_route = route[:route.index(i_1)] + [node] + list(reversed(
-                    route[route.index(i_1):route.index(j_1)])) + list(reversed(
-                        route[route.index(j_1):route.index(k_1)])) + route[route.index(k_1):]
+                test_route = self._type1_string(route, i_1, j_1, k_1, node)
                 if len(test_route) > len(self.route) + 1:
                     continue
                 else:
@@ -69,6 +74,13 @@ class GENI(TSPInstance):
                 best_insertion['route'] = test_route
         return best_insertion
 
+    @staticmethod
+    def _type2_string(route, i_1, j_1, k, m, node):
+        """Type II stringing, need i+1, j+1, k and m nodes, and the node to be inserted"""
+        return route[:route.index(i_1)] + [node] + list(reversed(
+                    route[route.index(m):route.index(j_1)])) + route[route.index(j_1):route.index(k)] + list(reversed(
+                        route[route.index(i_1):route.index(m)])) + route[route.index(k):]
+
     def _type2_routes(self, route, i, j, node):
         """Generates all appropriate Type II insertion routes for a pair of nodes and a route of specific orientation"""
         i_1, j_1 = self._next_item(route, i, True), self._next_item(route, j, True)
@@ -77,9 +89,7 @@ class GENI(TSPInstance):
             if route.index(k) < route.index(i) or route.index(k) > route.index(j_1):
                 for m in self.p_hoods[j_1]:
                     if route.index(i_1) < route.index(m) < route.index(j):
-                        test_route = (route[:route.index(i_1)] + [node] + list(
-                            reversed(route[route.index(m):route.index(j_1)])) + route[route.index(j_1):route.index(k)] +
-                                      list(reversed(route[route.index(i_1):route.index(m)])) + route[route.index(k):])
+                        test_route = self._type2_string(route, i_1, j_1, k, m, node)
                         if len(test_route) > len(self.route) + 1:
                             continue
                         else:
