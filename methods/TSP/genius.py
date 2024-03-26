@@ -39,23 +39,32 @@ class GENI(TSPInstance):
         """Find the next item in a list, by default going as read, but can be reversed"""
         return route[(route.index(item) + 2*up-1) % len(route)]
     
-    def _type1(self, i, j, node, best_insertion, reverse):
-        """Attempts all possible Type I insertions"""
-        if reverse:
-            route = list(reversed(self.route))
-        else:
-            route = self.route
+    def _type1_routes(self, route, i, j, node):
+        """Generates all appropriate Type I insertion routes for a pair of nodes and a route of specific orientation"""
         i_1, j_1 = self._next_item(route, i, True), self._next_item(route, j, True)
+        output = []
         for k in self.p_hoods[i_1]:
             if route.index(k) < route.index(i) or route.index(k) > route.index(j):
                 k_1 = self._next_item(route, k, True)
                 test_route = route[:route.index(i_1)] + [node] + list(reversed(route[route.index(i_1):route.index(j_1)])) + list(reversed(route[route.index(j_1):route.index(k_1)])) + route[route.index(k_1):]
                 if len(test_route) > len(self.route)+1:
                     continue
-                cost = self._get_cost(test_route)
-                if cost < best_insertion['cost']:
-                    best_insertion['cost'] = cost
-                    best_insertion['route'] = test_route
+                else:
+                    output.append(test_route)
+        return output
+
+    def _type1(self, i, j, node, best_insertion, reverse):
+        """Attempts all possible Type I insertions for the specified nodes and route orientation"""
+        if reverse:
+            route = list(reversed(self.route))
+        else:
+            route = self.route
+        test_routes = self._type1_routes(route, i, j, node)
+        for test_route in test_routes:
+            cost = self._get_cost(test_route)
+            if cost < best_insertion['cost']:
+                best_insertion['cost'] = cost
+                best_insertion['route'] = test_route
         return best_insertion
 
     def _type2(self, i, j, node, best_insertion, reverse):
