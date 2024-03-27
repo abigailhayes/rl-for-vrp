@@ -28,9 +28,9 @@ print(test.cost, " Perc worse: ", '{:.1%}'.format(test.perc))
 import numpy as np
 from methods.TSP.utils import TSPInstance
 from methods.TSP.genius import GENI
-instance = {'cluster': [0] + test.clusters[0],
-            'dimension': len([0] + test.clusters[0]),
-            'distance': test.distance[np.ix_([0] + test.clusters[0], [0] + test.clusters[0])],
-            'coords': test.coords[[0] + test.clusters[0]]}
+instance = {'cluster': [0] + test.clusters[7],
+            'dimension': len([0] + test.clusters[7]),
+            'distance': test.distance[np.ix_([0] + test.clusters[7], [0] + test.clusters[7])],
+            'coords': test.coords[[0] + test.clusters[7]]}
 tsp_test = GENI(instance)
 tsp_test.run_all()

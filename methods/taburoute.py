@@ -27,17 +27,17 @@ class Taburoute(utils.VRPInstance):
                               'h': 10,
                               'n_max': self.dimension-1}
 
-    def _f2(self):
+    def _f2(self, routes):
         """F2 evaluation function, with a penalty for an infeasible solution"""
-        return self.cost + self.alpha*sum([max(0, self._cap_check(route)-self.capacity) for route in self.routes])
+        return self._get_cost(routes) + self.alpha*sum([max(0, self._cap_check(route)-self.capacity) for route in self.routes])
 
     def _update_optimal(self, routes):
         # Updating optimal viewed solutions if appropriate
         if self._cap_check(routes[-1]) <= self.capacity and self._get_cost(routes) < self.f1_best:
             self.s_best = routes  # Best feasible route so far
             self.f1_best = self._get_cost(routes)  # Best solution so far to objective fn
-        if self._f2() < self.f2_best:
-            self.f2_best = self._f2()  # Best solution so far with penalty for infeasibility
+        if self._f2(routes) < self.f2_best:
+            self.f2_best = self._f2(routes)  # Best solution so far with penalty for infeasibility
             self.s_best_all = routes  # Best route so far, feasible or infeasible
 
     def _init_sol(self):
@@ -51,7 +51,7 @@ class Taburoute(utils.VRPInstance):
                     'distance': self.distance[np.ix_(cluster, cluster)],
                     'coords': self.coords[cluster]}
         tsp_instance = GENI(instance, self.p)
-        tsp_instance.run_all()
+        tsp_instance.geni()
         single_route = tsp_instance.route
         # Now split the solution into capacity respecting routes
         new_route = []
