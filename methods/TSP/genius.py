@@ -43,8 +43,16 @@ class GENI(TSPInstance):
     def _type1_string(route, i_1, j_1, k_1, node):
         """Type 1 stringing, need i+1, j+1 and k+1 nodes, and the node to be inserted"""
         return route[:route.index(i_1)] + [node] + list(reversed(
-                    route[route.index(i_1):route.index(j_1)])) + list(reversed(
-                        route[route.index(j_1):route.index(k_1)])) + route[route.index(k_1):]
+                route[route.index(i_1):route.index(j_1)])) + list(reversed(
+                    route[route.index(j_1):route.index(k_1)])) + route[route.index(k_1):]
+
+    @staticmethod
+    def _type1_unstring(route, i_1, j_1, node):
+        """Type 1 stringing, need i+1, j+1 and k+1 nodes, and the node to be inserted"""
+        route = route[route.index(node):] + route[:route.index(node)]
+
+        return (list(reversed(route[route.index(i_1):route.index(j_1)])
+                     ) + route[route.index(j_1):route.index(node)] + list(reversed(route[1:route.index(i_1)])))
 
     def _type1_routes(self, route, i, j, node):
         """Generates all appropriate Type I insertion routes for a pair of nodes and a route of specific orientation"""
@@ -78,8 +86,8 @@ class GENI(TSPInstance):
     def _type2_string(route, i_1, j_1, k, m, node):
         """Type II stringing, need i+1, j+1, k and m nodes, and the node to be inserted"""
         return route[:route.index(i_1)] + [node] + list(reversed(
-                    route[route.index(m):route.index(j_1)])) + route[route.index(j_1):route.index(k)] + list(reversed(
-                        route[route.index(i_1):route.index(m)])) + route[route.index(k):]
+                route[route.index(m):route.index(j_1)])) + route[route.index(j_1):route.index(k)] + list(reversed(
+                    route[route.index(i_1):route.index(m)])) + route[route.index(k):]
 
     def _type2_routes(self, route, i, j, node):
         """Generates all appropriate Type II insertion routes for a pair of nodes and a route of specific orientation"""
