@@ -70,10 +70,16 @@ class Taburoute(utils.VRPInstance):
     def _calc_p_hood(self, node):
         return [i for i in np.argsort(self.distance[node])[1:self.search_params['p2'] + 1]]
 
+    def _route_options(self, candidate):
+        p_hood = self._calc_p_hood(candidate)
+        current_route = [n-1 for n, route in enumerate(self.s) if candidate in route][0]
+        potential_routes = list({n - 1 for n, route in enumerate(self.s) if len([i for i in route if i in p_hood]) > 0 and n-1 != current_route})
+        return potential_routes
+
     def _search(self):
         t = 1
         candidates = random.sample(self.search_params['W'], self.search_params['q'])
-        for cand in candidates:
-            p_hood = self._calc_p_hood(cand)
+        for candidate in candidates:
+            potential_routes = self._route_options(candidate)
 
 
