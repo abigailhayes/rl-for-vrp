@@ -14,25 +14,30 @@ class GENI(TSPInstance):
         self.route = random.sample(self.cluster, k=3)
         self.p_hoods = {}
 
-    def _calc_p_hood(self, node):
+    def _calc_p_hood(self, route, node):
         """Calculate the nodes in a p neighbourhood of the specified node."""
-        if node not in self.route:
-            route = self.route + [node]
-        else:
-            route = self.route
+        if node not in route:
+            route = route + [node]
 
-        if len(self.route) <= self.p:
-            return [i for i in self.route if i != node]
+        if len(route) <= self.p:
+            return [i for i in route if i != node]
         else:
             output = [route[i] for i in np.argsort(self.distance[self.cluster.index(node)][[
                 self.cluster.index(i) for i in route]])[:self.p + 1]]
             output.remove(node)
             return output
 
+    def _calc_p_hoods(self, route):
+        """Calculate the p neighbourhoods for all nodes in the specified route"""
+        p_hoods = {}
+        for node in route:
+            p_hoods[node] = self._calc_p_hood(route, node)
+        return p_hoods
+
     def _calc_p_hoods_route(self):
         """Calculate the p neighbourhoods for all nodes in the route"""
         for node in self.route:
-            self.p_hoods[node] = self._calc_p_hood(node)
+            self.p_hoods[node] = self._calc_p_hood(self.route, node)
 
     @staticmethod
     def _next_item(route, item, up=True):
@@ -120,7 +125,7 @@ class GENI(TSPInstance):
 
     def _add_node(self, route, node):
         """Carrying out one loop of Step 2 in the algorithm, adding a node"""
-        p_hood = self._calc_p_hood(node)
+        p_hood = self._calc_p_hood(route, node)
         best_insertion = {'cost': np.sum(self.distance)}
         # Check all direct insertions to an edge with a node in neighbourhood
         for n, (i, j) in enumerate(pairwise(route + [route[0]])):
@@ -143,7 +148,21 @@ class GENI(TSPInstance):
 
     def _us_single(self, route, node):
         """Apply unstringing and restringing for a single setting"""
+        best_route = {'route': route, 'cost': self._get_cost(route)}
+        p_hoods = self._calc_p_hoods(route)
+        # Type I removals
+        for i, j in zip(p_hoods[self._next_item(route, node, False)], p_hoods[self._next_item(route, node, True)]):
+            i_1, j_1 = self._next_item(route, i, True), self._next_item(route, j, True)
+            if len({i, j, i_1, j_1, node}) != 5:
+                continue
+            else:
+                short_route = self._type1_unstring(route, i_1, j_1, node)
+                test_route = self._add_node(short_route, node)
+                if self._get_cost(test_route) < best_route['cost']:
+                    best_route = {'route': test_route, 'cost': self._get_cost(test_route)}
+        # Type II removals
 
+        return best_route['route'], best_route['cost']
 
     def us_improve(self):
         """US improvement method with unstringing and restringing"""
@@ -151,7 +170,7 @@ class GENI(TSPInstance):
         cost, cost_best = self._get_cost(route), self._get_cost(route)
         t = 0
         while t < len(self.route):
-            # Unstringing and restringing for node with current route, giving a new 'route' and 'cost'
+            route, cost = self._us_single(route, cost)
             if cost < cost_best:
                 t = 0
             else:
