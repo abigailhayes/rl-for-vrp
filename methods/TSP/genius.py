@@ -151,32 +151,34 @@ class GENI(TSPInstance):
         """Apply unstringing and restringing for a single setting"""
         best_route = {'route': route, 'cost': self._get_cost(route)}
         p_hoods = self._calc_p_hoods(route)
-        for i, j in zip(p_hoods[self._next_item(route, node, False)], p_hoods[self._next_item(route, node, True)]):
-            # Type I removals
-            i_1, j_1 = self._next_item(route, i, True), self._next_item(route, j, True)
-            if route.index(i) > route.index(j):
-                j_i_span = route[route.index(j):route.index(i)]
-            else:
-                j_i_span = route[route.index(j):] + route[:route.index(i)]
-            if len({i, j, i_1, j_1, node}) != 5 or node not in j_i_span:
-                continue
-            else:
-                short_route = self._type1_unstring(route, i_1, j_1, node)
-                test_route = self._add_node(short_route, node)
-                if self._get_cost(test_route) < best_route['cost']:
-                    best_route = {'route': test_route, 'cost': self._get_cost(test_route)}
-            # Type II removals
-            if route.index(i) > route.index(j):
-                i_j_span = route[route.index(i):]+route[:route.index(j)]
-            else:
-                i_j_span = route[route.index(i):route.index(j)]
-            for m in p_hoods[i_1]:
-                if route.index(m) in i_j_span:
-                    m_1 = self._next_item(route, m, True)
-                    short_route = self._type2_unstring(route, i, j_1, m_1, node)
+        routes = [route, list(reversed(route))]
+        for route in routes:
+            for i, j in zip(p_hoods[self._next_item(route, node, False)], p_hoods[self._next_item(route, node, True)]):
+                # Type I removals
+                i_1, j_1 = self._next_item(route, i, True), self._next_item(route, j, True)
+                if route.index(i) > route.index(j):
+                    j_i_span = route[route.index(j):route.index(i)]
+                else:
+                    j_i_span = route[route.index(j):] + route[:route.index(i)]
+                if len({i, j, i_1, j_1, node}) != 5 or node not in j_i_span:
+                    continue
+                else:
+                    short_route = self._type1_unstring(route, i_1, j_1, node)
                     test_route = self._add_node(short_route, node)
                     if self._get_cost(test_route) < best_route['cost']:
                         best_route = {'route': test_route, 'cost': self._get_cost(test_route)}
+                # Type II removals
+                if route.index(i) > route.index(j):
+                    i_j_span = route[route.index(i):]+route[:route.index(j)]
+                else:
+                    i_j_span = route[route.index(i):route.index(j)]
+                for m in p_hoods[i_1]:
+                    if route.index(m) in i_j_span:
+                        m_1 = self._next_item(route, m, True)
+                        short_route = self._type2_unstring(route, i, j_1, m_1, node)
+                        test_route = self._add_node(short_route, node)
+                        if self._get_cost(test_route) < best_route['cost']:
+                            best_route = {'route': test_route, 'cost': self._get_cost(test_route)}
         return best_route['route'], best_route['cost']
 
     def us_improve(self):
