@@ -151,6 +151,18 @@ class GENI(TSPInstance):
         self.route = best_insertion['route']
         self._calc_p_hoods_route()
 
+    def us_improve(self):
+        """US improvement method with unstringing and restringing"""
+        route, route_best = self.route, self.route
+        cost, cost_best = self._get_cost(route), self._get_cost(route)
+        t = 0
+        while t < len(self.route):
+            # Unstringing and restringing for node with current route, giving a new 'route' and 'cost'
+            if cost < cost_best:
+                t = 0
+            else:
+                t += 1
+
     def _standardise(self):
         self.route = self.route[self.route.index(0) + 1:] + self.route[:self.route.index(0)]
 
