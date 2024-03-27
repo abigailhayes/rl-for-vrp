@@ -68,12 +68,8 @@ class GENI(TSPInstance):
                     output.append(test_route)
         return output
 
-    def _type1(self, i, j, node, best_insertion, reverse):
+    def _type1(self, i, j, node, best_insertion, route):
         """Attempts all possible Type I insertions for the specified nodes and route orientation"""
-        if reverse:
-            route = list(reversed(self.route))
-        else:
-            route = self.route
         test_routes = self._type1_routes(route, i, j, node)
         for test_route in test_routes:
             cost = self._get_cost(test_route)
@@ -112,12 +108,8 @@ class GENI(TSPInstance):
                             output.append(test_route)
         return output
 
-    def _type2(self, i, j, node, best_insertion, reverse):
+    def _type2(self, i, j, node, best_insertion, route):
         """Attempts all possible Type II insertions"""
-        if reverse:
-            route = list(reversed(self.route))
-        else:
-            route = self.route
         test_routes = self._type1_routes(route, i, j, node)
         for test_route in test_routes:
             cost = self._get_cost(test_route)
@@ -126,30 +118,32 @@ class GENI(TSPInstance):
                 best_insertion['route'] = test_route
         return best_insertion
 
-    def _add_node(self, node):
+    def _add_node(self, route, node):
         """Carrying out one loop of Step 2 in the algorithm, adding a node"""
         p_hood = self._calc_p_hood(node)
         best_insertion = {'cost': np.sum(self.distance)}
         # Check all direct insertions to an edge with a node in neighbourhood
-        for n, (i, j) in enumerate(pairwise(self.route + [self.route[0]])):
+        for n, (i, j) in enumerate(pairwise(route + [route[0]])):
             if i in p_hood or j in p_hood:
-                cost = self._get_cost(self.route[:n + 1] + [node] + self.route[n + 1:])
+                cost = self._get_cost(route[:n + 1] + [node] + route[n + 1:])
                 if cost < best_insertion['cost']:
                     best_insertion['cost'] = cost
-                    best_insertion['route'] = self.route[:n + 1] + [node] + self.route[n + 1:]
+                    best_insertion['route'] = route[:n + 1] + [node] + route[n + 1:]
         # Now check all more complex insertions
         for i, j in combinations(p_hood, 2):
-            if self._next_item(self.route, i, True) == j or self._next_item(self.route, i, False) == j:
+            if self._next_item(route, i, True) == j or self._next_item(route, i, False) == j:
                 continue
             # Type I
-            best_insertion = self._type1(i, j, node, best_insertion, False)
-            best_insertion = self._type1(j, i, node, best_insertion, True)
+            best_insertion = self._type1(i, j, node, best_insertion, route)
+            best_insertion = self._type1(j, i, node, best_insertion, list(reversed(route)))
             # Type II
-            best_insertion = self._type2(i, j, node, best_insertion, False)
-            best_insertion = self._type2(j, i, node, best_insertion, True)
-        # Actually add in the node
-        self.route = best_insertion['route']
-        self._calc_p_hoods_route()
+            best_insertion = self._type2(i, j, node, best_insertion, route)
+            best_insertion = self._type2(j, i, node, best_insertion, list(reversed(route)))
+        return best_insertion['route']
+
+    def _us_single(self, route, node):
+        """Apply unstringing and restringing for a single setting"""
+
 
     def us_improve(self):
         """US improvement method with unstringing and restringing"""
@@ -173,5 +167,6 @@ class GENI(TSPInstance):
             if node in self.route:
                 continue
             else:
-                self._add_node(node)
+                self.route = self._add_node(self.route, node)
+                self._calc_p_hoods_route()
         self._standardise()
