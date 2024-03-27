@@ -17,6 +17,7 @@ class Taburoute(utils.VRPInstance):
         self.lam = floor(sqrt(self.dimension-1)/2)
         self.f1_best = inf
         self.f2_best = inf
+        self.init_method = 'geni'
         self.search_params = {'W': list(range(1, self.dimension)),
                               'q': 5*len(self.routes),
                               'p1': None,
@@ -51,7 +52,7 @@ class Taburoute(utils.VRPInstance):
                     'distance': self.distance[np.ix_(cluster, cluster)],
                     'coords': self.coords[cluster]}
         tsp_instance = GENI(instance, self.p)
-        tsp_instance.geni()
+        getattr(tsp_instance, self.init_method)()
         single_route = tsp_instance.route
         # Now split the solution into capacity respecting routes
         new_route = []
