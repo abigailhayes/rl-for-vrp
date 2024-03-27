@@ -16,7 +16,9 @@ test.run_all('standard', 'furthest_insertion')
 print(test.cost, " Perc worse: ", '{:.1%}'.format(test.perc))
 test.run_all('standard', 'nearest_neighbour')
 print(test.cost, " Perc worse: ", '{:.1%}'.format(test.perc))
-test.run_all('GENI', 'run_all')
+test.run_all('GENI', 'geni')
+print(test.cost, " Perc worse: ", '{:.1%}'.format(test.perc))
+test.run_all('GENI', 'genius')
 print(test.cost, " Perc worse: ", '{:.1%}'.format(test.perc))
 
 # Run over all test sets

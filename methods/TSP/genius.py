@@ -55,19 +55,19 @@ class GENI(TSPInstance):
     def _type1_unstring(route, i_1, j_1, node):
         """Type 1 stringing, need i+1 and j+1, and the node to be inserted"""
         route = route[route.index(node):] + route[:route.index(node)]
-
         return (list(reversed(route[route.index(i_1):route.index(j_1)])
-                     ) + route[route.index(j_1):route.index(node)] + list(reversed(route[1:route.index(i_1)])))
+                     ) + route[route.index(j_1):] + list(reversed(route[1:route.index(i_1)])))
 
     def _type1_routes(self, route, i, j, node):
         """Generates all appropriate Type I insertion routes for a pair of nodes and a route of specific orientation"""
         i_1, j_1 = self._next_item(route, i, True), self._next_item(route, j, True)
         output = []
-        for k in self.p_hoods[i_1]:
+        p_hoods = self._calc_p_hoods(route)
+        for k in p_hoods[i_1]:
             if route.index(k) < route.index(i) or route.index(k) > route.index(j):
                 k_1 = self._next_item(route, k, True)
                 test_route = self._type1_string(route, i_1, j_1, k_1, node)
-                if len(test_route) > len(self.route) + 1:
+                if len(test_route) > len(route) + 1:
                     continue
                 else:
                     output.append(test_route)
@@ -102,12 +102,13 @@ class GENI(TSPInstance):
         """Generates all appropriate Type II insertion routes for a pair of nodes and a route of specific orientation"""
         i_1, j_1 = self._next_item(route, i, True), self._next_item(route, j, True)
         output = []
-        for k in self.p_hoods[i_1]:
+        p_hoods = self._calc_p_hoods(route)
+        for k in p_hoods[i_1]:
             if route.index(k) < route.index(i) or route.index(k) > route.index(j_1):
                 for m in self.p_hoods[j_1]:
                     if route.index(i_1) < route.index(m) < route.index(j):
                         test_route = self._type2_string(route, i_1, j_1, k, m, node)
-                        if len(test_route) > len(self.route) + 1:
+                        if len(test_route) > len(route) + 1:
                             continue
                         else:
                             output.append(test_route)
@@ -153,7 +154,11 @@ class GENI(TSPInstance):
         for i, j in zip(p_hoods[self._next_item(route, node, False)], p_hoods[self._next_item(route, node, True)]):
             # Type I removals
             i_1, j_1 = self._next_item(route, i, True), self._next_item(route, j, True)
-            if len({i, j, i_1, j_1, node}) != 5:
+            if route.index(i) > route.index(j):
+                j_i_span = route[route.index(j):route.index(i)]
+            else:
+                j_i_span = route[route.index(j):] + route[:route.index(i)]
+            if len({i, j, i_1, j_1, node}) != 5 or node not in j_i_span:
                 continue
             else:
                 short_route = self._type1_unstring(route, i_1, j_1, node)
@@ -180,16 +185,19 @@ class GENI(TSPInstance):
         cost, cost_best = self._get_cost(route), self._get_cost(route)
         t = 0
         while t < len(self.route):
-            route, cost = self._us_single(route, cost)
+            route, cost = self._us_single(route, route[t])
             if cost < cost_best:
                 t = 0
+                cost_best = cost
+                route_best = route
             else:
                 t += 1
+        self.route = route_best
 
     def _standardise(self):
         self.route = self.route[self.route.index(0) + 1:] + self.route[:self.route.index(0)]
 
-    def run_all(self):
+    def geni(self):
         """Running the whole algorithm"""
         self._calc_p_hoods_route()
         for node in self.cluster:
@@ -198,4 +206,16 @@ class GENI(TSPInstance):
             else:
                 self.route = self._add_node(self.route, node)
                 self._calc_p_hoods_route()
+        self._standardise()
+
+    def genius(self):
+        """Running the whole algorithm with improvement"""
+        self._calc_p_hoods_route()
+        for node in self.cluster:
+            if node in self.route:
+                continue
+            else:
+                self.route = self._add_node(self.route, node)
+                self._calc_p_hoods_route()
+        self.us_improve()
         self._standardise()
