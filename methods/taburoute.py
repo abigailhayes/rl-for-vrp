@@ -81,5 +81,7 @@ class Taburoute(utils.VRPInstance):
         candidates = random.sample(self.search_params['W'], self.search_params['q'])
         for candidate in candidates:
             potential_routes = self._route_options(candidate)
+            for route in potential_routes:
+                print(route)
 
 
