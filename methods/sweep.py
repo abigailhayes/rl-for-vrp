@@ -1,22 +1,12 @@
 import methods.utils as utils
-import numpy as np
-
 
 class Sweep(utils.VRPInstance):
     """A class for implementing Sweep on a VRP instance."""
 
     def __init__(self, instance):
         super().__init__(instance)
-        self.clusters = None
-        self.polars = None
-
-    def polar_coord(self):
-        """Calculate the polar co-ordinate, and sort with a reference to the node id."""
-        depot = self.coords[0]
-        polars = np.append(0, np.arctan((self.coords[1:, 1] - depot[1]) / (self.coords[1:, 0] - depot[0])))
-        index = np.arange(polars.shape[0])  # create index array for indexing
-        polars2 = np.c_[polars, index]
-        self.polars = polars2[polars2[:, 0].argsort()]
+        self.polar_coord()
+        self.build_clusters()
 
     def build_clusters(self):
         """Build the clusters via a sweep"""
@@ -32,20 +22,18 @@ class Sweep(utils.VRPInstance):
                 new_route = [int(ident)]
         self.clusters.append(new_route)  # Save final cluster when no more nodes
 
-    def routing(self, method, improvement=None):
+    def routing(self, tsp_type, method, improvement=None):
         """Carry out routing for specified method"""
         self.routes = []
         for cluster in self.clusters:
-            instance = self._gen_tsp_instance(cluster)
+            instance = self._gen_tsp_instance(cluster, tsp_type)
             getattr(instance, method)()
             if improvement is not None:
                 getattr(instance, improvement)()
             self.routes.append(instance.route)
 
-    def run_all(self, tsp_method, tsp_improve=None):
-        self.polar_coord()
-        self.build_clusters()
-        self.routing(tsp_method, tsp_improve)
+    def run_all(self, tsp_type, tsp_method, tsp_improve=None):
+        self.routing(tsp_type, tsp_method, tsp_improve)
         self.get_cost()
         if self.sol:
             self.compare_cost()

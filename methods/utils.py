@@ -2,6 +2,7 @@ from itertools import pairwise
 import numpy as np
 
 from methods.TSP.utils import TSPInstance
+from methods.TSP.genius import GENI
 
 
 class VRPInstance:
@@ -12,6 +13,7 @@ class VRPInstance:
         self.sol_routes = None
         self.sol_cost = None
         self.cost = None
+        self.polars = None
         self.capacity = instance['capacity']
         self.demand = instance['demand']
         self.distance = instance['edge_weight']
@@ -28,8 +30,7 @@ class VRPInstance:
         """Calculate the total cost of a solution to an instance"""
         costs = 0
         for r in routes:
-            pairs = list(pairwise([0]+r+[0]))
-            for i, j in pairs:
+            for i, j in pairwise([0]+r+[0]):
                 costs += self.distance[i][j]
         return costs
 
@@ -48,14 +49,25 @@ class VRPInstance:
         self.get_cost()
         self.perc = (self.cost-self.sol_cost)/self.sol_cost
 
-    def _gen_tsp_instance(self, cluster):
+    def _gen_tsp_instance(self, cluster, tsp_type):
         """Takes a list of nodes and prepares an instance for giving to TSPInstance"""
         cluster = [0] + cluster
         instance = {'cluster': cluster,
                     'dimension': len(cluster),
                     'distance': self.distance[np.ix_(cluster, cluster)],
                     'coords': self.coords[cluster]}
-        return TSPInstance(instance)
+        if tsp_type == 'standard':
+            return TSPInstance(instance)
+        if tsp_type == 'GENI':
+            return GENI(instance)
+
+    def polar_coord(self):
+        """Calculate the polar co-ordinate, and sort with a reference to the node id."""
+        depot = self.coords[0]
+        polars = np.append(0, np.arctan((self.coords[1:, 1] - depot[1]) / (self.coords[1:, 0] - depot[0])))
+        index = np.arange(polars.shape[0])  # create index array for indexing
+        polars2 = np.c_[polars, index]
+        self.polars = polars2[polars2[:, 0].argsort()]
 
 
 class NodePair:
