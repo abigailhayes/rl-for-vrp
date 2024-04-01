@@ -69,7 +69,7 @@ class ORtools(utils.VRPInstance):
         # Convert from routing variable Index to distance matrix NodeIndex.
         from_node = self.manager.IndexToNode(from_index)
         to_node = self.manager.IndexToNode(to_index)
-        return self.distance[from_node][to_node]
+        return self.distance.astype(int)[from_node][to_node]
 
     def _demand_callback(self, from_index):
         """Returns the demand of the node."""
@@ -108,7 +108,6 @@ class ORtools(utils.VRPInstance):
         self.search_parameters.time_limit.FromSeconds(100)
 
     def run_all(self):
-        self.distance = self.distance.astype(int)
         self._min_vehicles()
         self.setup()
         self.search_settings()
