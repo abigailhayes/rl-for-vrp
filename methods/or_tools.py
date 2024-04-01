@@ -57,6 +57,7 @@ class ORtools(utils.VRPInstance):
             print(plan_output)
             total_distance += route_distance
             total_load += route_load
+            route.remove(0)
             self.routes.append(route)
         print(f"Total distance of all routes: {total_distance}m")
         print(f"Total load of all routes: {total_load}")
@@ -103,13 +104,11 @@ class ORtools(utils.VRPInstance):
         if self.init_method == 'savings':
             self.search_parameters.first_solution_strategy = routing_enums_pb2.FirstSolutionStrategy.SAVINGS
             self.search_parameters.savings_parallel_routes = True
-        elif self.init_method == 'sweep':
-            self.search_parameters.first_solution_strategy = routing_enums_pb2.FirstSolutionStrategy.SWEEP
         elif self.init_method == 'cheapest_arc':
             self.search_parameters.first_solution_strategy = routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
         elif self.init_method == 'christofides':
             self.search_parameters.first_solution_strategy = routing_enums_pb2.FirstSolutionStrategy.CHRISTOFIDES
-        elif self.init_method == 'local_cheap_insert':
+        elif self.init_method == 'local_cheapest_insert':
             self.search_parameters.first_solution_strategy = routing_enums_pb2.FirstSolutionStrategy.LOCAL_CHEAPEST_INSERTION
 
         if self.improve_method == 'guided_local':
