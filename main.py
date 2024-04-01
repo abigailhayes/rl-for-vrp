@@ -1,24 +1,15 @@
 import instances.utils as instances_utils
 import methods.cw_savings as cw_savings
+from methods.or_tools import ORtools
 from methods.sweep import Sweep
 from methods.taburoute import Taburoute
 import utils
 
 data = instances_utils.import_instance('instances/CVRP/A', 'A-n80-k10')
 
-test = Taburoute(data['instance'])
+test = ORtools(data['instance'], 'local_cheapest_insert', 'tabu')
 test.add_sol(data['solution'])
-
-
-test.run_all('standard', 'nearest_insertion')
-print(test.cost, " Perc worse: ", '{:.1%}'.format(test.perc))
-test.run_all('standard', 'furthest_insertion')
-print(test.cost, " Perc worse: ", '{:.1%}'.format(test.perc))
-test.run_all('standard', 'nearest_neighbour')
-print(test.cost, " Perc worse: ", '{:.1%}'.format(test.perc))
-test.run_all('GENI', 'geni')
-print(test.cost, " Perc worse: ", '{:.1%}'.format(test.perc))
-test.run_all('GENI', 'genius')
+test.run_all()
 print(test.cost, " Perc worse: ", '{:.1%}'.format(test.perc))
 
 # Run over all test sets
