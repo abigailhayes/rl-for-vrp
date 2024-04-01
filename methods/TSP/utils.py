@@ -16,8 +16,7 @@ class TSPInstance:
     def _get_cost(self, route):
         """Calculate the total cost of a solution to an instance"""
         costs = 0
-        pairs = list(pairwise([0]+route+[0]))
-        for i, j in pairs:
+        for i, j in pairwise(route + [route[0]]):
             costs += self.distance[self.cluster.index(i)][self.cluster.index(j)]
         return costs
 
@@ -91,6 +90,5 @@ class TSPInstance:
     def imp_2opt(self):
         self.get_cost()
         pairs = list(pairwise([0] + self.route + [0]))
-        comparisons = list(combinations(pairs, 2))
-        for first, second in comparisons:
+        for first, second in combinations(pairs, 2):
             self._check_2opt(first, second)
