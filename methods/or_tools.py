@@ -49,11 +49,7 @@ class ORtools(utils.VRPInstance):
                 index = solution.Value(self.routing.NextVar(index))
                 route_distance += self.routing.GetArcCostForVehicle(
                     previous_index, index, vehicle_id
-                )
-                print(previous_index, index, vehicle_id)
-                print(self.routing.GetArcCostForVehicle(
-                    previous_index, index, vehicle_id
-                ))
+                )/1000
             plan_output += f" {self.manager.IndexToNode(index)} Load({route_load})\n"
             plan_output += f"Distance of the route: {route_distance}m\n"
             plan_output += f"Load of the route: {route_load}\n"
@@ -69,7 +65,7 @@ class ORtools(utils.VRPInstance):
         # Convert from routing variable Index to distance matrix NodeIndex.
         from_node = self.manager.IndexToNode(from_index)
         to_node = self.manager.IndexToNode(to_index)
-        return self.distance.astype(int)[from_node][to_node]
+        return int(self.distance[from_node][to_node]*1000)
 
     def _demand_callback(self, from_index):
         """Returns the demand of the node."""
@@ -105,7 +101,7 @@ class ORtools(utils.VRPInstance):
         """Set up conditions for the search"""
         self.search_parameters.first_solution_strategy = routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
         self.search_parameters.local_search_metaheuristic = routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH
-        self.search_parameters.time_limit.FromSeconds(100)
+        self.search_parameters.time_limit.FromSeconds(30)
 
     def run_all(self):
         self._min_vehicles()
