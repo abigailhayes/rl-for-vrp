@@ -15,7 +15,6 @@
 
 import methods.utils as utils
 
-import numpy as np
 from math import ceil
 from ortools.constraint_solver import pywrapcp
 from ortools.constraint_solver import routing_enums_pb2
@@ -24,14 +23,16 @@ from ortools.constraint_solver import routing_enums_pb2
 class ORtools(utils.VRPInstance):
     """A class for implementing the methods included in OR tools on a VRP instance."""
 
-    def __init__(self, instance):
+    def __init__(self, instance, init_method, improve_method=None):
         super().__init__(instance)
         self.search_parameters = pywrapcp.DefaultRoutingSearchParameters()
         self.depot = 0
+        self.init_method = init_method
+        self.improve_method = improve_method
 
     def print_solution(self, solution):
         """Prints solution on console."""
-        print(f"Objective: {solution.ObjectiveValue()}")
+        print(f"Objective: {solution.ObjectiveValue()/1000}")
         total_distance = 0
         total_load = 0
         for vehicle_id in range(self.no_vehicles):
@@ -99,8 +100,26 @@ class ORtools(utils.VRPInstance):
 
     def search_settings(self):
         """Set up conditions for the search"""
-        self.search_parameters.first_solution_strategy = routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
-        self.search_parameters.local_search_metaheuristic = routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH
+        if self.init_method == 'savings':
+            self.search_parameters.first_solution_strategy = routing_enums_pb2.FirstSolutionStrategy.SAVINGS
+            self.search_parameters.savings_parallel_routes = True
+        elif self.init_method == 'sweep':
+            self.search_parameters.first_solution_strategy = routing_enums_pb2.FirstSolutionStrategy.SWEEP
+        elif self.init_method == 'cheapest_arc':
+            self.search_parameters.first_solution_strategy = routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
+        elif self.init_method == 'christofides':
+            self.search_parameters.first_solution_strategy = routing_enums_pb2.FirstSolutionStrategy.CHRISTOFIDES
+        elif self.init_method == 'local_cheap_insert':
+            self.search_parameters.first_solution_strategy = routing_enums_pb2.FirstSolutionStrategy.LOCAL_CHEAPEST_INSERTION
+
+        if self.improve_method == 'guided_local':
+            self.search_parameters.local_search_metaheuristic = routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH
+        elif self.improve_method == 'sa':
+            self.search_parameters.local_search_metaheuristic = routing_enums_pb2.LocalSearchMetaheuristic.SIMULATED_ANNEALING
+        elif self.improve_method == 'tabu':
+            self.search_parameters.local_search_metaheuristic = routing_enums_pb2.LocalSearchMetaheuristic.GENERIC_TABU_SEARCH
+
+        self.search_parameters.log_search = False
         self.search_parameters.time_limit.FromSeconds(30)
 
     def run_all(self):
@@ -112,5 +131,3 @@ class ORtools(utils.VRPInstance):
         self.get_cost()
         if self.sol:
             self.compare_cost()
-
-
