@@ -31,7 +31,10 @@ def gen_cvrp(type, nodes, capacity, max_demand):
     output['depot'] = [0]
 
     # Edge weight (distances)
-
+    distances = np.zeros((nodes+1, nodes+1))
+    for i in range(nodes+1):
+        distances[i] = np.linalg.norm(output['node_coord'] - output['node_coord'][i])
+    output['edge_weight'] = distances
 
     return output
 
