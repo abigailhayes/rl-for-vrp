@@ -34,6 +34,7 @@ class ORtools(utils.VRPInstance):
             self.method = f'{self.improve_method}/{self.init_method}'
         else:
             self.method = self.init_method
+        random.seed(self.seed)
 
     def print_solution(self, solution):
         """Prints solution on console."""
@@ -127,7 +128,6 @@ class ORtools(utils.VRPInstance):
         self.search_parameters.time_limit.FromSeconds(30)
 
     def run_all(self):
-        random.seed(self.seed)
         self._min_vehicles()
         self.setup()
         self.search_settings()
