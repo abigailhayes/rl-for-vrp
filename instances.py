@@ -1,6 +1,5 @@
 import instances.utils as instances_utils
-import vrplib
-from types import SimpleNamespace
+
 import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np

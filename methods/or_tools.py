@@ -15,6 +15,7 @@
 
 import methods.utils as utils
 
+import random
 from math import ceil
 from ortools.constraint_solver import pywrapcp
 from ortools.constraint_solver import routing_enums_pb2
@@ -29,6 +30,10 @@ class ORtools(utils.VRPInstance):
         self.depot = 0
         self.init_method = init_method
         self.improve_method = improve_method
+        if self.improve_method is not None:
+            self.method = f'{self.improve_method}/{self.init_method}'
+        else:
+            self.method = self.init_method
 
     def print_solution(self, solution):
         """Prints solution on console."""
@@ -122,6 +127,7 @@ class ORtools(utils.VRPInstance):
         self.search_parameters.time_limit.FromSeconds(30)
 
     def run_all(self):
+        random.seed(self.seed)
         self._min_vehicles()
         self.setup()
         self.search_settings()

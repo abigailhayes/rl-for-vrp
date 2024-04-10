@@ -62,7 +62,6 @@ def avg_perf(task, method, small=True):
     perc_averages['all'] = mean(nested_dict_values(perc_results))
 
     # Save all outputs in files
-    os.makedirs(f'results/{task}', exist_ok=True)
     os.makedirs(f'results/{task}/{method}', exist_ok=True)
     with open(f'results/{task}/{method}/perc_results.json', 'w') as f:
         json.dump(perc_results, f, indent=2)
