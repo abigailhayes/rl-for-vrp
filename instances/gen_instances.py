@@ -11,7 +11,7 @@ def gen_cvrp(type, nodes, capacity, max_demand):
 
     # Helper function for generating coordinates
     def random_coords():
-        return [random.random() for i in range(1)]
+        return [random.random() for i in range(2)]
 
     # Set depot location and demand
     if type == 'random_centre':
