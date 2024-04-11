@@ -84,3 +84,6 @@ def gen_cvrp_multi(set_type, seed, number=100, nodes=20, capacity='normal', dema
     if set_type == 'random_all':
         for i in range(number):
             gen_cvrp(filepath, i, nodes, capacity_n, max_demand, node_type='random', depot_type='random')
+    elif set_type == 'random_centred':
+        for i in range(number):
+            gen_cvrp(filepath, i, nodes, capacity_n, max_demand, node_type='random', depot_type='centre')
