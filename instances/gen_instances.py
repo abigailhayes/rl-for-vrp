@@ -4,6 +4,14 @@ import vrplib
 
 
 def gen_cvrp(filepath, nodes, capacity, max_demand, node_type='random', depot_type='centre'):
+    """Function for generating a single CVRP instance
+    - filepath - the folder where the instance should be saved
+    - nodes - number of customer nodes
+    - capacity - the capacity of each of the vehicles
+    - max_demand - the maximum demand of any one customer
+    - node_type - how the co-ordinates of the customers should be selected, currently only random, but will expand to
+    allow for clustering
+    - depot_type - the position of the depot, can be random or centred"""
     # Initial values
     output = {'name': f'{node_type}-{depot_type}-{nodes}-{capacity}-{max_demand}',
               'type': 'CVRP',
