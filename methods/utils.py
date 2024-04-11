@@ -1,24 +1,31 @@
 from itertools import pairwise
 import numpy as np
+import os
 
 from methods.TSP.utils import TSPInstance
 from methods.TSP.genius import GENI
+from vrplib import write_solution
 
 
 class VRPInstance:
     """A class for storing a VRP instance.
     - instance: need to provide an instance as input when creating"""
     def __init__(self, instance):
+        self.method = None
+        self.task = instance['type']
         self.perc = None
         self.sol_routes = None
         self.sol_cost = None
         self.cost = None
         self.polars = None
+        self.seed = 0
+        self.instance = instance
         self.capacity = instance['capacity']
         self.demand = instance['demand']
         self.distance = instance['edge_weight']
         self.dimension = instance['dimension']
         self.coords = instance['node_coord']
+        self.name = instance['name']
         self.routes = []
         self.sol = False
 
@@ -68,6 +75,12 @@ class VRPInstance:
         index = np.arange(polars.shape[0])  # create index array for indexing
         polars2 = np.c_[polars, index]
         self.polars = polars2[polars2[:, 0].argsort()]
+
+    def save_solution(self):
+        """Save the solution, can then be used for plotting."""
+        filepath = f'results/{self.task}/{self.method}/solutions'
+        os.makedirs(filepath, exist_ok=True)
+        write_solution(path=f'{filepath}/{self.name}-{self.seed}.sol', routes=self.routes, data={'cost': self.cost})
 
 
 class NodePair:
