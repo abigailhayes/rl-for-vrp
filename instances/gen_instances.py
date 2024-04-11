@@ -30,6 +30,10 @@ def gen_cvrp(filepath, ident, nodes, capacity, max_demand, node_type='random', d
         coords = [[0.5, 0.5]]
     elif depot_type == 'random':
         coords = [random_coords()]
+    elif depot_type == 'outer':
+        coords = [random_coords()]
+        element = random.randint(0,1)
+        coords[0][element] = round(coords[0][element])
     demand = [0]
 
     # Node co-ordinates and demand
@@ -87,3 +91,6 @@ def gen_cvrp_multi(set_type, seed, number=100, nodes=20, capacity='normal', dema
     elif set_type == 'random_centre':
         for i in range(number):
             gen_cvrp(filepath, i, nodes, capacity_n, max_demand, node_type='random', depot_type='centre')
+    elif set_type == 'random_outer':
+        for i in range(number):
+            gen_cvrp(filepath, i, nodes, capacity_n, max_demand, node_type='random', depot_type='outer')
