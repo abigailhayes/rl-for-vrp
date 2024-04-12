@@ -9,7 +9,7 @@ import vrplib
 data = vrplib.read_instance(f'instances/clusters-random-50-100-15-1.vrp')
 
 
-def plot_solution(instance, solution, name="CVRP solution"):
+def plot_solution(instance, solution, name="CVRP solution", demand=False):
     """
     Plot the routes of the passed-in solution.
     Adapted from https://alns.readthedocs.io/en/stable/examples/capacitated_vehicle_routing_problem.html
@@ -33,6 +33,10 @@ def plot_solution(instance, solution, name="CVRP solution"):
     ax.set_xlabel("X-coordinate")
     ax.set_ylabel("Y-coordinate")
     ax.legend(frameon=False, ncol=3)
+
+    if demand == True:
+        for n, [xi,yi] in enumerate(instance['node_coord'][1:]):
+            plt.text(xi, yi, instance['demand'][n], va='bottom', ha='center')
 
 
 def plot_instance(instance, name="CVRP instance", demand=False):
