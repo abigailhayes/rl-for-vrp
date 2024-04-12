@@ -2,6 +2,7 @@ import random
 import numpy as np
 import vrplib
 import os
+from sklearn.datasets import make_blobs
 
 
 def gen_cvrp(filepath, ident, nodes, capacity, max_demand, node_type='random', depot_type='centre'):
@@ -11,8 +12,7 @@ def gen_cvrp(filepath, ident, nodes, capacity, max_demand, node_type='random', d
     - nodes - number of customer nodes
     - capacity - the capacity of each of the vehicles
     - max_demand - the maximum demand of any one customer
-    - node_type - how the co-ordinates of the customers should be selected, currently only random, but will expand to
-    allow for clustering
+    - node_type - how the co-ordinates of the customers should be selected, either completely randomly or with clustering
     - depot_type - the position of the depot, can be random or centred"""
     # Initial values
     output = {'name': f'{node_type}-{depot_type}-{nodes}-{capacity}-{max_demand}-{ident}',
@@ -37,9 +37,16 @@ def gen_cvrp(filepath, ident, nodes, capacity, max_demand, node_type='random', d
     demand = [0]
 
     # Node co-ordinates and demand
-    for i in range(nodes):
-        coords.append(random_coords())
-        demand.append(random.randint(1, max_demand))
+    if node_type == 'random':
+        for i in range(nodes):
+            coords.append(random_coords())
+            demand.append(random.randint(1, max_demand))
+    elif node_type == 'clusters':
+        output['no_clusters'] = random.randint(2,round(nodes/10))
+        centres = [random_coords() for _ in range(output['no_clusters'])]
+        for i in range(nodes):
+            cluster = random.randint(0, output['no_clusters']-1)
+            coords.append(np.clip([centres[cluster][i]+(random.random()-0.5)/2 for i in range(2)], 0, 1))
     output['node_coord'] = np.array(coords)
     output['demand'] = np.array(demand)
 
