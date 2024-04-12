@@ -35,7 +35,7 @@ def plot_solution(instance, solution, name="CVRP solution"):
     ax.legend(frameon=False, ncol=3)
 
 
-def plot_instance(instance, name="CVRP instance"):
+def plot_instance(instance, name="CVRP instance", demand=False):
     """
     Plot the nodes of the passed-in instance.
     """
@@ -57,6 +57,10 @@ def plot_instance(instance, name="CVRP instance"):
     ax.set_xlabel("X-coordinate")
     ax.set_ylabel("Y-coordinate")
     ax.legend(frameon=False, ncol=3)
+
+    if demand == True:
+        for n, [xi,yi] in enumerate(instance['node_coord'][1:]):
+            plt.text(xi, yi, instance['demand'][n], va='bottom', ha='center')
 
 
 plot_solution(data['instance'], data['solution'], name="Best known solution")
