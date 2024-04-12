@@ -102,3 +102,12 @@ def gen_cvrp_multi(set_type, seed, number=100, nodes=20, capacity='normal', dema
     elif set_type == 'random_outer':
         for i in range(number):
             gen_cvrp(filepath, i, nodes, capacity_n, max_demand, node_type='random', depot_type='outer')
+    elif set_type == 'cluster_random':
+        for i in range(number):
+            gen_cvrp(filepath, i, nodes, capacity_n, max_demand, node_type='clusters', depot_type='random')
+    elif set_type == 'cluster_centre':
+        for i in range(number):
+            gen_cvrp(filepath, i, nodes, capacity_n, max_demand, node_type='clusters', depot_type='centre')
+    elif set_type == 'cluster_outer':
+        for i in range(number):
+            gen_cvrp(filepath, i, nodes, capacity_n, max_demand, node_type='clusters', depot_type='outer')
