@@ -15,23 +15,21 @@ def gen_cvrp(filepath, ident, nodes, capacity, max_demand, node_type='random', d
     - node_type - how the co-ordinates of the customers should be selected, either completely randomly or with clustering
     - depot_type - the position of the depot, can be random or centred"""
     # Initial values
-    output = {'name': f'{node_type}-{depot_type}-{nodes}-{capacity}-{max_demand}-{ident}',
-              'type': 'CVRP',
-              'dimension': nodes + 1,
-              'edge_weight_type': 'EUC_2D',
-              'capacity': capacity}
+    output = {'NAME': f'{node_type}-{depot_type}-{nodes}-{capacity}-{max_demand}-{ident}',
+              'TYPE': 'CVRP',
+              'DIMENSION': nodes + 1,
+              'EDGE_WEIGHT_TYPE': 'EUC_2D',
+              'CAPACITY': capacity}
 
     # Helper function for generating coordinates
     def random_coords():
         return [random.random() for _ in range(2)]
 
     # Set depot location and demand
+    coords = [random_coords()]
     if depot_type == 'centre':
         coords = [[0.5, 0.5]]
-    elif depot_type == 'random':
-        coords = [random_coords()]
     elif depot_type == 'outer':
-        coords = [random_coords()]
         element = random.randint(0,1)
         coords[0][element] = round(coords[0][element])
     demand = [0]
@@ -42,24 +40,27 @@ def gen_cvrp(filepath, ident, nodes, capacity, max_demand, node_type='random', d
             coords.append(random_coords())
             demand.append(random.randint(1, max_demand))
     elif node_type == 'clusters':
-        output['no_clusters'] = random.randint(2,round(nodes/10))
-        centres = [random_coords() for _ in range(output['no_clusters'])]
+        no_clusters = random.randint(2,round(nodes/10))
+        centres = [random_coords() for _ in range(no_clusters)]
         for i in range(nodes):
-            cluster = random.randint(0, output['no_clusters']-1)
+            cluster = random.randint(0, no_clusters-1)
             coords.append(np.clip([centres[cluster][i]+(random.random()-0.5)/2 for i in range(2)], 0, 1))
-    output['node_coord'] = np.array(coords)
-    output['demand'] = np.array(demand)
+            demand.append(random.randint(1, max_demand))
+    output['NODE_COORD_SECTION'] = np.array(coords)
+    output['DEMAND_SECTION'] = np.array(demand)
 
     # Indicate depot position in the arrays
-    output['depot'] = [0]
+    output['DEPOT_SECTION'] = [1, -1]
 
     # Edge weight (distances)
-    distances = np.zeros((nodes + 1, nodes + 1))
+    """distances = np.zeros((nodes + 1, nodes + 1))
     for i in range(nodes + 1):
-        distances[i] = np.linalg.norm(output['node_coord'] - output['node_coord'][i], axis=1)
-    output['edge_weight'] = distances
+        distances[i] = np.linalg.norm(output['NODE_COORD_SECTION'] - output['NODE_COORD_SECTION'][i], axis=1)
+    output['EDGE_WEIGHT'] = distances"""
 
-    vrplib.write_instance(f"{filepath}/{output['name']}", output)
+    #output['COMMENT'] = f'{no_clusters} clusters'
+
+    vrplib.write_instance(f"{filepath}/{output['NAME']}.vrp", output)
 
 
 def gen_cvrp_multi(set_type, seed, number=100, nodes=20, capacity='normal', demand='normal'):

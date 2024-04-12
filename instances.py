@@ -3,8 +3,10 @@ import instances.utils as instances_utils
 import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
+import vrplib
 
-data = instances_utils.import_instance('instances/CVRP/A', 'A-n80-k10')
+#data = instances_utils.import_instance('instances/CVRP/A', 'A-n80-k10')
+data = vrplib.read_instance(f'instances/clusters-random-50-100-15-1.vrp')
 
 
 def plot_solution(instance, solution, name="CVRP solution"):
@@ -58,4 +60,4 @@ def plot_instance(instance, name="CVRP instance"):
 
 
 plot_solution(data['instance'], data['solution'], name="Best known solution")
-plot_instance(data['instance'])
+plot_instance(data)
