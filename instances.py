@@ -26,13 +26,12 @@ def plot_solution(instance, solution, name="CVRP solution", demand=False):
         )
 
     # Plot the depot
-    kwargs = dict(label="Depot", zorder=3, marker="*", s=750)
+    kwargs = dict(s=250)
     ax.scatter(instance["node_coord"][0][0], instance["node_coord"][0][1], c="tab:red", **kwargs)
 
     ax.set_title(f"{name}\n Total distance: {solution['cost']}")
     ax.set_xlabel("X-coordinate")
     ax.set_ylabel("Y-coordinate")
-    ax.legend(frameon=False, ncol=3)
 
     if demand == True:
         for n, [xi,yi] in enumerate(instance['node_coord'][1:]):
@@ -49,18 +48,16 @@ def plot_instance(instance, name="CVRP instance", demand=False):
     ax.scatter(
         [instance["node_coord"][loc][0] for loc in range(1, instance['dimension'])],
         [instance["node_coord"][loc][1] for loc in range(1, instance['dimension'])],
-        color=cmap[0],
-        marker='.'
+        color=cmap[0]
     )
 
     # Plot the depot
-    kwargs = dict(label="Depot", zorder=3, marker="*", s=750)
+    kwargs = dict(s=250)
     ax.scatter(instance["node_coord"][0][0], instance["node_coord"][0][1], c="tab:red", **kwargs)
 
     ax.set_title(f"{name}\n Customers: {instance['dimension']-1}")
     ax.set_xlabel("X-coordinate")
     ax.set_ylabel("Y-coordinate")
-    ax.legend(frameon=False, ncol=3)
 
     if demand == True:
         for n, [xi,yi] in enumerate(instance['node_coord'][1:]):
