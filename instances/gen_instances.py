@@ -44,7 +44,7 @@ def gen_cvrp(filepath, ident, nodes, capacity, max_demand, node_type='random', d
         centres = [random_coords() for _ in range(no_clusters)]
         for i in range(nodes):
             cluster = random.randint(0, no_clusters-1)
-            coords.append(np.clip([centres[cluster][i]+(random.random()-0.5)/2 for i in range(2)], 0, 1))
+            coords.append(np.clip([centres[cluster][i]+(random.random()-0.5)/3 for i in range(2)], 0, 1))
             demand.append(random.randint(1, max_demand))
     output['NODE_COORD_SECTION'] = np.array(coords)
     output['DEMAND_SECTION'] = np.array(demand)
