@@ -5,7 +5,7 @@ import matplotlib
 import numpy as np
 import vrplib
 
-#data = instances_utils.import_instance('instances/CVRP/A', 'A-n80-k10')
+# data = instances_utils.import_instance('instances/CVRP/A', 'A-n80-k10')
 data = vrplib.read_instance(f'instances/clusters-random-50-100-15-1.vrp')
 
 
@@ -33,8 +33,8 @@ def plot_solution(instance, solution, name="CVRP solution", demand=False):
     ax.set_xlabel("X-coordinate")
     ax.set_ylabel("Y-coordinate")
 
-    if demand == True:
-        for n, [xi,yi] in enumerate(instance['node_coord'][1:]):
+    if demand:
+        for n, [xi, yi] in enumerate(instance['node_coord'][1:]):
             plt.text(xi, yi, instance['demand'][n], va='bottom', ha='center')
 
 
@@ -55,12 +55,12 @@ def plot_instance(instance, name="CVRP instance", demand=False):
     kwargs = dict(s=250)
     ax.scatter(instance["node_coord"][0][0], instance["node_coord"][0][1], c="tab:red", **kwargs)
 
-    ax.set_title(f"{name}\n Customers: {instance['dimension']-1}")
+    ax.set_title(f"{name}\n Customers: {instance['dimension'] - 1}")
     ax.set_xlabel("X-coordinate")
     ax.set_ylabel("Y-coordinate")
 
-    if demand == True:
-        for n, [xi,yi] in enumerate(instance['node_coord'][1:]):
+    if demand:
+        for n, [xi, yi] in enumerate(instance['node_coord'][1:]):
             plt.text(xi, yi, instance['demand'][n], va='bottom', ha='center')
 
 
