@@ -2,7 +2,6 @@ import random
 import numpy as np
 import vrplib
 import os
-from sklearn.datasets import make_blobs
 
 
 def gen_cvrp(filepath, ident, nodes, capacity, max_demand, node_type='random', depot_type='centre'):
