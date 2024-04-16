@@ -418,7 +418,9 @@ class DataGenerator(object):
 
         # create test data
         self.n_problems = args['test_size']
-        self.test_data = args['test_data']
+        # self.test_data = args['test_data']
+        self.test_data = create_VRP_dataset(self.n_problems, args['n_cust'], './data',
+                                            seed=args['random_seed'] + 1, data_type='test')
 
         self.reset()
 
