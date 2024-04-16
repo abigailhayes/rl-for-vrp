@@ -52,7 +52,7 @@ class RLAgent(object):
                                         rnn_layers=args['rnn_layers'],
                                         _scope='Actor/')
         self.decoder_input = tf.compat.v1.get_variable('decoder_input', [1, 1, args['embedding_dim']],
-                                                       initializer=tf.compat.v1.keras.initializers.glorot_uniform()())
+                                                       initializer=tf.compat.v1.keras.initializers.glorot_uniform())
 
         start_time = time.time()
         if is_train:

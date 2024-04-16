@@ -8,6 +8,8 @@ from methods.nazari.attention_agent import RLAgent
 from methods.nazari.utils import Env, reward_func
 from methods.nazari.attention import AttentionVRPActor, AttentionVRPCritic
 
+tf.compat.v1.reset_default_graph()
+
 # Data formatting
 directory = 'instances/CVRP/generate/random_random-20-normal-normal-1'
 working = []
@@ -31,3 +33,4 @@ agent = RLAgent(args,
                 AttentionVRPActor,
                 AttentionVRPCritic,
                 is_train=args['is_train'])
+
