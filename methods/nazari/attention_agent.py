@@ -17,7 +17,7 @@ class RLAgent(object):
                  clAttentionCritic,
                  is_train=True,
                  _scope=''):
-        '''
+        """
         This class builds the model and run testt and train.
         Inputs:
             args: arguments. See the description in config.py file.
@@ -30,7 +30,7 @@ class RLAgent(object):
             clAttentionCritic: Attention mechanism that is used in critic.
             is_train: if true, the agent is used for training; else, it is used only
                         for inference.
-        '''
+        """
 
         self.args = args
         self.prt = prt
