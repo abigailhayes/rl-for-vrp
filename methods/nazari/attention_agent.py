@@ -1,8 +1,8 @@
 import tensorflow as tf
 import numpy as np
 import time
-from embeddings import LinearEmbedding
-from decode_step import RNNDecodeStep
+from methods.nazari.embeddings import LinearEmbedding
+from methods.nazari.decode_step import RNNDecodeStep
 
 
 class RLAgent(object):
@@ -52,7 +52,7 @@ class RLAgent(object):
                                         rnn_layers=args['rnn_layers'],
                                         _scope='Actor/')
         self.decoder_input = tf.compat.v1.get_variable('decoder_input', [1, 1, args['embedding_dim']],
-                                                       initializer=tf.compat.v1.layers.xavier_initializer())
+                                                       initializer=tf.compat.v1.keras.initializers.glorot_uniform()())
 
         start_time = time.time()
         if is_train:

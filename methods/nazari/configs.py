@@ -1,7 +1,7 @@
 import argparse
 import utils as utils
 import os
-from task_specific_params import task_lst
+from methods.nazari.task_specific_params import task_lst
 
 
 def str2bool(v):
