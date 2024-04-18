@@ -9,8 +9,6 @@ from methods.nazari.attention_agent import RLAgent
 from methods.nazari.utils import DataGenerator, Env, reward_func
 from methods.nazari.attention import AttentionVRPActor, AttentionVRPCritic
 
-tf.compat.v1.reset_default_graph()
-
 
 # Test data formatting
 def data_to_nazari(directory):
@@ -20,60 +18,66 @@ def data_to_nazari(directory):
         if os.path.splitext(file)[-1].lower() == '.vrp':
             instance = vrplib.read_instance(f'{directory}/{file}')
             result = np.column_stack((instance['node_coord'], instance['demand']))
-            result = np.roll(result, -1, axis=0) # Move the depot to the end
+            result = np.roll(result, -1, axis=0)  # Move the depot to the end
             working.append(result)
     output = np.stack(working, axis=0)
-    np.savetxt(fname="instances/CVRP/nazari/"+os.path.basename(directory), X=output.reshape(-1, instance['dimension'] * 3))
+    np.savetxt(fname="instances/CVRP/nazari/" + os.path.basename(directory),
+               X=output.reshape(-1, instance['dimension'] * 3))
 
 
-# Set up agent
-args, prt = ParseParams()
-args['test_data'] = output
-dataGen = DataGenerator(args)
-dataGen.reset()
-tf.compat.v1.disable_eager_execution()
-env = Env(args)
-agent = RLAgent(args,
-                prt,
-                env,
-                dataGen,
-                reward_func,
-                AttentionVRPActor,
-                AttentionVRPCritic,
-                is_train=args['is_train'])
+class Nazari():
 
-config = tf.compat.v1.ConfigProto()
-config.gpu_options.allow_growth = True
-sess = tf.compat.v1.Session(config=config)
-agent.Initialize(sess)
+    def __init__(self):
+        tf.compat.v1.reset_default_graph()
+        self.args, self.prt = ParseParams()
+        self.dataGen = DataGenerator(self.args)
+        self.dataGen.reset()
+        tf.compat.v1.disable_eager_execution()
+        self.env = Env(self.args)
+        self.agent = RLAgent(self.args,
+                             self.prt,
+                             self.env,
+                             self.dataGen,
+                             reward_func,
+                             AttentionVRPActor,
+                             AttentionVRPCritic,
+                             is_train=self.args['is_train'])
+        self.config = tf.compat.v1.ConfigProto()
+        self.config.gpu_options.allow_growth = True
+        self.sess = tf.compat.v1.Session(config=self.config)
+        self.agent.Initialize(self.sess)
 
-# Train
-start_time = time.time()
-if args['is_train']:
-    prt.print_out('Training started ...')
-    train_time_beg = time.time()
-    for step in range(args['n_train']):
-        summary = agent.run_train_step()
-        _, _, actor_loss_val, critic_loss_val, actor_gra_and_var_val, critic_gra_and_var_val, \
-            R_val, v_val, logprobs_val, probs_val, actions_val, idxs_val = summary
-
-        if step % args['save_interval'] == 0:
-            agent.saver.save(sess, args['model_dir'] + '/model.ckpt', global_step=step)
-
-        if step % args['log_interval'] == 0:
-            train_time_end = time.time() - train_time_beg
-            prt.print_out('Train Step: {} -- Time: {} -- Train reward: {} -- Value: {}'
-                          .format(step, time.strftime("%H:%M:%S", time.gmtime(train_time_end)),
-                                  np.mean(R_val), np.mean(v_val)))
-            prt.print_out('    actor loss: {} -- critic loss: {}'
-                          .format(np.mean(actor_loss_val), np.mean(critic_loss_val)))
+    def train_model(self):
+        start_time = time.time()
+        if self.args['is_train']:
+            self.prt.print_out('Training started ...')
             train_time_beg = time.time()
-        if step % args['test_interval'] == 0:
-            agent.inference(args['infer_type'])
+            for step in range(self.args['n_train']):
+                summary = self.agent.run_train_step()
+                _, _, actor_loss_val, critic_loss_val, actor_gra_and_var_val, critic_gra_and_var_val, \
+                    R_val, v_val, logprobs_val, probs_val, actions_val, idxs_val = summary
 
-else:  # inference
-    prt.print_out('Evaluation started ...')
-    agent.inference(args['infer_type'])
+                if step % self.args['save_interval'] == 0:
+                    self.agent.saver.save(self.sess, self.args['model_dir'] + '/model.ckpt', global_step=step)
 
-prt.print_out('Total time is {}'.format(
-    time.strftime("%H:%M:%S", time.gmtime(time.time() - start_time))))
+                if step % self.args['log_interval'] == 0:
+                    train_time_end = time.time() - train_time_beg
+                    self.prt.print_out('Train Step: {} -- Time: {} -- Train reward: {} -- Value: {}'
+                                  .format(step, time.strftime("%H:%M:%S", time.gmtime(train_time_end)),
+                                          np.mean(R_val), np.mean(v_val)))
+                    self.prt.print_out('    actor loss: {} -- critic loss: {}'
+                                  .format(np.mean(actor_loss_val), np.mean(critic_loss_val)))
+                    train_time_beg = time.time()
+                if step % self.args['test_interval'] == 0:
+                    self.agent.inference(self.args['infer_type'])
+
+            self.prt.print_out('Total time is {}'.format(
+                time.strftime("%H:%M:%S", time.gmtime(time.time() - start_time))))
+
+    def inference(self, test_data=None):
+        start_time = time.time()
+        self.prt.print_out('Evaluation started ...')
+        self.agent.inference(self.args['infer_type'], test_data)
+        self.prt.print_out('Total time is {}'.format(
+            time.strftime("%H:%M:%S", time.gmtime(time.time() - start_time))))
+
