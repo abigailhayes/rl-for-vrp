@@ -1,6 +1,7 @@
 # Import
 
 from methods.or_tools import ORtools
+import methods.nazari.nazari as nazari
 import utils
 
 import os
@@ -30,6 +31,14 @@ def main():
     random.seed(args['seed'])  # May need to look at more
 
     # Set up/train model (and save where appropriate)
+    if args['method'] == 'ortools':
+        init_method = args['method_options']['init_method']
+        improve_method = args['method_options']['improve_method']
+    elif args['method'] == 'nazari':
+        model = nazari.Nazari()
+        model.train_model()
+    else:
+        raise ValueError
 
     # Run tests
 
