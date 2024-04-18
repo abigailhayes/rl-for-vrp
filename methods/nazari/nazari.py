@@ -11,16 +11,20 @@ from methods.nazari.attention import AttentionVRPActor, AttentionVRPCritic
 
 tf.compat.v1.reset_default_graph()
 
+
 # Test data formatting
-directory = 'instances/CVRP/generate/random_random-20-normal-normal-1'
-working = []
-for file in next(os.walk(directory))[2]:
-    if os.path.splitext(file)[-1].lower() == '.vrp':
-        instance = vrplib.read_instance(f'{directory}/{file}')
-        result = np.column_stack((instance['node_coord'], instance['demand']))
-        result = np.roll(result, -1, axis=0) # Move the depot to the end
-        working.append(result)
-output = np.stack(working, axis=0)
+def data_to_nazari(directory):
+    """Function to convert a folder of instances to the format needed for the Nazari setup"""
+    working = []
+    for file in next(os.walk(directory))[2]:
+        if os.path.splitext(file)[-1].lower() == '.vrp':
+            instance = vrplib.read_instance(f'{directory}/{file}')
+            result = np.column_stack((instance['node_coord'], instance['demand']))
+            result = np.roll(result, -1, axis=0) # Move the depot to the end
+            working.append(result)
+    output = np.stack(working, axis=0)
+    np.savetxt(fname="instances/CVRP/nazari/"+os.path.basename(directory), X=output.reshape(-1, instance['dimension'] * 3))
+
 
 # Set up agent
 args, prt = ParseParams()
