@@ -27,10 +27,11 @@ def data_to_nazari(directory):
 
 class Nazari():
 
-    def __init__(self, ident):
+    def __init__(self, ident, task):
         self.ident = ident
         tf.compat.v1.reset_default_graph()
         self.args, self.prt = ParseParams(self.ident)
+        self.args['task'] = task
         self.dataGen = DataGenerator(self.args)
         self.dataGen.reset()
         tf.compat.v1.disable_eager_execution()
