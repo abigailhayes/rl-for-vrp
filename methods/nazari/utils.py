@@ -629,3 +629,41 @@ def reward_func(sample_solution):
     route_lens_decoded = tf.reduce_sum(tf.pow(tf.reduce_sum(tf.pow(
         (sample_solution_tilted - sample_solution), 2), 2), .5), 0)
     return route_lens_decoded
+
+
+# Shared misc_utils
+
+def has_nan(datum, tensor):
+    if hasattr(tensor, 'dtype'):
+        if (np.issubdtype(tensor.dtype, float) or
+                np.issubdtype(tensor.dtype, complex) or
+                np.issubdtype(tensor.dtype, np.integer)):
+            return np.any(np.isnan(tensor))
+        else:
+            return False
+    else:
+        return False
+
+
+def openAI_entropy(logits):
+    # Entropy proposed by OpenAI in their A2C baseline
+    a0 = logits - tf.reduce_max(logits, 2, keepdims=True)
+    ea0 = tf.exp(a0)
+    z0 = tf.reduce_sum(ea0, 2, keepdims=True)
+    p0 = ea0 / z0
+    return tf.reduce_mean(tf.reduce_sum(p0 * (tf.compat.v1.log(z0) - a0), 2))
+
+
+def softmax_entropy(p0):
+    # Normal information theory entropy by Shannon
+    return - tf.reduce_sum(p0 * tf.compat.v1.log(p0 + 1e-6), axis=1)
+
+
+def Dist_mat(A):
+    # A is of shape [batch_size x nnodes x 2].
+    # return: a distance matrix with shape [batch_size x nnodes x nnodes]
+    nnodes = tf.shape(A)[1]
+    A1 = tf.tile(tf.expand_dims(A, 1), [1, nnodes, 1, 1])
+    A2 = tf.tile(tf.expand_dims(A, 2), [1, 1, nnodes, 1])
+    dist = tf.norm(A1 - A2, axis=3)
+    return dist
