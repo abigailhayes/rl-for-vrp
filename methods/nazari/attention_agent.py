@@ -355,7 +355,7 @@ class RLAgent(object):
         self.prt.print_out("Finished evaluation with %d steps in %s." % (step, time.strftime("%H:%M:%S",
                                                                                              time.gmtime(end_time))))
 
-    def evaluate_batch(self, eval_type='greedy'):
+    def evaluate_batch(self, eval_type='greedy', test_set = None):
         self.env.reset()
         if eval_type == 'greedy':
             summary = self.val_summary_greedy
@@ -364,7 +364,10 @@ class RLAgent(object):
             summary = self.val_summary_beam
             beam_width = self.args['beam_width']
 
-        data = self.dataGen.get_test_all()
+        if test_set == None:
+            data = self.dataGen.get_test_all()
+        else:
+            data = test_set
         start_time = time.time()
         R, v, logprobs, actions, idxs, batch, _ = self.sess.run(summary,
                                                                 feed_dict={self.env.input_data: data,
@@ -378,10 +381,10 @@ class RLAgent(object):
                                                                                            np.sqrt(np.var(R)),
                                                                                            end_time))
 
-    def inference(self, infer_type='batch'):
+    def inference(self, infer_type='batch', test_set = None):
         if infer_type == 'batch':
-            self.evaluate_batch('greedy')
-            self.evaluate_batch('beam_search')
+            self.evaluate_batch('greedy', test_set)
+            self.evaluate_batch('beam_search', test_set)
         elif infer_type == 'single':
             self.evaluate_single('greedy')
             self.evaluate_single('beam_search')
