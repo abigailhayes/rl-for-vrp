@@ -35,7 +35,7 @@ def main():
         init_method = args['method_options']['init_method']
         improve_method = args['method_options']['improve_method']
     elif args['method'] == 'nazari':
-        model = nazari.Nazari()
+        model = nazari.Nazari(ident)
         model.train_model()
     else:
         raise ValueError
