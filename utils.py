@@ -1,12 +1,34 @@
 import os
 import json
+import sys
+import time
+from datetime import datetime
+import numpy as np
+import argparse
 
 from statistics import mean
 from pandas import Series
+import tensorflow as tf
 
 import instances.utils as instances_utils
 import methods.cw_savings as cw_savings
 
+
+def parse_experiment():
+    """Parse arguments for an experiment run"""
+    parser = argparse.ArgumentParser(description="Experiment arguments")
+    parser.add_argument('--seed', help="Specify random seed")
+    parser.add_argument('--task', help="Specify task. Options: 'CVRP'")
+    parser.add_argument('--training', default=None, help="Specify training data")
+    parser.add_argument('--method', default='nazari', help="Specify solution method")
+    parser.add_argument('--method_settings', default=None, help="Specify method specific parameters")
+    parser.add_argument('--testing', default=None, help="Specify test sets")
+    parser.add_argument('--device', default=0, help="Specify device that should be used. GPU: 0 (default), CPU: -1")
+
+    args, unknown = parser.parse_known_args()
+    args = vars(args)
+
+    return args
 
 def apply_method(method, instance):
     """Apply the appropriate method to the example dataset."""
@@ -71,3 +93,6 @@ def avg_perf(task, method, small=True):
         json.dump(results, f, indent=2)
     with open(f'results/{task}/{method}/averages.json', 'w') as f:
         json.dump(averages, f, indent=2)
+
+
+
