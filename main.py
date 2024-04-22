@@ -45,11 +45,11 @@ def main():
     print(args)
 
     # Load dataframe that stores the results (every run adds a new row)
-    results_df = pd.read_csv('results/results.csv')
+    settings_df = pd.read_csv('results/settings.csv')
     # Store settings in data frame
-    results_df = pd.concat([results_df, pd.DataFrame.from_dict(args)], ignore_index=True)
+    settings_df = pd.concat([settings_df, pd.DataFrame.from_dict(args)], ignore_index=True)
     # save updated csv file
-    results_df.to_csv('results/results.csv', index=False)
+    settings_df.to_csv('results/settings.csv', index=False)
 
 
 if __name__ == '__main__':
