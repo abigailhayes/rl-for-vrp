@@ -1,17 +1,12 @@
 import os
 import json
-import sys
-import time
-from datetime import datetime
-import numpy as np
 import argparse
+import vrplib
 
-from statistics import mean
 from pandas import Series
-import tensorflow as tf
 
 import instances.utils as instances_utils
-import methods.cw_savings as cw_savings
+from methods.or_tools import ORtools
 
 
 def parse_experiment():
@@ -30,69 +25,59 @@ def parse_experiment():
 
     return args
 
-def apply_method(method, instance):
-    """Apply the appropriate method to the example dataset."""
-    if method == 'CWSavings':
-        output = cw_savings.CWSavings(instance['instance'])
-    else:
-        raise ValueError("Unrecognised method")
 
-    output.add_sol(instance['solution'])
-    output.run_all()
-    return output
+def test_cvrp(method, method_settings, ident, testing, model=None):
+    """ Function for running CVRP testing
+    - method - the solution method being applied
+    - method_settings - any additional settings for the method
+    - ident - the experiment id
+    - testing - the testing instances to use
+    - model - provided for RL methods, after training"""
 
+    # Setting up dictionaries for saving results
+    results_a = {}
+    averages_a = {}
 
-def get_dir(task):
-    """Specifies the directory to run through, based on the task."""
-    if task == 'CVRP':
-        return './instances/CVRP'
-    else:
-        raise ValueError("Unrecognised task")
+    # Running testing
+    for test_set in testing:
 
+        if test_set == 'generate':
+            # Running all tests for the generated test instances
+            results_b = {}
+            averages_b = {}
+            for subdir in next(os.walk('instances/CVRP/generate'))[1]:
+                results_b[subdir] = {}
+                if method == 'ortools':
+                    for example in next(os.walk(f'instances/CVRP/generate/{subdir}'))[2]:
+                        data = vrplib.read_instance(f'instances/CVRP/generate/{subdir}/{example}')
+                        model = ORtools(data['instance'], method_settings['init_method'],
+                                        method_settings['improve_method'])
+                        model.run_all()
+                        results_b[subdir][example] = model.cost
+                    averages_b[subdir] = Series([*results_b[subdir].values()]).mean()
 
-def nested_dict_values(d):
-    for v1 in d.values():
-        for v2 in v1.values():
-            yield v2
+        else:
+            # Running all tests for the general test instances
+            results_a[test_set] = {}
+            if method == 'ortools':
+                for example in [example[:-4] for example in next(os.walk(f'instances/CVRP/{test_set}'))[2] if
+                                example.endswith('vrp')]:
+                    data = instances_utils.import_instance(f'instances/CVRP/{test_set}', example)
+                    model = ORtools(data['instance'], method_settings['init_method'], method_settings['improve_method'])
+                    model.add_sol(data['solution'])
+                    model.run_all()
+                    results_a[test_set][example] = model.cost
+                averages_a[test_set] = Series([*results_a[test_set].values()]).mean()
 
-
-def avg_perf(task, method, small=True):
-    """Function to run over all available instances and get the average percentage that the algorithm
-    is worse by
-    Specify:
-    - task; CVRP or other
-    - method; the algorithm being tested"""
-    directory = get_dir(task)
-    perc_results = {}
-    perc_averages = {}
-    results = {}
-    averages = {}
-    for subdir in next(os.walk(directory))[1]:
-        print('Running:', subdir)
-        if small & (subdir in ["XML100", "XXL", "X", "Li"]):
-            continue
-        results[subdir] = {}
-        perc_results[subdir] = {}
-        for example in [example[:-4] for example in next(os.walk(f'{directory}/{subdir}'))[2] if
-                        example.endswith('vrp')]:
-            instance = instances_utils.import_instance(f'{directory}/{subdir}', example)
-            run = apply_method(method, instance)
-            results[subdir][example] = run.cost
-            perc_results[subdir][example] = run.perc
-        averages[subdir] = Series([*results[subdir].values()]).mean()
-        perc_averages[subdir] = Series([*perc_results[subdir].values()]).mean()
-    perc_averages['all'] = mean(nested_dict_values(perc_results))
-
-    # Save all outputs in files
-    os.makedirs(f'results/{task}/{method}', exist_ok=True)
-    with open(f'results/{task}/{method}/perc_results.json', 'w') as f:
-        json.dump(perc_results, f, indent=2)
-    with open(f'results/{task}/{method}/perc_averages.json', 'w') as f:
-        json.dump(perc_averages, f, indent=2)
-    with open(f'results/{task}/{method}/results.json', 'w') as f:
-        json.dump(results, f, indent=2)
-    with open(f'results/{task}/{method}/averages.json', 'w') as f:
-        json.dump(averages, f, indent=2)
-
-
-
+    # Saving results
+    with open(f'results/exp_{ident}/results_a.json', 'w') as f:
+        json.dump(results_a, f, indent=2)
+    with open(f'results/exp_{ident}/averages_a.json', 'w') as f:
+        json.dump(averages_a, f, indent=2)
+    try:
+        with open(f'results/exp_{ident}/results_b.json', 'w') as f:
+            json.dump(results_b, f, indent=2)
+        with open(f'results/exp_{ident}/averages_b.json', 'w') as f:
+            json.dump(averages_b, f, indent=2)
+    except NameError:
+        pass
