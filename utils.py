@@ -47,27 +47,27 @@ def test_cvrp(method, method_settings, ident, testing, model=None):
             averages_b = {}
             for subdir in next(os.walk('instances/CVRP/generate'))[1]:
                 results_b[subdir] = {}
-                if method == 'ortools':
-                    for example in next(os.walk(f'instances/CVRP/generate/{subdir}'))[2]:
+                for example in next(os.walk(f'instances/CVRP/generate/{subdir}'))[2]:
+                    if method == 'ortools':
                         data = vrplib.read_instance(f'instances/CVRP/generate/{subdir}/{example}')
                         model = ORtools(data['instance'], method_settings['init_method'],
                                         method_settings['improve_method'])
                         model.run_all()
                         results_b[subdir][example] = model.cost
-                    averages_b[subdir] = Series([*results_b[subdir].values()]).mean()
+                averages_b[subdir] = Series([*results_b[subdir].values()]).mean()
 
         else:
             # Running all tests for the general test instances
             results_a[test_set] = {}
-            if method == 'ortools':
-                for example in [example[:-4] for example in next(os.walk(f'instances/CVRP/{test_set}'))[2] if
-                                example.endswith('vrp')]:
+            for example in [example[:-4] for example in next(os.walk(f'instances/CVRP/{test_set}'))[2] if
+                            example.endswith('vrp')]:
+                if method == 'ortools':
                     data = instances_utils.import_instance(f'instances/CVRP/{test_set}', example)
                     model = ORtools(data['instance'], method_settings['init_method'], method_settings['improve_method'])
                     model.add_sol(data['solution'])
                     model.run_all()
                     results_a[test_set][example] = model.cost
-                averages_a[test_set] = Series([*results_a[test_set].values()]).mean()
+            averages_a[test_set] = Series([*results_a[test_set].values()]).mean()
 
     # Saving results
     with open(f'results/exp_{ident}/results_a.json', 'w') as f:
