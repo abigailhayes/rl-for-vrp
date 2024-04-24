@@ -4,6 +4,7 @@ import argparse
 import vrplib
 
 from pandas import Series
+import numpy as np
 
 import instances.utils as instances_utils
 from methods.or_tools import ORtools
@@ -25,6 +26,9 @@ def parse_experiment():
 
     return args
 
+
+def instance_to_nazari(instance):
+    return np.roll(np.column_stack((instance['node_coord'], instance['demand'])), -1, axis=0).reshape(-1, instance['dimension'], 3)
 
 def test_cvrp(method, method_settings, ident, testing, model=None):
     """ Function for running CVRP testing
@@ -48,12 +52,15 @@ def test_cvrp(method, method_settings, ident, testing, model=None):
             for subdir in next(os.walk('instances/CVRP/generate'))[1]:
                 results_b[subdir] = {}
                 for example in next(os.walk(f'instances/CVRP/generate/{subdir}'))[2]:
+                    data = vrplib.read_instance(f'instances/CVRP/generate/{subdir}/{example}')
                     if method == 'ortools':
-                        data = vrplib.read_instance(f'instances/CVRP/generate/{subdir}/{example}')
                         model = ORtools(data['instance'], method_settings['init_method'],
                                         method_settings['improve_method'])
                         model.run_all()
-                        results_b[subdir][example] = model.cost
+                    elif method == 'nazari':
+                        model.testing(instance_to_nazari(data), data)
+                    results_b[subdir][example] = model.cost
+
                 averages_b[subdir] = Series([*results_b[subdir].values()]).mean()
 
         else:
@@ -61,12 +68,14 @@ def test_cvrp(method, method_settings, ident, testing, model=None):
             results_a[test_set] = {}
             for example in [example[:-4] for example in next(os.walk(f'instances/CVRP/{test_set}'))[2] if
                             example.endswith('vrp')]:
+                data = instances_utils.import_instance(f'instances/CVRP/{test_set}', example)
                 if method == 'ortools':
-                    data = instances_utils.import_instance(f'instances/CVRP/{test_set}', example)
                     model = ORtools(data['instance'], method_settings['init_method'], method_settings['improve_method'])
                     model.add_sol(data['solution'])
                     model.run_all()
-                    results_a[test_set][example] = model.cost
+                elif method == 'nazari':
+                    model.testing(instance_to_nazari(data), data)
+                results_a[test_set][example] = model.cost
             averages_a[test_set] = Series([*results_a[test_set].values()]).mean()
 
     # Saving results

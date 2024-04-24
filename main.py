@@ -23,7 +23,7 @@ def main():
         ident = max(id_list) + 1
 
     # Set up folder to save experiment results
-    experiment_dir = f'results/exp_{str(id)}'
+    experiment_dir = f'results/exp_{str(ident)}'
     if not os.path.exists(experiment_dir):
         os.makedirs(experiment_dir)
 
@@ -32,7 +32,7 @@ def main():
 
     # Set up/train model (and save where appropriate)
     if args['method'] == 'nazari':
-        model = nazari.Nazari(ident, args['method_options']['task'])
+        model = nazari.Nazari(ident, args['method_settings']['task'])
         model.train_model()
         print("Finished training")
 

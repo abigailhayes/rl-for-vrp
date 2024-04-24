@@ -3,6 +3,7 @@ import tensorflow as tf
 import vrplib
 import os
 import time
+from itertools import pairwise
 
 from methods.nazari.configs import ParseParams
 from methods.nazari.attention_agent import RLAgent
@@ -82,4 +83,53 @@ class Nazari():
         self.agent.inference(self.args['infer_type'], test_data)
         self.prt.print_out('Total time is {}'.format(
             time.strftime("%H:%M:%S", time.gmtime(time.time() - start_time))))
+
+    def testing(self, test_data=None, instance=None):
+        self.agent.inference('testing', test_data)
+        # Getting routes in normal format
+        self.routing(instance)
+        self.get_cost(instance)
+
+    def routing(self, instance):
+        self.routes = {}
+        self.routes['greedy'] = []
+        current = []
+        for node in [np.where(np.all(np.isin(instance['node_coord'], i), axis=1))[0][0] for i in
+                             self.agent.test_coords['greedy']]:
+            if node == 0:
+                self.routes['greedy'].append(current)
+                current = []
+            else:
+                current.append(node)
+        self.routes['greedy'].append(current)
+        self.routes['greedy'] = [route for route in self.routes['greedy'] if len(route) != 0]
+
+        self.routes['beam'] = []
+        current = []
+        for node in [np.where(np.all(np.isin(instance['node_coord'], i), axis=1))[0][0] for i in
+                           self.agent.test_coords['greedy']]:
+            if node == 0:
+                self.routes['greedy'].append(current)
+                current = []
+            else:
+                current.append(node)
+        self.routes['greedy'].append(current)
+        self.routes['greedy'] = [route for route in self.routes['greedy'] if len(route) != 0]
+
+    def _get_cost(self, routes, instance):
+        """Calculate the total cost of a solution to an instance"""
+        costs = 0
+        for r in routes:
+            for i, j in pairwise([0]+r+[0]):
+                costs += instance['distance'][i][j]
+        return costs
+
+    def get_cost(self, instance):
+        """Calculate the total cost of the current solution to an instance"""
+        self.cost = {}
+        self.cost['greedy'] = self._get_cost(self.routes['greedy'], instance)
+        self.cost['beam'] = self._get_cost(self.routes['beam'], instance)
+
+
+
 
