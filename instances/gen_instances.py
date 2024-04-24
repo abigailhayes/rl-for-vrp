@@ -2,6 +2,7 @@ import random
 import numpy as np
 import vrplib
 import os
+from itertools import product
 
 
 def gen_cvrp(filepath, ident, nodes, capacity, max_demand, node_type='random', depot_type='centre'):
@@ -36,7 +37,7 @@ def gen_cvrp(filepath, ident, nodes, capacity, max_demand, node_type='random', d
             coords.append(random_coords())
             demand.append(random.randint(1, max_demand))
     elif node_type == 'clusters':
-        no_clusters = random.randint(2, round(nodes / 10))
+        no_clusters = random.randint(2, max(round(nodes / 10),2))
         centres = [random_coords() for _ in range(no_clusters)]
         for i in range(nodes):
             cluster = random.randint(0, no_clusters - 1)
@@ -98,7 +99,8 @@ def main():
     custs = [10, 20, 50, 100]
     capacity = [100]
     max_demand = [90, 50, 30]
-    for variant, cust, cap, demand in zip(variants, custs, capacity, max_demand):
+    for (variant, cust, cap, demand) in product(*[variants, custs, capacity, max_demand]):
+        print(variant, cust, cap, demand)
         gen_cvrp_multi(variant, seed=42, number=100, nodes=cust, capacity=cap, max_demand=demand)
 
 
