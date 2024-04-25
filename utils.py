@@ -40,7 +40,7 @@ def test_cvrp(method, method_settings, ident, testing, model=None):
 
     # Setting up dictionaries for saving results
     results_a = {}
-    averages_a = {}
+    routes_a = {}
 
     # Running testing
     for test_set in testing:
@@ -48,11 +48,15 @@ def test_cvrp(method, method_settings, ident, testing, model=None):
         if test_set == 'generate':
             # Running all tests for the generated test instances
             results_b = {}
+            routes_b = {}
             for subdir in next(os.walk('instances/CVRP/generate'))[1]:
                 results_b[subdir] = {}
+                routes_b[subdir] = {}
                 if method == 'nazari':
                     results_b[subdir]['greedy'] = {}
                     results_b[subdir]['beam'] = {}
+                    routes_b[subdir]['greedy'] = {}
+                    routes_b[subdir]['beam'] = {}
                 for example in next(os.walk(f'instances/CVRP/generate/{subdir}'))[2]:
                     data = vrplib.read_instance(f'instances/CVRP/generate/{subdir}/{example}')
                     if method == 'ortools':
@@ -60,39 +64,52 @@ def test_cvrp(method, method_settings, ident, testing, model=None):
                                         method_settings['improve_method'])
                         model.run_all()
                         results_b[subdir][example] = model.cost
+                        routes_b[subdir][example] = model.routes
                     elif method == 'nazari':
                         if model.args['n_nodes'] != data['dimension']:
                             continue
                         model.testing(instance_to_nazari(data), data)
                         results_b[subdir]['greedy'][example] = model.cost['greedy']
                         results_b[subdir]['beam'][example] = model.cost['beam']
+                        routes_b[subdir]['greedy'][example] = model.routes['greedy']
+                        routes_b[subdir]['beam'][example] = model.routes['beam']
 
         else:
             # Running all tests for the general test instances
             results_a[test_set] = {}
+            routes_a[test_set] = {}
             if method == 'nazari':
                 results_a[test_set]['greedy'] = {}
                 results_a[test_set]['beam'] = {}
+                routes_a[test_set]['greedy'] = {}
+                routes_a[test_set]['beam'] = {}
             for example in [example[:-4] for example in next(os.walk(f'instances/CVRP/{test_set}'))[2] if
                             example.endswith('vrp')]:
                 data = instances_utils.import_instance(f'instances/CVRP/{test_set}', example)
                 if method == 'ortools':
-                    results_a[test_set][example] = model.cost
                     model = ORtools(data['instance'], method_settings['init_method'], method_settings['improve_method'])
                     model.add_sol(data['solution'])
                     model.run_all()
+                    results_a[test_set][example] = model.cost
+                    routes_a[test_set][example] = model.routes
                 elif method == 'nazari':
                     if model.args['n_nodes'] != data['dimension']:
                         continue
                     model.testing(instance_to_nazari(data), data)
                     results_a[test_set]['greedy'][example] = model.cost['greedy']
                     results_a[test_set]['beam'][example] = model.cost['beam']
+                    routes_a[test_set]['greedy'][example] = model.routes['greedy']
+                    routes_a[test_set]['beam'][example] = model.routes['beam']
 
     # Saving results
     with open(f'results/exp_{ident}/results_a.json', 'w') as f:
         json.dump(results_a, f, indent=2)
+    with open(f'results/exp_{ident}/routes_a.json', 'w') as f:
+        json.dump(routes_a, f, indent=2)
     try:
         with open(f'results/exp_{ident}/results_b.json', 'w') as f:
             json.dump(results_b, f, indent=2)
+        with open(f'results/exp_{ident}/routes_b.json', 'w') as f:
+            json.dump(routes_b, f, indent=2)
     except NameError:
         pass
