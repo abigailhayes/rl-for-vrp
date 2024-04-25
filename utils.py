@@ -51,6 +51,9 @@ def test_cvrp(method, method_settings, ident, testing, model=None):
             averages_b = {}
             for subdir in next(os.walk('instances/CVRP/generate'))[1]:
                 results_b[subdir] = {}
+                if method == 'nazari':
+                    results_b[subdir]['greedy'] = {}
+                    results_b[subdir]['beam'] = {}
                 for example in next(os.walk(f'instances/CVRP/generate/{subdir}'))[2]:
                     data = vrplib.read_instance(f'instances/CVRP/generate/{subdir}/{example}')
                     if method == 'ortools':
@@ -62,8 +65,6 @@ def test_cvrp(method, method_settings, ident, testing, model=None):
                         if model.args['n_nodes'] != data['dimension']:
                             continue
                         model.testing(instance_to_nazari(data), data)
-                        results_b[subdir]['greedy'] = {}
-                        results_b[subdir]['beam'] = {}
                         results_b[subdir]['greedy'][example] = model.cost['greedy']
                         results_b[subdir]['beam'][example] = model.cost['beam']
 
