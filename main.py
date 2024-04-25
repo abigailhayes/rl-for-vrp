@@ -38,7 +38,7 @@ def main():
 
     # Run tests
     if args['testing'] is not None:
-        utils.test_cvrp(args['method'], args['method_settings'], ident, args['testing'], model=None)
+        utils.test_cvrp(args['method'], args['method_settings'], ident, args['testing'], model)
 
     # Create a dict with all variables of the current run
     args.update({'ID': ident, 'date': date.today()})

@@ -57,11 +57,24 @@ def test_cvrp(method, method_settings, ident, testing, model=None):
                         model = ORtools(data['instance'], method_settings['init_method'],
                                         method_settings['improve_method'])
                         model.run_all()
+                        results_b[subdir][example] = model.cost
                     elif method == 'nazari':
+                        if model.args['n_nodes'] != data['dimension']:
+                            continue
                         model.testing(instance_to_nazari(data), data)
-                    results_b[subdir][example] = model.cost
+                        results_b[subdir]['greedy'] = {}
+                        results_b[subdir]['beam'] = {}
+                        results_b[subdir]['greedy'][example] = model.cost['greedy']
+                        results_b[subdir]['beam'][example] = model.cost['beam']
 
-                averages_b[subdir] = Series([*results_b[subdir].values()]).mean()
+                if method == 'ortools':
+                    averages_b[subdir] = Series([*results_b[subdir].values()]).mean()
+                elif method == 'nazari':
+                    try:
+                        averages_b[subdir]['greedy'] = Series([*results_b[subdir]['greedy'].values()]).mean()
+                        averages_b[subdir]['beam'] = Series([*results_b[subdir]['beam'].values()]).mean()
+                    except:
+                        continue
 
         else:
             # Running all tests for the general test instances
@@ -74,9 +87,16 @@ def test_cvrp(method, method_settings, ident, testing, model=None):
                     model.add_sol(data['solution'])
                     model.run_all()
                 elif method == 'nazari':
+                    if model.args['n_nodes'] != data['dimension']:
+                        continue
                     model.testing(instance_to_nazari(data), data)
                 results_a[test_set][example] = model.cost
-            averages_a[test_set] = Series([*results_a[test_set].values()]).mean()
+
+            if method == 'ortools':
+                averages_a[test_set] = Series([*results_a[test_set].values()]).mean()
+            elif method == 'nazari':
+                averages_a['greedy'][test_set] = Series([*results_a['greedy'][test_set].values()]).mean()
+                averages_a['beam'][test_set] = Series([*results_a['beam'][test_set].values()]).mean()
 
     # Saving results
     with open(f'results/exp_{ident}/results_a.json', 'w') as f:
