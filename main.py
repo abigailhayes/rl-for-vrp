@@ -8,9 +8,11 @@ import os
 import random
 from datetime import date
 import pandas as pd
+import time
 
 
 def main():
+    start_time = time.time()
     args = utils.parse_experiment()
 
     # Looking at current ids in use as folders
@@ -38,10 +40,14 @@ def main():
 
     # Run tests
     if args['testing'] is not None:
-        utils.test_cvrp(args['method'], args['method_settings'], ident, args['testing'], model)
+        if args['method'] == 'nazari':
+            utils.test_cvrp(args['method'], args['method_settings'], ident, args['testing'], model)
+        elif args['method'] == 'ortools':
+            utils.test_cvrp(args['method'], args['method_settings'], ident, args['testing'])
 
+    end_time = time.time()
     # Create a dict with all variables of the current run
-    args.update({'ID': ident, 'date': date.today()})
+    args.update({'ID': ident, 'date': date.today(), 'time': end_time-start_time})
     print(args)
 
     # Load dataframe that stores the results (every run adds a new row)
