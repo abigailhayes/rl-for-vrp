@@ -34,7 +34,7 @@ def main():
 
     # Set up/train model (and save where appropriate)
     if args['method'] == 'nazari':
-        model = nazari.Nazari(ident, args['method_settings']['task'])
+        model = nazari.Nazari(ident, task=args['method_settings']['task'])
         model.train_model()
         print("Finished training")
 

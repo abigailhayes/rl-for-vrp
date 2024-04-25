@@ -26,13 +26,13 @@ def initialize_task_settings(args, task):
     return args
 
 
-def ParseParams(ident):
+def ParseParams(ident, task):
     parser = argparse.ArgumentParser(description="Neural Combinatorial Optimization with RL")
 
     # Data
     parser.add_argument('--task', default='vrp10', help="Select the task to solve; i.e. tsp10")
     parser.add_argument('--batch_size', default=128, type=int, help='Batch size in training')
-    parser.add_argument('--n_train', default=260000, type=int, help='Number of training steps')
+    parser.add_argument('--n_train', default=20000, type=int, help='Number of training steps')
     parser.add_argument('--test_size', default=1000, type=int, help='Number of problems in test set')
 
     # Network
@@ -82,6 +82,7 @@ def ParseParams(ident):
 
     args, unknown = parser.parse_known_args()
     args = vars(args)
+    args['task'] = task
 
     args['log_dir'] = "{}/{}-{}".format(args['log_dir'], args['task'], nazari_utils.get_time())
     if args['model_dir'] == '':

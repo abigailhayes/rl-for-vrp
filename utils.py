@@ -11,14 +11,22 @@ from methods.or_tools import ORtools
 
 
 def parse_experiment():
+    # To handle dictionary input
+    class ParseKwargs(argparse.Action):
+        def __call__(self, parser, namespace, values, option_string=None):
+            setattr(namespace, self.dest, dict())
+            for value in values:
+                key, value = value.split('=')
+                getattr(namespace, self.dest)[key] = value
+
     """Parse arguments for an experiment run"""
     parser = argparse.ArgumentParser(description="Experiment arguments")
     parser.add_argument('--seed', help="Specify random seed")
-    parser.add_argument('--task', help="Specify task. Options: 'CVRP'")
+    parser.add_argument('--problem', help="Specify task. Options: 'CVRP'")
     parser.add_argument('--training', default=None, help="Specify training data")
     parser.add_argument('--method', default='nazari', help="Specify solution method")
-    parser.add_argument('--method_settings', default=None, help="Specify method specific parameters")
-    parser.add_argument('--testing', default=None, help="Specify test sets")
+    parser.add_argument('--method_settings', default={}, help="Specify method specific parameters", nargs='*', action=ParseKwargs)
+    parser.add_argument('--testing', default=[], help="Specify test sets", type=str, nargs="*")
     parser.add_argument('--device', default=0, help="Specify device that should be used. GPU: 0 (default), CPU: -1")
 
     args, unknown = parser.parse_known_args()
@@ -83,8 +91,7 @@ def test_cvrp(method, method_settings, ident, testing, model=None):
                 results_a[test_set]['beam'] = {}
                 routes_a[test_set]['greedy'] = {}
                 routes_a[test_set]['beam'] = {}
-            for example in [example[:-4] for example in next(os.walk(f'instances/CVRP/{test_set}'))[2] if
-                            example.endswith('vrp')]:
+            for example in [example[:-4] for example in next(os.walk(f'instances/CVRP/{test_set}'))[2] if example.endswith('vrp')]:
                 data = instances_utils.import_instance(f'instances/CVRP/{test_set}', example)
                 if method == 'ortools':
                     model = ORtools(data['instance'], method_settings['init_method'], method_settings['improve_method'])
