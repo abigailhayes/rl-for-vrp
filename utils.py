@@ -92,10 +92,9 @@ def test_cvrp(method, method_settings, ident, testing, model=None):
                 routes_a[test_set]['greedy'] = {}
                 routes_a[test_set]['beam'] = {}
             for example in [example[:-4] for example in next(os.walk(f'instances/CVRP/{test_set}'))[2] if example.endswith('vrp')]:
-                data = instances_utils.import_instance(f'instances/CVRP/{test_set}', example)
+                data = vrplib.read_instance(f'instances/CVRP/{test_set}/{example}.vrp')
                 if method == 'ortools':
-                    model = ORtools(data['instance'], method_settings['init_method'], method_settings['improve_method'])
-                    model.add_sol(data['solution'])
+                    model = ORtools(data, method_settings['init_method'], method_settings['improve_method'])
                     model.run_all()
                     results_a[test_set][example] = model.cost
                     routes_a[test_set][example] = model.routes
