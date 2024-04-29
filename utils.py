@@ -52,6 +52,7 @@ def test_cvrp(method, method_settings, ident, testing, model=None):
 
     # Running testing
     for test_set in testing:
+        print('Starting: ', test_set)
 
         if test_set == 'generate':
             # Running all tests for the generated test instances
@@ -91,8 +92,10 @@ def test_cvrp(method, method_settings, ident, testing, model=None):
                 results_a[test_set]['beam'] = {}
                 routes_a[test_set]['greedy'] = {}
                 routes_a[test_set]['beam'] = {}
-            for example in [example[:-4] for example in next(os.walk(f'instances/CVRP/{test_set}'))[2] if example.endswith('vrp')]:
-                data = vrplib.read_instance(f'instances/CVRP/{test_set}/{example}.vrp')
+            for example in next(os.walk(f'instances/CVRP/{test_set}'))[2]:
+                if example.endswith('sol'):
+                    continue
+                data = vrplib.read_instance(f'instances/CVRP/{test_set}/{example}')
                 if method == 'ortools':
                     model = ORtools(data, method_settings['init_method'], method_settings['improve_method'])
                     model.run_all()

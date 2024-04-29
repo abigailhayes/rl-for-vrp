@@ -101,7 +101,7 @@ class Nazari():
                 self.routes['greedy'].append(current)
                 current = []
             else:
-                current.append(node)
+                current.append(int(node))
         self.routes['greedy'].append(current)
         self.routes['greedy'] = [route for route in self.routes['greedy'] if len(route) != 0]
 
@@ -113,7 +113,7 @@ class Nazari():
                 self.routes['beam'].append(current)
                 current = []
             else:
-                current.append(node)
+                current.append(int(node))
         self.routes['beam'].append(current)
         self.routes['beam'] = [route for route in self.routes['beam'] if len(route) != 0]
 
