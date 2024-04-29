@@ -36,6 +36,7 @@ def parse_experiment():
 
 
 def instance_to_nazari(instance):
+    """Convert an instance in the general format to that needed for Nazari"""
     return np.roll(np.column_stack((instance['node_coord'], instance['demand'])), -1, axis=0).reshape(-1, instance['dimension'], 3)
 
 def test_cvrp(method, method_settings, ident, testing, model=None):
@@ -62,11 +63,13 @@ def test_cvrp(method, method_settings, ident, testing, model=None):
                 results_b[subdir] = {}
                 routes_b[subdir] = {}
                 if method == 'nazari':
+                    # Nazari has two variants, and these are run adjacently, so need another level of dictionary
                     results_b[subdir]['greedy'] = {}
                     results_b[subdir]['beam'] = {}
                     routes_b[subdir]['greedy'] = {}
                     routes_b[subdir]['beam'] = {}
                 for example in next(os.walk(f'instances/CVRP/generate/{subdir}'))[2]:
+                    # Go through all test instances
                     data = vrplib.read_instance(f'instances/CVRP/generate/{subdir}/{example}')
                     if method == 'ortools':
                         model = ORtools(data['instance'], method_settings['init_method'],
@@ -93,6 +96,7 @@ def test_cvrp(method, method_settings, ident, testing, model=None):
                 routes_a[test_set]['greedy'] = {}
                 routes_a[test_set]['beam'] = {}
             for example in next(os.walk(f'instances/CVRP/{test_set}'))[2]:
+                # Go through all test instances
                 if example.endswith('sol'):
                     continue
                 data = vrplib.read_instance(f'instances/CVRP/{test_set}/{example}')
