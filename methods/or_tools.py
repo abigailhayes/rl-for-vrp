@@ -83,7 +83,7 @@ class ORtools(utils.VRPInstance):
 
     def _min_vehicles(self):
         """Minimum number of vehicles that should be attempted"""
-        self.no_vehicles = ceil(sum(self.demand)/self.capacity)
+        self.no_vehicles = 2*ceil(sum(self.demand)/self.capacity)
 
     def _veh_capacities(self):
         """Generate a list of the correct length from a single capacity value"""
@@ -125,7 +125,7 @@ class ORtools(utils.VRPInstance):
             self.search_parameters.local_search_metaheuristic = routing_enums_pb2.LocalSearchMetaheuristic.GENERIC_TABU_SEARCH
 
         self.search_parameters.log_search = False
-        self.search_parameters.time_limit.FromSeconds(30)
+        self.search_parameters.time_limit.FromSeconds(60)
 
     def run_all(self):
         self._min_vehicles()
