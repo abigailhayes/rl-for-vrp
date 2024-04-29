@@ -47,13 +47,15 @@ def main():
 
     end_time = time.time()
     # Create a dict with all variables of the current run
-    args.update({'ID': ident, 'date': date.today(), 'time': end_time-start_time})
-    print(args)
+    settings = {**args, **args['method_settings']}
+    settings.update({'id': ident, 'date': date.today(), 'time': end_time-start_time, 'testing': str(settings['testing'])})
+    del settings['method_settings']
+    print(settings)
 
     # Load dataframe that stores the results (every run adds a new row)
     settings_df = pd.read_csv('results/settings.csv')
     # Store settings in data frame
-    settings_df = pd.concat([settings_df, pd.DataFrame.from_dict(args)], ignore_index=True)
+    settings_df = pd.concat([settings_df, pd.DataFrame.from_dict([settings])], ignore_index=True)
     # save updated csv file
     settings_df.to_csv('results/settings.csv', index=False)
 
