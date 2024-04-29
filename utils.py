@@ -72,7 +72,7 @@ def test_cvrp(method, method_settings, ident, testing, model=None):
                     # Go through all test instances
                     data = vrplib.read_instance(f'instances/CVRP/generate/{subdir}/{example}')
                     if method == 'ortools':
-                        model = ORtools(data['instance'], method_settings['init_method'],
+                        model = ORtools(data, method_settings['init_method'],
                                         method_settings['improve_method'])
                         model.run_all()
                         results_b[subdir][example] = model.cost
