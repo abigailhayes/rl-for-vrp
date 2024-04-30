@@ -8,9 +8,11 @@ import os
 import random
 from datetime import date
 import pandas as pd
+import time
 
 
 def main():
+    start_time = time.time()
     args = utils.parse_experiment()
 
     # Looking at current ids in use as folders
@@ -23,7 +25,7 @@ def main():
         ident = max(id_list) + 1
 
     # Set up folder to save experiment results
-    experiment_dir = f'results/exp_{str(id)}'
+    experiment_dir = f'results/exp_{str(ident)}'
     if not os.path.exists(experiment_dir):
         os.makedirs(experiment_dir)
 
@@ -31,27 +33,31 @@ def main():
     random.seed(args['seed'])  # May need to look at more
 
     # Set up/train model (and save where appropriate)
-    if args['method'] == 'ortools':
-        init_method = args['method_options']['init_method']
-        improve_method = args['method_options']['improve_method']
-    elif args['method'] == 'nazari':
-        model = nazari.Nazari(ident, args['method_options']['task'])
+    if args['method'] == 'nazari':
+        model = nazari.Nazari(ident, task=args['method_settings']['task'])
         model.train_model()
-    else:
-        raise ValueError
+        print("Finished training")
 
     # Run tests
+    if args['testing'] is not None:
+        if args['method'] == 'nazari':
+            utils.test_cvrp(args['method'], args['method_settings'], ident, args['testing'], model)
+        elif args['method'] == 'ortools':
+            utils.test_cvrp(args['method'], args['method_settings'], ident, args['testing'])
 
+    end_time = time.time()
     # Create a dict with all variables of the current run
-    args.update({'ID': ident, 'date': date.today()})
-    print(args)
+    settings = {**args, **args['method_settings']}
+    settings.update({'id': ident, 'date': date.today(), 'time': end_time-start_time, 'testing': str(settings['testing'])})
+    del settings['method_settings']
+    print(settings)
 
     # Load dataframe that stores the results (every run adds a new row)
-    results_df = pd.read_csv('results/results.csv')
-    # Store everything in data frame
-    results_df = pd.concat([results_df, pd.DataFrame.from_dict(args)], ignore_index=True)
+    settings_df = pd.read_csv('results/settings.csv')
+    # Store settings in data frame
+    settings_df = pd.concat([settings_df, pd.DataFrame.from_dict([settings])], ignore_index=True)
     # save updated csv file
-    results_df.to_csv('results/results.csv', index=False)
+    settings_df.to_csv('results/settings.csv', index=False)
 
 
 if __name__ == '__main__':

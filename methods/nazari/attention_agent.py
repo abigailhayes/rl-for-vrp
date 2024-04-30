@@ -355,7 +355,34 @@ class RLAgent(object):
         self.prt.print_out("Finished evaluation with %d steps in %s." % (step, time.strftime("%H:%M:%S",
                                                                                              time.gmtime(end_time))))
 
-    def evaluate_batch(self, eval_type='greedy', test_set = None):
+    def evaluate_one(self, eval_type='greedy'):
+        if eval_type == 'greedy':
+            summary = self.val_summary_greedy
+        elif eval_type == 'beam_search':
+            summary = self.val_summary_beam
+
+        data = self.dataGen.get_test_next()
+        R, v, logprobs, actions, idxs, batch, _ = self.sess.run(summary,
+                                                                feed_dict={self.env.input_data: data,
+                                                                           self.decodeStep.dropout: 0.0})
+
+        if eval_type == 'greedy':
+            R_ind0 = 0
+        elif eval_type == 'beam_search':
+            R = np.concatenate(np.split(np.expand_dims(R, 1), self.args['beam_width'], axis=0), 1)
+            R_val = np.amin(R, 1, keepdims=False)
+            R_ind0 = np.argmin(R, 1)[0]
+
+        example_output = []
+        example_input = []
+        for i in range(self.env.n_nodes):
+            example_input.append(list(batch[0, i, :]))
+        for idx, action in enumerate(actions):
+            example_output.append(list(action[R_ind0 * np.shape(batch)[0]]))
+
+        return example_output, example_input
+
+    def evaluate_batch(self, eval_type='greedy', test_set=None):
         self.env.reset()
         if eval_type == 'greedy':
             summary = self.val_summary_greedy
@@ -364,7 +391,7 @@ class RLAgent(object):
             summary = self.val_summary_beam
             beam_width = self.args['beam_width']
 
-        if test_set == None:
+        if test_set is None:
             data = self.dataGen.get_test_all()
         else:
             data = test_set
@@ -381,13 +408,21 @@ class RLAgent(object):
                                                                                            np.sqrt(np.var(R)),
                                                                                            end_time))
 
-    def inference(self, infer_type='batch', test_set = None):
+    def inference(self, infer_type='batch', test_set=None):
         if infer_type == 'batch':
             self.evaluate_batch('greedy', test_set)
             self.evaluate_batch('beam_search', test_set)
         elif infer_type == 'single':
             self.evaluate_single('greedy')
             self.evaluate_single('beam_search')
+        elif infer_type == 'testing':
+            self.dataGen.test_data = test_set
+            self.dataGen.reset()
+            self.test_coords = {}
+            self.test_coords['coords_greedy'], self.test_coords['input_greedy'] = self.evaluate_one(eval_type='greedy')
+            self.dataGen.test_data = test_set
+            self.dataGen.reset()
+            self.test_coords['coords_beam'], self.test_coords['input_beam'] = self.evaluate_one(eval_type='beam_search')
         self.prt.print_out("##################################################################")
 
     def run_train_step(self):

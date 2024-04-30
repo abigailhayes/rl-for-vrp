@@ -1,5 +1,5 @@
 import argparse
-import utils as utils
+import methods.nazari.utils as nazari_utils
 import os
 from methods.nazari.task_specific_params import task_lst
 
@@ -26,7 +26,7 @@ def initialize_task_settings(args, task):
     return args
 
 
-def ParseParams(ident):
+def ParseParams(ident, task):
     parser = argparse.ArgumentParser(description="Neural Combinatorial Optimization with RL")
 
     # Data
@@ -82,8 +82,9 @@ def ParseParams(ident):
 
     args, unknown = parser.parse_known_args()
     args = vars(args)
+    args['task'] = task
 
-    args['log_dir'] = "{}/{}-{}".format(args['log_dir'], args['task'], utils.get_time())
+    args['log_dir'] = "{}/{}-{}".format(args['log_dir'], args['task'], nazari_utils.get_time())
     if args['model_dir'] == '':
         args['model_dir'] = os.path.join(args['log_dir'], 'model')
 
@@ -96,7 +97,7 @@ def ParseParams(ident):
 
     # create a print handler
     out_file = open(os.path.join(args['log_dir'], 'results.txt'), 'w+')
-    prt = utils.printOut(out_file, args['stdout_print'])
+    prt = nazari_utils.printOut(out_file, args['stdout_print'])
 
     os.environ["CUDA_VISIBLE_DEVICES"] = args['gpu']
 
