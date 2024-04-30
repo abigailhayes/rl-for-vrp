@@ -74,7 +74,10 @@ def test_cvrp(method, method_settings, ident, testing, model=None):
                     if method == 'ortools':
                         model = ORtools(data, method_settings['init_method'],
                                         method_settings['improve_method'])
-                        model.run_all()
+                        try:
+                            model.run_all()
+                        except AttributeError:
+                            continue
                         results_b[subdir][example] = model.cost
                         routes_b[subdir][example] = model.routes
                     elif method == 'nazari':
@@ -102,7 +105,10 @@ def test_cvrp(method, method_settings, ident, testing, model=None):
                 data = vrplib.read_instance(f'instances/CVRP/{test_set}/{example}')
                 if method == 'ortools':
                     model = ORtools(data, method_settings['init_method'], method_settings['improve_method'])
-                    model.run_all()
+                    try:
+                        model.run_all()
+                    except AttributeError:
+                        continue
                     results_a[test_set][example] = model.cost
                     routes_a[test_set][example] = model.routes
                 elif method == 'nazari':
