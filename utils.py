@@ -69,6 +69,7 @@ def test_cvrp(method, method_settings, ident, testing, model=None):
                     routes_b[subdir]['greedy'] = {}
                     routes_b[subdir]['beam'] = {}
                 for example in next(os.walk(f'instances/CVRP/generate/{subdir}'))[2]:
+                    print(example)
                     # Go through all test instances
                     data = vrplib.read_instance(f'instances/CVRP/generate/{subdir}/{example}')
                     if method == 'ortools':
@@ -99,10 +100,13 @@ def test_cvrp(method, method_settings, ident, testing, model=None):
                 routes_a[test_set]['greedy'] = {}
                 routes_a[test_set]['beam'] = {}
             for example in next(os.walk(f'instances/CVRP/{test_set}'))[2]:
+                print(example)
                 # Go through all test instances
                 if example.endswith('sol'):
                     continue
                 data = vrplib.read_instance(f'instances/CVRP/{test_set}/{example}')
+                if data['edge_weight_type'] != 'EUC_2D':
+                    continue
                 if method == 'ortools':
                     model = ORtools(data, method_settings['init_method'], method_settings['improve_method'])
                     try:
