@@ -57,3 +57,7 @@ for subdir in next(os.walk('instances/CVRP/generate'))[1]:
                 output_b[subdir][example]['route'] = routes_or[ident]['b'][subdir][example]
 
 # Save result
+with open(f'analysis/or_results_a.json', 'w') as f:
+    json.dump(output_a, f, indent=2)
+with open(f'analysis/or_results_b.json', 'w') as f:
+    json.dump(output_b, f, indent=2)
