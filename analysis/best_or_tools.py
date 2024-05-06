@@ -23,20 +23,34 @@ for ident in or_ids:
         routes_or[ident]['b'] = json.load(json_data)
 
 # Find best solution
+# Test set A
 test_sets = ['A', 'B', 'E', 'F', 'M', 'P', 'CMT']
-output = {}
+output_a = {}
 for test_set in test_sets:
-    output[test_set] = {}
+    output_a[test_set] = {}
     for example in next(os.walk(f'instances/CVRP/{test_set}'))[2]:
         if example.endswith('sol'):
             continue
-        output[test_set][example] = {}
+        output_a[test_set][example] = {}
         for ident in or_ids:
             value = all_or[ident]['a'][test_set].get(example)
             if value is None:
                 continue
-            elif output[test_set][example].get('id') == None or value < output[test_set][example].get('value'):
-                output[test_set][example]['value'] = value
-                output[test_set][example]['id'] = ident
+            elif output_a[test_set][example].get('id') is None or value < output_a[test_set][example].get('value'):
+                output_a[test_set][example]['value'] = value
+                output_a[test_set][example]['id'] = ident
+# Test set B
+output_b = {}
+for subdir in next(os.walk('instances/CVRP/generate'))[1]:
+    output_b[subdir] = {}
+    for example in next(os.walk(f'instances/CVRP/generate/{subdir}'))[2]:
+        output_b[subdir][example] = {}
+        for ident in or_ids:
+            value = all_or[ident]['b'][subdir].get(example)
+            if value is None:
+                continue
+            elif output_b[subdir][example].get('id') is None or value < output_b[subdir][example].get('value'):
+                output_b[subdir][example]['value'] = value
+                output_b[subdir][example]['id'] = ident
 
-            # Save result
+# Save result
