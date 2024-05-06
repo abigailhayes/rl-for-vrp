@@ -1,3 +1,4 @@
+"""Counting the number of solutions returned in each experiment"""
 import json
 import pandas as pd
 

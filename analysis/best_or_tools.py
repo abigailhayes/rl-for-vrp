@@ -1,3 +1,4 @@
+"""Combining the results from the OR tools methods"""
 import os
 import json
 
