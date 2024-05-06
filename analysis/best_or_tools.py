@@ -17,9 +17,9 @@ for ident in or_ids:
         all_or[ident]['a'] = json.load(json_data)
     with open(f'results/exp_{ident}/results_b.json') as json_data:
         all_or[ident]['b'] = json.load(json_data)
-    with open(f'results/exp_{ident}/results_a.json') as json_data:
+    with open(f'results/exp_{ident}/routes_a.json') as json_data:
         routes_or[ident]['a'] = json.load(json_data)
-    with open(f'results/exp_{ident}/results_b.json') as json_data:
+    with open(f'results/exp_{ident}/routes_b.json') as json_data:
         routes_or[ident]['b'] = json.load(json_data)
 
 # Find best solution
@@ -39,6 +39,8 @@ for test_set in test_sets:
             elif output_a[test_set][example].get('id') is None or value < output_a[test_set][example].get('value'):
                 output_a[test_set][example]['value'] = value
                 output_a[test_set][example]['id'] = ident
+                output_a[test_set][example]['route'] = routes_or[ident]['a'][test_set][example]
+
 # Test set B
 output_b = {}
 for subdir in next(os.walk('instances/CVRP/generate'))[1]:
@@ -52,5 +54,6 @@ for subdir in next(os.walk('instances/CVRP/generate'))[1]:
             elif output_b[subdir][example].get('id') is None or value < output_b[subdir][example].get('value'):
                 output_b[subdir][example]['value'] = value
                 output_b[subdir][example]['id'] = ident
+                output_b[subdir][example]['route'] = routes_or[ident]['b'][subdir][example]
 
 # Save result
