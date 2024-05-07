@@ -31,3 +31,13 @@ def baseline_optima(save = False):
             json.dump(output, f, indent=2)
 
     return output
+
+def validate_routes(routes, demands, capacity):
+    """Check the validity of a route, given the demands and capacity"""
+
+    # Check that all nodes are visited once
+    if set([i for j in routes for i in j]) != len(demands)-1:
+        print('Incorrect number of visited nodes')
+        return 0
+
+    # Check that capacity is not exceeded
