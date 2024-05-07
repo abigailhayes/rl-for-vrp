@@ -3,24 +3,33 @@ from rl4co.models import AttentionModel
 from rl4co.utils import RL4COTrainer
 from lightning.pytorch import seed_everything
 
-seed_everything(42, workers=True)
+import methods.utils as utils
 
-# Environment, Model, and Lightning Module
-env = CVRPEnv(num_loc=20)
-model = AttentionModel(env,
-                       baseline="rollout",
-                       train_data_size=250_000,
-                       test_data_size=10_000,
-                       optimizer_kwargs={'lr': 1e-4}
-                       )
 
-# Trainer
-trainer_kwargs = {'accelerator':"auto"}
-trainer = RL4COTrainer(max_epochs=100, **trainer_kwargs)
+class RL4CO(utils.VRPInstance):
+    """A class for implementing the methods included in RL4CO on a VRP instance."""
 
-# Fit the model
-trainer.fit(model)
+    def __init__(self, instance, init_method, customers, seed):
+        super().__init__(instance)
+        self.trainer = None
+        self.model = None
+        seed_everything(seed, workers=True)
+        self.init_method = init_method
+        self.customers = customers
+        self.env = CVRPEnv(num_loc=self.customers)
 
-# Test the model
-trainer.test(model)
+    def set_model(self):
+        if self.init_method == 'am':
+            self.model = AttentionModel(self.env,
+                                        baseline="rollout",
+                                        train_data_size=250_000,
+                                        test_data_size=10_000,
+                                        optimizer_kwargs={'lr': 1e-4})
 
+    def train_model(self):
+        trainer_kwargs = {'accelerator': "auto"}
+        self.trainer = RL4COTrainer(max_epochs=100, **trainer_kwargs)
+        self.trainer.fit(self.model)
+
+    def test_model(self):
+        self.trainer.test(self.model)
