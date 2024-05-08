@@ -11,13 +11,17 @@ def main():
 
     # Update dataframe
     def instance_row(ident):
+        """Count the instances for a given id"""
         output = {'id': ident}
         json_paths = [f'results/exp_{ident}/results_a.json', f'results/exp_{ident}/results_b.json']
-        for json_path in json_paths:
-            with open(json_path) as json_data:
-                data = json.load(json_data)
-            for key in data:
-                output[key] = len(data[key])
+        try:
+            for json_path in json_paths:
+                with open(json_path) as json_data:
+                    data = json.load(json_data)
+                for key in data:
+                    output[key] = len(data[key])
+        except ValueError:
+            pass
         return pd.DataFrame.from_dict([output])
 
 
