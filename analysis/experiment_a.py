@@ -14,15 +14,15 @@ def compare_optimum(exp_filepath):
 
     # Compare for each instance
     comparison = {}
-    for test_set in optima:
+    for test_set in results:
         comparison[test_set] = {}
-        for instance in test_set:
+        for instance in results[test_set]:
             try:
-                if instance in results[test_set] and results[test_set][instance] is dict:
+                if instance in optima[test_set] and results[test_set][instance] is dict:
                     # Compiled OR tools results format
                     comparison[test_set][instance] = (results[test_set][instance]['value'] - optima[test_set][
                         instance]) / optima[test_set][instance]
-                elif instance in results[test_set]:
+                elif instance in optima[test_set]:
                     # General results format
                     comparison[test_set][instance] = (results[test_set][instance] - optima[test_set][
                         instance]) / optima[test_set][instance]
