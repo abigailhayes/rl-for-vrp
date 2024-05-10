@@ -1,4 +1,6 @@
 import torch
+from einops import repeat
+from math import ceil
 
 from rl4co.envs import CVRPEnv
 from rl4co.models import AttentionModel
@@ -45,5 +47,32 @@ class RL4CO(utils.VRPInstance):
         coord_scaled = torch.stack([x_scaled, y_scaled], dim=1)
         return coord_scaled
 
-    def test_model(self):
-        self.trainer.test(self.model)
+    def single_test(self, instance):
+        """ Test for a single instance """
+        coords = torch.tensor(instance['node_coord']).float()
+        coords_norm = self.normalize_coord(coords)
+        demand = torch.tensor(instance['demand'][1:]).float()
+        capacity = instance['capacity']
+        n = coords.shape[0]
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        policy = self.model.policy
+        policy = policy.to(device)
+
+        # Prepare the tensordict
+        batch_size = 2
+        td = self.env.reset(batch_size=(batch_size,)).to(device)
+        td['locs'] = repeat(coords_norm, 'n d -> b n d', b=batch_size, d=2)
+        td['demand'] = repeat(demand, 'n -> b n', b=batch_size) / capacity
+        td['visited'] = torch.zeros((batch_size, 1, n), dtype=torch.uint8)
+        action_mask = torch.ones(batch_size, n, dtype=torch.bool)
+        action_mask[:, 0] = False
+        td['action_mask'] = action_mask
+
+        # Get the solution from the policy
+        with torch.no_grad():
+            out = policy(td.clone(), decode_type='greedy', return_actions=True)
+
+        # Calculate the cost on the original scale
+        td['locs'] = repeat(coords, 'n d -> b n d', b=batch_size, d=2)
+        neg_reward = self.env.get_reward(td, out['actions'])
+        cost = ceil(-1 * neg_reward[0].item())
