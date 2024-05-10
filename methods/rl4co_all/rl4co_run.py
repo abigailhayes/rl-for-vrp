@@ -13,8 +13,7 @@ import methods.utils as utils
 class RL4CO(utils.VRPInstance):
     """A class for implementing the methods included in RL4CO on a VRP instance."""
 
-    def __init__(self, instance, init_method, customers, seed):
-        super().__init__(instance)
+    def __init__(self, init_method, customers, seed):
         self.trainer = None
         self.model = None
         seed_everything(seed, workers=True)
@@ -26,13 +25,13 @@ class RL4CO(utils.VRPInstance):
         if self.init_method == 'am':
             self.model = AttentionModel(self.env,
                                         baseline="rollout",
-                                        train_data_size=250_000,
+                                        train_data_size=10_000,
                                         test_data_size=10_000,
                                         optimizer_kwargs={'lr': 1e-4})
 
     def train_model(self):
         trainer_kwargs = {'accelerator': "auto"}
-        self.trainer = RL4COTrainer(max_epochs=100, **trainer_kwargs)
+        self.trainer = RL4COTrainer(max_epochs=3, **trainer_kwargs)
         self.trainer.fit(self.model)
 
     @staticmethod
@@ -75,4 +74,17 @@ class RL4CO(utils.VRPInstance):
         # Calculate the cost on the original scale
         td['locs'] = repeat(coords, 'n d -> b n d', b=batch_size, d=2)
         neg_reward = self.env.get_reward(td, out['actions'])
-        cost = ceil(-1 * neg_reward[0].item())
+        print(out['actions'])
+        self.cost = ceil(-1 * neg_reward[0].item())
+
+        # Routing
+        self.routes = []
+        current = []
+        for node in out['actions'][0]:
+            if node == 0:
+                self.routes.append(current)
+                current = []
+            else:
+                current.append(int(node))
+        self.routes.append(current)
+        self.routes = [route for route in self.routes if len(route) != 0]
