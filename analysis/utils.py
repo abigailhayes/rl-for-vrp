@@ -2,6 +2,7 @@ import os
 import json
 from pathlib import Path
 from itertools import pairwise
+import vrplib
 
 import instances.utils as instance_utils
 
@@ -47,3 +48,32 @@ def validate_routes(routes, demand, capacity):
             return 0
 
     return 1
+
+def validate_experiment(ident):
+    """Carry out validation checks on all of the results for an experiment"""
+    options = ['a', 'b']
+    paths = {'a': 'instances/CVRP',
+             'b': 'instances/CVRP/generate'}
+    for option in options:
+        # Run separately for each of a and b
+        output = {}
+        with open(f'results/exp_{ident}/routes_{option}.json') as json_data:
+            routes = json.load(json_data)
+        for test_set in routes:
+            output[test_set] = {}
+            if 'greedy' in routes[test_set]:
+                # Procedure for Nazari results
+                splits = ['greedy', 'beam']
+                for split in splits:
+                    if len(routes[test_set][split]) > 0:
+                        # Check there are results, and then run through them
+                        output[test_set][split] = {}
+                        for instance in routes[test_set][split]:
+                            # Load instance and run validity check
+                            data = vrplib.read_instance(f'{paths[option]}/{instance}.vrp')
+                            output[test_set][split][instance] = validate_routes(routes[test_set][split][instance], data['demand'], data['capacity'])
+        # Save results
+        with open(f'results/exp_{ident}/validity_{option}.json', 'w') as f:
+            json.dump(output, f, indent=2)
+
+

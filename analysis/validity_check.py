@@ -15,7 +15,7 @@ def main():
         if os.path.isfile(f'results/exp_{ident}/validity_a.json'):
             continue
         else:
-
+            analysis_utils.validate_experiment(ident)
 
 
 if __name__ == '__main__':
