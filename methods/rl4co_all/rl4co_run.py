@@ -25,13 +25,13 @@ class RL4CO(utils.VRPInstance):
         if self.init_method == 'am':
             self.model = AttentionModel(self.env,
                                         baseline="rollout",
-                                        train_data_size=10_000,
+                                        train_data_size=250_000,
                                         test_data_size=10_000,
                                         optimizer_kwargs={'lr': 1e-4})
 
     def train_model(self):
         trainer_kwargs = {'accelerator': "auto"}
-        self.trainer = RL4COTrainer(max_epochs=3, **trainer_kwargs)
+        self.trainer = RL4COTrainer(max_epochs=100, **trainer_kwargs)
         self.trainer.fit(self.model)
 
     @staticmethod
