@@ -1,3 +1,5 @@
+import torch
+
 from rl4co.envs import CVRPEnv
 from rl4co.models import AttentionModel
 from rl4co.utils import RL4COTrainer
@@ -30,6 +32,18 @@ class RL4CO(utils.VRPInstance):
         trainer_kwargs = {'accelerator': "auto"}
         self.trainer = RL4COTrainer(max_epochs=100, **trainer_kwargs)
         self.trainer.fit(self.model)
+
+    @staticmethod
+    def normalize_coord(coord: torch.Tensor) -> torch.Tensor:
+        """From https://github.com/ai4co/rl4co/blob/v0.3.3/notebooks/tutorials/6-test-on-cvrplib.ipynb"""
+        x, y = coord[:, 0], coord[:, 1]
+        x_min, x_max = x.min(), x.max()
+        y_min, y_max = y.min(), y.max()
+
+        x_scaled = (x - x_min) / (x_max - x_min)
+        y_scaled = (y - y_min) / (y_max - y_min)
+        coord_scaled = torch.stack([x_scaled, y_scaled], dim=1)
+        return coord_scaled
 
     def test_model(self):
         self.trainer.test(self.model)
