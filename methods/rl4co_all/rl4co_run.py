@@ -74,7 +74,6 @@ class RL4CO(utils.VRPInstance):
         # Calculate the cost on the original scale
         td['locs'] = repeat(coords, 'n d -> b n d', b=batch_size, d=2)
         neg_reward = self.env.get_reward(td, out['actions'])
-        print(out['actions'])
         self.cost = ceil(-1 * neg_reward[0].item())
 
         # Routing
