@@ -16,14 +16,30 @@ def main():
     for ident in or_ids:
         all_or[ident] = {}
         routes_or[ident] = {}
-        with open(f'results/exp_{ident}/results_a.json') as json_data:
-            all_or[ident]['a'] = json.load(json_data)
-        with open(f'results/exp_{ident}/results_b.json') as json_data:
-            all_or[ident]['b'] = json.load(json_data)
-        with open(f'results/exp_{ident}/routes_a.json') as json_data:
-            routes_or[ident]['a'] = json.load(json_data)
-        with open(f'results/exp_{ident}/routes_b.json') as json_data:
-            routes_or[ident]['b'] = json.load(json_data)
+        try:
+            with open(f'results/exp_{ident}/results_a.json') as json_data:
+                all_or[ident]['a'] = json.load(json_data)
+        except ValueError:
+            pass
+        try:
+            with open(f'results/exp_{ident}/routes_a.json') as json_data:
+                routes_or[ident]['a'] = json.load(json_data)
+        except ValueError:
+            pass
+        if os.path.isfile(f'results/exp_{ident}/routes_b.json'):
+            no_b = False
+            try:
+                with open(f'results/exp_{ident}/results_b.json') as json_data:
+                    all_or[ident]['b'] = json.load(json_data)
+            except ValueError:
+                pass
+            try:
+                with open(f'results/exp_{ident}/routes_b.json') as json_data:
+                    routes_or[ident]['b'] = json.load(json_data)
+            except ValueError:
+                pass
+        else:
+            no_b=True
 
     # Find best solution
     # Test set A
@@ -46,18 +62,19 @@ def main():
 
     # Test set B
     output_b = {}
-    for subdir in next(os.walk('instances/CVRP/generate'))[1]:
-        output_b[subdir] = {}
-        for example in next(os.walk(f'instances/CVRP/generate/{subdir}'))[2]:
-            output_b[subdir][example] = {}
-            for ident in or_ids:
-                value = all_or[ident]['b'][subdir].get(example)
-                if value is None:
-                    continue
-                elif output_b[subdir][example].get('id') is None or value < output_b[subdir][example].get('value'):
-                    output_b[subdir][example]['value'] = value
-                    output_b[subdir][example]['id'] = ident
-                    output_b[subdir][example]['route'] = routes_or[ident]['b'][subdir][example]
+    if no_b == False:
+        for subdir in next(os.walk('instances/CVRP/generate'))[1]:
+            output_b[subdir] = {}
+            for example in next(os.walk(f'instances/CVRP/generate/{subdir}'))[2]:
+                output_b[subdir][example] = {}
+                for ident in or_ids:
+                    value = all_or[ident]['b'][subdir].get(example)
+                    if value is None:
+                        continue
+                    elif output_b[subdir][example].get('id') is None or value < output_b[subdir][example].get('value'):
+                        output_b[subdir][example]['value'] = value
+                        output_b[subdir][example]['id'] = ident
+                        output_b[subdir][example]['route'] = routes_or[ident]['b'][subdir][example]
 
     # Save result
     with open(f'results/or_results_a.json', 'w') as f:
