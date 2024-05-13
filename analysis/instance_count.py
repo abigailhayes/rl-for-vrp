@@ -12,7 +12,7 @@ def main():
     def instance_row(ident):
         """Count the instances for a given id"""
         json_paths = [f'results/exp_{ident}/results_a.json', f'results/exp_{ident}/results_b.json']
-        if settings_df[settings_df['id']==ident]['method']=='nazari':
+        if (settings_df[settings_df['id'] == ident]['method'] == 'nazari').item():
             # When data is split between beam and greedy
             output_greedy = {'id': ident, 'notes': 'greedy'}
             output_beam = {'id': ident, 'notes': 'beam'}
@@ -20,8 +20,8 @@ def main():
                 with open(json_path) as json_data:
                     data = json.load(json_data)
                 for key in data:
-                    output_greedy[key] = len(data['greedy'][key])
-                    output_beam[key] = len(data['beam'][key])
+                    output_greedy[key] = len(data[key]['greedy'])
+                    output_beam[key] = len(data[key]['beam'])
             return pd.concat([pd.DataFrame.from_dict([output_greedy]), pd.DataFrame.from_dict([output_beam])], ignore_index=True)
         else:
             # When data is stored directly for each instance
