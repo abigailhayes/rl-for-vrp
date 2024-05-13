@@ -13,9 +13,10 @@ import methods.utils as utils
 class RL4CO(utils.VRPInstance):
     """A class for implementing the methods included in RL4CO on a VRP instance."""
 
-    def __init__(self, init_method, customers, seed):
+    def __init__(self, init_method, customers, seed, ident):
         self.trainer = None
         self.model = None
+        self.ident = ident
         seed_everything(seed, workers=True)
         self.init_method = init_method
         self.customers = customers
@@ -30,7 +31,8 @@ class RL4CO(utils.VRPInstance):
                                         optimizer_kwargs={'lr': 1e-4})
 
     def train_model(self):
-        trainer_kwargs = {'accelerator': "auto"}
+        trainer_kwargs = {'accelerator': "auto",
+                          'default_root_dir': f'results/exp_{self.ident}'}
         self.trainer = RL4COTrainer(max_epochs=100, **trainer_kwargs)
         self.trainer.fit(self.model)
 
