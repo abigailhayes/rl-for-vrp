@@ -39,6 +39,7 @@ def instance_to_nazari(instance):
     """Convert an instance in the general format to that needed for Nazari"""
     return np.roll(np.column_stack((instance['node_coord'], instance['demand'])), -1, axis=0).reshape(-1, instance['dimension'], 3)
 
+
 def test_cvrp(method, method_settings, ident, testing, model=None):
     """ Function for running CVRP testing
     - method - the solution method being applied
@@ -81,6 +82,10 @@ def test_cvrp(method, method_settings, ident, testing, model=None):
                             continue
                         results_b[subdir][example] = model.cost
                         routes_b[subdir][example] = model.routes
+                    elif method == 'rl4co':
+                        model.single_test(data)
+                        results_b[subdir][example] = model.cost
+                        routes_b[subdir][example] = model.routes
                     elif method == 'nazari':
                         if model.args['n_nodes'] != data['dimension']:
                             continue
@@ -113,6 +118,10 @@ def test_cvrp(method, method_settings, ident, testing, model=None):
                         model.run_all()
                     except AttributeError:
                         continue
+                    results_a[test_set][example] = model.cost
+                    routes_a[test_set][example] = model.routes
+                elif method == 'rl4co':
+                    model.single_test(data)
                     results_a[test_set][example] = model.cost
                     routes_a[test_set][example] = model.routes
                 elif method == 'nazari':
