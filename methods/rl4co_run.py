@@ -33,7 +33,9 @@ class RL4CO(utils.VRPInstance):
     def train_model(self):
         trainer_kwargs = {'accelerator': "auto",
                           'default_root_dir': f'results/exp_{self.ident}'}
-        self.trainer = RL4COTrainer(max_epochs=100, **trainer_kwargs)
+        self.trainer = RL4COTrainer(max_epochs=100,
+                                    accelerator="auto",
+                                    **trainer_kwargs)
         self.trainer.fit(self.model)
 
     @staticmethod
