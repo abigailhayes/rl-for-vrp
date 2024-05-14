@@ -10,10 +10,12 @@ from lightning.pytorch import seed_everything
 import methods.utils as utils
 
 
-class RL4CO(utils.VRPInstance):
+class RL4CO:
     """A class for implementing the methods included in RL4CO on a VRP instance."""
 
     def __init__(self, init_method, customers, seed, ident):
+        self.routes = None
+        self.cost = None
         self.trainer = None
         self.model = None
         self.ident = ident
