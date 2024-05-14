@@ -26,7 +26,7 @@ def data_to_nazari(directory):
                X=output.reshape(-1, instance['dimension'] * 3))
 
 
-class Nazari():
+class Nazari:
 
     def __init__(self, ident, task):
         self.ident = ident
@@ -65,10 +65,10 @@ class Nazari():
                 if step % self.args['log_interval'] == 0:
                     train_time_end = time.time() - train_time_beg
                     self.prt.print_out('Train Step: {} -- Time: {} -- Train reward: {} -- Value: {}'
-                                  .format(step, time.strftime("%H:%M:%S", time.gmtime(train_time_end)),
-                                          np.mean(R_val), np.mean(v_val)))
+                                       .format(step, time.strftime("%H:%M:%S", time.gmtime(train_time_end)),
+                                               np.mean(R_val), np.mean(v_val)))
                     self.prt.print_out('    actor loss: {} -- critic loss: {}'
-                                  .format(np.mean(actor_loss_val), np.mean(critic_loss_val)))
+                                       .format(np.mean(actor_loss_val), np.mean(critic_loss_val)))
                     train_time_beg = time.time()
                 if step % self.args['test_interval'] == 0:
                     self.agent.inference(self.args['infer_type'])
@@ -86,17 +86,14 @@ class Nazari():
     def testing(self, test_data=None, instance=None):
         self.agent.inference('testing', test_data)
         # Getting routes in normal format
-        self.routing(instance)
+        self.routing()
         self.get_cost(instance)
 
-    def routing(self, instance):
-        self.routes = {}
-        self.routes['greedy'] = []
+    def routing(self):
+        self.routes = {'greedy': []}
         current = []
-        self.test = {}
-        self.test['coords']=instance['node_coord']
-        for node in [np.where(np.all(np.isin(np.roll(self.agent.test_coords['input_greedy'], 1, axis=0), i), axis=1))[0][0] for i in
-                             self.agent.test_coords['coords_greedy']]:
+        for node in [np.where(np.all(np.isin(np.roll(self.agent.test_coords['input_greedy'], 1, axis=0), i),
+                                     axis=1))[0][0] for i in self.agent.test_coords['coords_greedy']]:
             if node == 0:
                 self.routes['greedy'].append(current)
                 current = []
@@ -107,8 +104,8 @@ class Nazari():
 
         self.routes['beam'] = []
         current = []
-        for node in [np.where(np.all(np.isin(np.roll(self.agent.test_coords['input_beam'], 1, axis=0), i), axis=1))[0][0] for i in
-                           self.agent.test_coords['coords_beam']]:
+        for node in [np.where(np.all(np.isin(np.roll(self.agent.test_coords['input_beam'], 1, axis=0), i),
+                                     axis=1))[0][0] for i in self.agent.test_coords['coords_beam']]:
             if node == 0:
                 self.routes['beam'].append(current)
                 current = []
@@ -117,20 +114,16 @@ class Nazari():
         self.routes['beam'].append(current)
         self.routes['beam'] = [route for route in self.routes['beam'] if len(route) != 0]
 
-    def _get_cost(self, routes, instance):
+    @staticmethod
+    def _get_cost(routes, instance):
         """Calculate the total cost of a solution to an instance"""
         costs = 0
         for r in routes:
-            for i, j in pairwise([0]+r+[0]):
+            for i, j in pairwise([0] + r + [0]):
                 costs += instance['edge_weight'][i][j]
         return costs
 
     def get_cost(self, instance):
         """Calculate the total cost of the current solution to an instance"""
-        self.cost = {}
-        self.cost['greedy'] = self._get_cost(self.routes['greedy'], instance)
-        self.cost['beam'] = self._get_cost(self.routes['beam'], instance)
-
-
-
-
+        self.cost = {'greedy': self._get_cost(self.routes['greedy'], instance),
+                     'beam': self._get_cost(self.routes['beam'], instance)}
