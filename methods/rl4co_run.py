@@ -42,7 +42,7 @@ class RL4CO:
                                 optimizer_kwargs={'lr': 1e-4})
         elif self.init_method == 'pomo':
             self.model = POMO(self.env,
-                              train_data_size=250_000,
+                              train_data_size=100_000,
                               test_data_size=10_000,
                               optimizer_kwargs={'lr': 1e-4})
         elif self.init_method == 'mdam':
@@ -52,14 +52,19 @@ class RL4CO:
                               optimizer_kwargs={'lr': 1e-4})
         elif self.init_method == 'deepaco':
             self.model = DeepACO(self.env,
-                                 train_data_size=250_000,
-                                 test_data_size=10_000,
+                                 train_data_size=640,
+                                 test_data_size=320,
                                  optimizer_kwargs={'lr': 1e-4})
 
     def train_model(self):
+        if self.init_method == 'deepaco':
+            epochs = 1
+        else:
+            epochs = 100
+            # Currently ignoring POMO instructions for 2000 epochs
         trainer_kwargs = {'accelerator': "auto",
                           'default_root_dir': f'results/exp_{self.ident}'}
-        self.trainer = RL4COTrainer(max_epochs=100, **trainer_kwargs)
+        self.trainer = RL4COTrainer(max_epochs=epochs, **trainer_kwargs)
         self.trainer.fit(self.model)
 
     @staticmethod
