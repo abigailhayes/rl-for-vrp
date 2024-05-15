@@ -22,7 +22,7 @@ class RL4CO:
         seed_everything(seed, workers=True)
         self.init_method = init_method
         self.customers = customers
-        self.env = CVRPEnv(generator_params=dict(num_loc=self.customers))
+        self.env = CVRPEnv(num_loc=self.customers)
 
     def set_model(self):
         if self.init_method == 'am':
