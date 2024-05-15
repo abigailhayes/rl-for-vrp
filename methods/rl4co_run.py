@@ -22,7 +22,7 @@ class RL4CO:
         seed_everything(seed, workers=True)
         self.init_method = init_method
         self.customers = customers
-        self.env = CVRPEnv(num_loc=self.customers)
+        self.env = CVRPEnv(generator_params=dict(num_loc=self.customers))
 
     def set_model(self):
         if self.init_method == 'am':
@@ -35,9 +35,7 @@ class RL4CO:
     def train_model(self):
         trainer_kwargs = {'accelerator': "auto",
                           'default_root_dir': f'results/exp_{self.ident}'}
-        self.trainer = RL4COTrainer(max_epochs=100,
-                                    accelerator="auto",
-                                    **trainer_kwargs)
+        self.trainer = RL4COTrainer(max_epochs=100, **trainer_kwargs)
         self.trainer.fit(self.model)
 
     @staticmethod
