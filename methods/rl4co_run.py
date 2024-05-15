@@ -3,7 +3,7 @@ from einops import repeat
 from math import ceil
 
 from rl4co.envs import CVRPEnv
-from rl4co.models import AttentionModel
+from rl4co.models import AttentionModel, AMPPO, SymNCO, POMO, MDAM, DeepACO
 from rl4co.utils import RL4COTrainer
 from lightning.pytorch import seed_everything
 
@@ -27,10 +27,34 @@ class RL4CO:
     def set_model(self):
         if self.init_method == 'am':
             self.model = AttentionModel(self.env,
-                                        baseline="rollout",
                                         train_data_size=250_000,
                                         test_data_size=10_000,
                                         optimizer_kwargs={'lr': 1e-4})
+        elif self.init_method == 'amppo':
+            self.model = AMPPO(self.env,
+                               train_data_size=250_000,
+                               test_data_size=10_000,
+                               optimizer_kwargs={'lr': 1e-4})
+        elif self.init_method == 'symnco':
+            self.model = SymNCO(self.env,
+                                train_data_size=250_000,
+                                test_data_size=10_000,
+                                optimizer_kwargs={'lr': 1e-4})
+        elif self.init_method == 'pomo':
+            self.model = POMO(self.env,
+                              train_data_size=250_000,
+                              test_data_size=10_000,
+                              optimizer_kwargs={'lr': 1e-4})
+        elif self.init_method == 'mdam':
+            self.model = MDAM(self.env,
+                              train_data_size=250_000,
+                              test_data_size=10_000,
+                              optimizer_kwargs={'lr': 1e-4})
+        elif self.init_method == 'deepaco':
+            self.model = DeepACO(self.env,
+                                 train_data_size=250_000,
+                                 test_data_size=10_000,
+                                 optimizer_kwargs={'lr': 1e-4})
 
     def train_model(self):
         trainer_kwargs = {'accelerator': "auto",
