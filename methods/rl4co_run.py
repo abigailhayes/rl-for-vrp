@@ -3,7 +3,7 @@ from einops import repeat
 from math import ceil
 
 from rl4co.envs import CVRPEnv
-from rl4co.models import AttentionModel
+from rl4co.models import AttentionModel, AMPPO, SymNCO, POMO, MDAM, DeepACO
 from rl4co.utils import RL4COTrainer
 from lightning.pytorch import seed_everything
 
@@ -22,20 +22,49 @@ class RL4CO:
         seed_everything(seed, workers=True)
         self.init_method = init_method
         self.customers = customers
-        self.env = CVRPEnv(generator_params=dict(num_loc=self.customers))
+        self.env = CVRPEnv(num_loc=self.customers)
 
     def set_model(self):
         if self.init_method == 'am':
             self.model = AttentionModel(self.env,
-                                        baseline="rollout",
                                         train_data_size=250_000,
                                         test_data_size=10_000,
                                         optimizer_kwargs={'lr': 1e-4})
+        elif self.init_method == 'amppo':
+            self.model = AMPPO(self.env,
+                               train_data_size=250_000,
+                               test_data_size=10_000,
+                               optimizer_kwargs={'lr': 1e-4})
+        elif self.init_method == 'symnco':
+            self.model = SymNCO(self.env,
+                                train_data_size=250_000,
+                                test_data_size=10_000,
+                                optimizer_kwargs={'lr': 1e-4})
+        elif self.init_method == 'pomo':
+            self.model = POMO(self.env,
+                              train_data_size=100_000,
+                              test_data_size=10_000,
+                              optimizer_kwargs={'lr': 1e-4})
+        elif self.init_method == 'mdam':
+            self.model = MDAM(self.env,
+                              train_data_size=250_000,
+                              test_data_size=10_000,
+                              optimizer_kwargs={'lr': 1e-4})
+        elif self.init_method == 'deepaco':
+            self.model = DeepACO(self.env,
+                                 train_data_size=640,
+                                 test_data_size=320,
+                                 optimizer_kwargs={'lr': 1e-4})
 
     def train_model(self):
+        if self.init_method == 'deepaco':
+            epochs = 1
+        else:
+            epochs = 100
+            # Currently ignoring POMO instructions for 2000 epochs
         trainer_kwargs = {'accelerator': "auto",
                           'default_root_dir': f'results/exp_{self.ident}'}
-        self.trainer = RL4COTrainer(max_epochs=100, **trainer_kwargs)
+        self.trainer = RL4COTrainer(max_epochs=epochs, **trainer_kwargs)
         self.trainer.fit(self.model)
 
     @staticmethod
