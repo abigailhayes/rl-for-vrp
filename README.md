@@ -26,3 +26,14 @@ And for the improvement methods:
 ### Reinforcement learning
 
 The first to be implemented is from the work of Nazari et al. and is based on [https://github.com/OptMLGroup/VRP-RL](https://github.com/OptMLGroup/VRP-RL). More information in [Nazari README](methods/nazari/README.md).
+
+The remaining RL methods are implemented via the rl4co module in [rl4co_run.py](methods/rl4co_run.py). The methods implemented are 'am', 'amppo', 'symnco' and 'mdam'.
+
+## Analysis
+
+There is additional code to conduct basic analysis of the results.
+
+* [best_or_tools.py](analysis/best_or_tools.py) searches through the OR tools results and identifies the optimal value for each instance
+* [experiment_a.py](analysis/experiment_a.py) is for processing the results in comparison to the established benchmarks
+* [instance_count.py](analysis/instance_count.py) looks at the number of solutions provided for each method
+* [validity_check.py](analysis/validity_check.py) can be used to look at whether the RL methods have provided routes which visit every node exactly once without exceeding the capacity of any vehicles

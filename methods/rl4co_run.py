@@ -79,6 +79,19 @@ class RL4CO:
         coord_scaled = torch.stack([x_scaled, y_scaled], dim=1)
         return coord_scaled
 
+    def routing(self):
+        # Routing
+        self.routes = []
+        current = []
+        for node in out['actions'][0]:
+            if node == 0:
+                self.routes.append(current)
+                current = []
+            else:
+                current.append(int(node))
+        self.routes.append(current)
+        self.routes = [route for route in self.routes if len(route) != 0]
+
     def single_test(self, instance):
         """ Test for a single instance """
         coords = torch.tensor(instance['node_coord']).float()
@@ -109,14 +122,5 @@ class RL4CO:
         neg_reward = self.env.get_reward(td, out['actions'])
         self.cost = ceil(-1 * neg_reward[0].item())
 
-        # Routing
-        self.routes = []
-        current = []
-        for node in out['actions'][0]:
-            if node == 0:
-                self.routes.append(current)
-                current = []
-            else:
-                current.append(int(node))
-        self.routes.append(current)
-        self.routes = [route for route in self.routes if len(route) != 0]
+        self.routing()
+
