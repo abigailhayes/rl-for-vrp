@@ -76,7 +76,10 @@ class ORtools(utils.VRPInstance):
         # Convert from routing variable Index to distance matrix NodeIndex.
         from_node = self.manager.IndexToNode(from_index)
         to_node = self.manager.IndexToNode(to_index)
-        return int(self.distance[from_node][to_node]*1000)
+        if self.task == 'CVRP':
+            return int(self.distance[from_node][to_node]*1000)
+        elif self.task == 'CVRPTW':
+            return int(self.distance[from_node][to_node] + self.service_time['to_index']) * 1000
 
     def _demand_callback(self, from_index):
         """Returns the demand of the node."""
