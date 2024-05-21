@@ -26,6 +26,9 @@ class ORtools(utils.VRPInstance):
 
     def __init__(self, instance, init_method, improve_method=None):
         super().__init__(instance)
+        if self.instance['type'] == 'CVRPTW':
+            self.time_window = instance['time_window']
+            self.service_time = instance['service_time']
         self.search_parameters = pywrapcp.DefaultRoutingSearchParameters()
         self.depot = 0
         self.init_method = init_method
