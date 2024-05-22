@@ -34,21 +34,26 @@ def main():
     random.seed(args['seed'])  # May need to look at more
 
     # Set up/train model (and save where appropriate)
-    if args['method'] == 'nazari':
-        model = nazari.Nazari(ident, task=args['method_settings']['task'])
-        model.train_model()
-        print("Finished training")
-    elif args['method'] == 'rl4co':
-        model = rl4co_run.RL4CO(args['method_settings']['init_method'], args['method_settings']['customers'], args['seed'], ident)
-        model.set_model()
-        model.train_model()
+    if args['problem'] == 'CVRP':
+        if args['method'] == 'nazari':
+            model = nazari.Nazari(ident, task=args['method_settings']['task'])
+            model.train_model()
+            print("Finished training")
+        elif args['method'] == 'rl4co':
+            model = rl4co_run.RL4CO(args['method_settings']['init_method'], args['method_settings']['customers'], args['seed'], ident)
+            model.set_model()
+            model.train_model()
 
     # Run tests
     if args['testing'] is not None:
-        if args['method'] in ['nazari', 'rl4co']:
-            utils.test_cvrp(args['method'], args['method_settings'], ident, args['testing'], model)
-        elif args['method'] == 'ortools':
-            utils.test_cvrp(args['method'], args['method_settings'], ident, args['testing'])
+        if args['problem'] == 'CVRP':
+            if args['method'] in ['nazari', 'rl4co']:
+                utils.test_cvrp(args['method'], args['method_settings'], ident, args['testing'], model)
+            elif args['method'] == 'ortools':
+                utils.test_cvrp(args['method'], args['method_settings'], ident, args['testing'])
+        elif args['problem'] == 'CVRPTW':
+            if args['method'] == 'ortools':
+                utils.test_cvrptw(args['method'], args['method_settings'], ident, args['testing'])
 
     end_time = time.time()
     # Create a dict with all variables of the current run
