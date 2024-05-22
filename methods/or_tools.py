@@ -84,14 +84,14 @@ class ORtools(utils.VRPInstance):
             route = []
             while not self.routing.IsEnd(index):
                 time_var = time_dimension.CumulVar(index)
+                route.append(self.manager.IndexToNode(index))
+                route_load += self.demand[self.manager.IndexToNode(index)]
                 plan_output += (
                     f"{self.manager.IndexToNode(index)}"
                     f" Time({solution.Min(time_var)},{solution.Max(time_var)})"
                     " -> "
                     f"Load of the route: {route_load}\n"
                 )
-                route.append(self.manager.IndexToNode(index))
-                route_load += self.demand[self.manager.IndexToNode(index)]
                 index = solution.Value(self.routing.NextVar(index))
             time_var = time_dimension.CumulVar(index)
             plan_output += (
