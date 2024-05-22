@@ -146,6 +146,7 @@ def test_cvrp(method, method_settings, ident, testing, model=None):
     except NameError:
         pass
 
+
 def test_cvrptw(method, method_settings, ident, testing, model=None):
     """ Function for running CVRP testing
     - method - the solution method being applied
