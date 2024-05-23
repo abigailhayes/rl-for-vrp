@@ -1,4 +1,4 @@
-"""Combining the results from the OR tools methods"""
+"""Combining the CVRP results from the OR tools methods"""
 import os
 import json
 
@@ -8,7 +8,7 @@ import pandas as pd
 def main():
     # Read in settings file to get OR tools ids
     settings_df = pd.read_csv('results/settings.csv')
-    or_ids = settings_df[settings_df['method'] == 'ortools']['id'].tolist()
+    or_ids = settings_df[settings_df['method'] == 'ortools'][settings_df['problem'] == 'CVRP']['id'].tolist()
 
     # Load in results for all OR tools experiments
     all_or = {}
