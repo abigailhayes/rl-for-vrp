@@ -43,9 +43,11 @@ def main():
             model = rl4co_run.RL4CO(args['method_settings']['init_method'], args['method_settings']['customers'], args['seed'], ident)
             model.set_model()
             model.train_model()
+            print("Finished training")
 
     # Run tests
     if args['testing'] is not None:
+        print("Testing...")
         if args['problem'] == 'CVRP':
             if args['method'] in ['nazari', 'rl4co']:
                 utils.test_cvrp(args['method'], args['method_settings'], ident, args['testing'], model)

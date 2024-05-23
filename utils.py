@@ -166,17 +166,29 @@ def test_cvrptw(method, method_settings, ident, testing, model=None):
         # Go through all test instances
         if example.endswith('sol'):
             continue
-        data = vrplib.read_instance(f'instances/CVRPTW/Solomon/{example}')
+        data = vrplib.read_instance(f'instances/CVRPTW/Solomon/{example}', instance_format="solomon")
+        data['type'] = 'CVRPTW'
+        data['dimension'] = len(data['demand'])
         if method == 'ortools':
             for tester in testing:
                 data2 = instances_utils.shrink_twinstance(data, tester)
                 model = ORtools(data2, method_settings['init_method'], method_settings['improve_method'])
+                print('model done')
                 try:
                     model.run_all()
+                    print('run all')
+                    results[tester][example] = model.cost
+                    routes[tester][example] = model.routes
                 except AttributeError:
                     continue
-                results[tester][example] = model.cost
-                routes[tester][example] = model.routes
+                except SystemError:
+                    try:
+                        model.no_vehicles = 2*model.no_vehicles
+                        print('run all')
+                        results[tester][example] = model.cost
+                        routes[tester][example] = model.routes
+                    except SystemError:
+                        continue
 
     # Saving results
     with open(f'results/exp_{ident}/results.json', 'w') as f:

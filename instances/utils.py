@@ -17,11 +17,14 @@ def import_twinstance(folder, name):
 
 def shrink_twinstance(instance, size):
     """Deriving the smaller Solomon instances"""
+    size = int(size)
     return {'name': instance['name']+'.'+str(size),
+            'type': 'CVRPTW',
             'vehicles': instance['vehicles'],
             'capacity': instance['capacity'],
             'node_coord': instance['node_coord'][:size+1,],
             'demand': instance['demand'][:size+1,],
             'time_window': instance['time_window'][:size+1,],
             'service_time': instance['service_time'][:size+1,],
-            'edge_weight': instance['edge_weight'][:size+1,:size+1]}
+            'edge_weight': instance['edge_weight'][:size+1,:size+1],
+            'dimension': size+1}
