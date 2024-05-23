@@ -1,4 +1,4 @@
-"""Counting the number of solutions returned in each experiment"""
+"""Counting the number of solutions returned in each CVRP experiment"""
 import json
 import pandas as pd
 
@@ -38,7 +38,7 @@ def main():
 
 
     # Run over new ids
-    targets = [ident for ident in settings_df['id'] if ident not in instances_df['id']]
+    targets = [ident for ident in settings_df[settings_df['problem'] == 'CVRP']['id'] if ident not in instances_df['id']]
     for ident in targets:
         instances_df = pd.concat([instances_df, instance_row(ident)], ignore_index=True)
 

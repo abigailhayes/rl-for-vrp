@@ -26,6 +26,9 @@ class ORtools(utils.VRPInstance):
 
     def __init__(self, instance, init_method, improve_method=None):
         super().__init__(instance)
+        if self.instance['type'] == 'CVRPTW':
+            self.time_window = instance['time_window']
+            self.service_time = instance['service_time']
         self.search_parameters = pywrapcp.DefaultRoutingSearchParameters()
         self.depot = 0
         self.init_method = init_method
@@ -36,7 +39,7 @@ class ORtools(utils.VRPInstance):
             self.method = self.init_method
         random.seed(self.seed)
 
-    def print_solution(self, solution):
+    def print_cvrp_solution(self, solution):
         """Prints solution on console."""
         print(f"Objective: {solution.ObjectiveValue()/1000}")
         total_distance = 0
@@ -68,12 +71,51 @@ class ORtools(utils.VRPInstance):
         print(f"Total distance of all routes: {total_distance}m")
         print(f"Total load of all routes: {total_load}")
 
+    def print_cvrptw_solution(self, solution):
+        """Prints solution on console."""
+        print(f"Objective: {solution.ObjectiveValue()/1000}")
+        time_dimension = self.routing.GetDimensionOrDie("Time")
+        total_time = 0
+        total_load = 0
+        for vehicle_id in range(self.no_vehicles):
+            index = self.routing.Start(vehicle_id)
+            plan_output = f"Route for vehicle {vehicle_id}:\n"
+            route_load = 0
+            route = []
+            while not self.routing.IsEnd(index):
+                time_var = time_dimension.CumulVar(index)
+                route.append(self.manager.IndexToNode(index))
+                route_load += self.demand[self.manager.IndexToNode(index)]
+                plan_output += (
+                    f"{self.manager.IndexToNode(index)}"
+                    f" Time({solution.Min(time_var)},{solution.Max(time_var)})"
+                    " -> "
+                    f"Load of the route: {route_load}\n"
+                )
+                index = solution.Value(self.routing.NextVar(index))
+            time_var = time_dimension.CumulVar(index)
+            plan_output += (
+                f"{self.manager.IndexToNode(index)}"
+                f" Time({solution.Min(time_var)},{solution.Max(time_var)})\n"
+            )
+            plan_output += f"Time of the route: {solution.Min(time_var)}min\n"
+            print(plan_output)
+            total_time += solution.Min(time_var)
+            total_load += route_load
+            route.remove(0)
+            self.routes.append(route)
+        print(f"Total time of all routes: {total_time}min")
+        print(f"Total load of all routes: {total_load}")
+
     def _distance_callback(self, from_index, to_index):
         """Returns the distance between the two nodes."""
         # Convert from routing variable Index to distance matrix NodeIndex.
         from_node = self.manager.IndexToNode(from_index)
         to_node = self.manager.IndexToNode(to_index)
-        return int(self.distance[from_node][to_node]*1000)
+        if self.task == 'CVRP':
+            return int(self.distance[from_node][to_node]*1000)
+        elif self.task == 'CVRPTW':
+            return int(self.distance[from_node][to_node] + self.service_time['to_index']) * 1000
 
     def _demand_callback(self, from_index):
         """Returns the demand of the node."""
@@ -96,6 +138,34 @@ class ORtools(utils.VRPInstance):
         self.routing = pywrapcp.RoutingModel(self.manager)
         # Define cost of each arc
         self.routing.SetArcCostEvaluatorOfAllVehicles(self.routing.RegisterTransitCallback(self._distance_callback))
+        # Adding in time window constraints when appropriate
+        if self.task == 'CVRPTW':
+            time = "Time"
+            self.routing.AddDimension(
+                self.routing.RegisterTransitCallback(self._distance_callback),
+                180,  # allow waiting time
+                int(self.time_window[self.depot][1] - self.time_window[self.depot][0]),  # maximum time per vehicle
+                True,  # Don't force start cumul to zero.
+                time)
+            time_dimension = self.routing.GetDimensionOrDie(time)
+            # Add time window constraints for each location except depot.
+            for location_idx, time_window in enumerate(self.time_window):
+                if location_idx == self.depot:
+                    continue
+                index = self.manager.NodeToIndex(location_idx)
+                time_dimension.CumulVar(index).SetRange(int(time_window[0]), int(time_window[1]))
+            # Add time window constraints for each vehicle start node.
+            depot_idx = self.depot
+            for vehicle_id in range(self.no_vehicles):
+                index = self.routing.Start(vehicle_id)
+                time_dimension.CumulVar(index).SetRange(
+                    int(self.time_window[depot_idx][0]), int(self.time_window[depot_idx][1])
+                )
+            for i in range(self.no_vehicles):
+                self.routing.AddVariableMinimizedByFinalizer(
+                    time_dimension.CumulVar(self.routing.Start(i))
+                )
+                self.routing.AddVariableMinimizedByFinalizer(time_dimension.CumulVar(self.routing.End(i)))
         # Add in capacity limitations
         self.routing.AddDimensionWithVehicleCapacity(
             self.routing.RegisterUnaryTransitCallback(self._demand_callback),
@@ -132,7 +202,10 @@ class ORtools(utils.VRPInstance):
         self.setup()
         self.search_settings()
         solution = self.routing.SolveWithParameters(self.search_parameters)
-        self.print_solution(solution)
+        if self.task == 'CVRP':
+            self.print_cvrp_solution(solution)
+        elif self.task == 'CVRPTW':
+            self.print_cvrptw_solution(solution)
         self.get_cost()
         if self.sol:
             self.compare_cost()

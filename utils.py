@@ -145,3 +145,53 @@ def test_cvrp(method, method_settings, ident, testing, model=None):
             json.dump(routes_b, f, indent=2)
     except NameError:
         pass
+
+
+def test_cvrptw(method, method_settings, ident, testing, model=None):
+    """ Function for running CVRP testing
+    - method - the solution method being applied
+    - method_settings - any additional settings for the method
+    - ident - the experiment id
+    - testing - the testing instances to use, indicated by numbers for the customer size
+    - model - provided for RL methods, after training"""
+    # Set up for saving results
+    results = {}
+    routes = {}
+    for tester in testing:
+        results[tester] = {}
+        routes[tester] = {}
+    # Running testing
+    for example in next(os.walk(f'instances/CVRPTW/Solomon'))[2]:
+        print(example)
+        # Go through all test instances
+        if example.endswith('sol'):
+            continue
+        data = vrplib.read_instance(f'instances/CVRPTW/Solomon/{example}', instance_format="solomon")
+        data['type'] = 'CVRPTW'
+        data['dimension'] = len(data['demand'])
+        if method == 'ortools':
+            for tester in testing:
+                data2 = instances_utils.shrink_twinstance(data, tester)
+                model = ORtools(data2, method_settings['init_method'], method_settings['improve_method'])
+                print('model done')
+                try:
+                    model.run_all()
+                    print('run all')
+                    results[tester][example] = model.cost
+                    routes[tester][example] = model.routes
+                except AttributeError:
+                    continue
+                except SystemError:
+                    try:
+                        model.no_vehicles = 2*model.no_vehicles
+                        print('run all')
+                        results[tester][example] = model.cost
+                        routes[tester][example] = model.routes
+                    except SystemError:
+                        continue
+
+    # Saving results
+    with open(f'results/exp_{ident}/results.json', 'w') as f:
+        json.dump(results, f, indent=2)
+    with open(f'results/exp_{ident}/routes.json', 'w') as f:
+        json.dump(routes, f, indent=2)
