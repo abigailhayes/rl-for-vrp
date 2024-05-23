@@ -2,7 +2,7 @@ import torch
 from einops import repeat
 from math import ceil
 
-from rl4co.envs import CVRPEnv
+from rl4co.envs import CVRPEnv, CVRPTWEnv
 from rl4co.models import AttentionModel, AMPPO, SymNCO, POMO, MDAM, DeepACO
 from rl4co.utils import RL4COTrainer
 from lightning.pytorch import seed_everything
@@ -13,7 +13,7 @@ import methods.utils as utils
 class RL4CO:
     """A class for implementing the methods included in RL4CO on a VRP instance."""
 
-    def __init__(self, init_method, customers, seed, ident):
+    def __init__(self, problem, init_method, customers, seed, ident):
         self.routes = None
         self.cost = None
         self.trainer = None
@@ -22,7 +22,10 @@ class RL4CO:
         seed_everything(seed, workers=True)
         self.init_method = init_method
         self.customers = customers
-        self.env = CVRPEnv(num_loc=self.customers)
+        if problem == 'CVRP':
+            self.env = CVRPEnv(num_loc=self.customers)
+        elif problem =='CVRPTW':
+            self.env = CVRPTWEnv(num_loc=self.customers)
 
     def set_model(self):
         if self.init_method == 'am':
