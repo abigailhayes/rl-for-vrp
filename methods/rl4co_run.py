@@ -21,12 +21,12 @@ class RL4CO:
         self.ident = ident
         seed_everything(seed, workers=True)
         self.init_method = init_method
-        self.customers = customers
+        self.customers = int(customers)
         self.problem = problem
         if self.problem == "CVRP":
-            self.env = CVRPEnv(generator_params={'num_loc':self.customers})
+            self.env = CVRPEnv(num_loc=self.customers)
         elif self.problem == "CVRPTW":
-            self.env = CVRPTWEnv(generator_params={'num_loc':self.customers})
+            self.env = CVRPTWEnv(generator_params={'num_loc': self.customers})
 
     def set_model(self):
         if self.init_method == "am":
