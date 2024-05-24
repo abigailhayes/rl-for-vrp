@@ -32,7 +32,7 @@ class RL4CO:
         if self.init_method == "am":
             self.model = AttentionModel(
                 self.env,
-                train_data_size=20_000,
+                train_data_size=250_000,
                 test_data_size=10_000,
                 optimizer_kwargs={"lr": 1e-4},
             )
@@ -76,7 +76,7 @@ class RL4CO:
         if self.init_method == "deepaco":
             epochs = 1
         else:
-            epochs = 1
+            epochs = 100
             # Currently ignoring POMO instructions for 2000 epochs
         trainer_kwargs = {
             "accelerator": "auto",
