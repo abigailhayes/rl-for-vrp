@@ -24,15 +24,15 @@ class RL4CO:
         self.customers = customers
         self.problem = problem
         if self.problem == "CVRP":
-            self.env = CVRPEnv(num_loc=self.customers)
+            self.env = CVRPEnv(generator_params={'num_loc':self.customers})
         elif self.problem == "CVRPTW":
-            self.env = CVRPTWEnv(num_loc=self.customers)
+            self.env = CVRPTWEnv(generator_params={'num_loc':self.customers})
 
     def set_model(self):
         if self.init_method == "am":
             self.model = AttentionModel(
                 self.env,
-                train_data_size=250_000,
+                train_data_size=20_000,
                 test_data_size=10_000,
                 optimizer_kwargs={"lr": 1e-4},
             )
@@ -76,7 +76,7 @@ class RL4CO:
         if self.init_method == "deepaco":
             epochs = 1
         else:
-            epochs = 100
+            epochs = 1
             # Currently ignoring POMO instructions for 2000 epochs
         trainer_kwargs = {
             "accelerator": "auto",
@@ -97,7 +97,7 @@ class RL4CO:
         coord_scaled = torch.stack([x_scaled, y_scaled], dim=1)
         return coord_scaled
 
-    def routing(self):
+    def routing(self, out):
         # Routing
         self.routes = []
         current = []
@@ -117,8 +117,8 @@ class RL4CO:
         demand = torch.tensor(instance["demand"][1:]).float()
         capacity = instance["capacity"]
         if self.problem == "CVRPTW":
-            durations = torch.tensor(instance["service_time"][1:]).float()
-            time_windows = torch.tensor(instance["time_window"][1:]).float()
+            durations = torch.tensor(instance["service_time"]).float()
+            time_windows = torch.tensor(instance["time_window"]).float()
         n = coords.shape[0]
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         policy = self.model.policy
@@ -132,7 +132,7 @@ class RL4CO:
         td["visited"] = torch.zeros((batch_size, 1, n), dtype=torch.uint8)
         if self.problem == "CVRPTW":
             td["durations"] = repeat(durations, "n -> b n", b=batch_size)
-            td["time_windows"] = repeat(time_windows, "n -> b n d", b=batch_size, d=2)
+            td["time_windows"] = repeat(time_windows, "n d -> b n d", b=batch_size, d=2)
         action_mask = torch.ones(batch_size, n, dtype=torch.bool)
         action_mask[:, 0] = False
         td["action_mask"] = action_mask
@@ -146,4 +146,4 @@ class RL4CO:
         neg_reward = self.env.get_reward(td, out["actions"])
         self.cost = ceil(-1 * neg_reward[0].item())
 
-        self.routing()
+        self.routing(out)

@@ -34,16 +34,15 @@ def main():
     random.seed(args['seed'])  # May need to look at more
 
     # Set up/train model (and save where appropriate)
-    if args['problem'] == 'CVRP':
-        if args['method'] == 'nazari':
-            model = nazari.Nazari(ident, task=args['method_settings']['task'])
-            model.train_model()
-            print("Finished training")
-        elif args['method'] == 'rl4co':
-            model = rl4co_run.RL4CO(args['method_settings']['init_method'], args['method_settings']['customers'], args['seed'], ident)
-            model.set_model()
-            model.train_model()
-            print("Finished training")
+    if args['method'] == 'nazari':
+        model = nazari.Nazari(ident, task=args['method_settings']['task'])
+        model.train_model()
+        print("Finished training")
+    elif args['method'] == 'rl4co':
+        model = rl4co_run.RL4CO(args['problem'], args['method_settings']['init_method'], args['method_settings']['customers'], args['seed'], ident)
+        model.set_model()
+        model.train_model()
+        print("Finished training")
 
     # Run tests
     if args['testing'] is not None:
