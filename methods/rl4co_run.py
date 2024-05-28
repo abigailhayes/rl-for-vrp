@@ -76,10 +76,10 @@ class RL4CO:
         if self.init_method == "deepaco":
             epochs = 1
         else:
-            epochs = 100
+            epochs = 20
             # Currently ignoring POMO instructions for 2000 epochs
         trainer_kwargs = {
-            "accelerator": "auto",
+            "accelerator": "gpu",
             "default_root_dir": f"results/exp_{self.ident}",
         }
         self.trainer = RL4COTrainer(max_epochs=epochs, **trainer_kwargs)
