@@ -76,7 +76,7 @@ class RL4CO:
         if self.init_method == "deepaco":
             epochs = 1
         else:
-            epochs = 20
+            epochs = 50
             # Currently ignoring POMO instructions for 2000 epochs
         trainer_kwargs = {
             "accelerator": "auto",
