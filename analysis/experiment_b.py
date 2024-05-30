@@ -1,6 +1,8 @@
 import json
 import pandas as pd
 
+from analysis.utils import add_settings
+
 
 def check_instances(table, col_name: str):
     """Boolean indication of whether the full instance set is evaluated, returned as float"""
@@ -26,7 +28,7 @@ def b_all_averages():
     )
     include = include.drop(index=0, axis=0)
     for column_name in list(include):
-        include[column_name] = check_instances(column_name)
+        include[column_name] = check_instances(include, column_name)
     include["id"] = instance_count["id"]
     include["notes"] = instance_count["notes"]
 
@@ -46,8 +48,27 @@ def b_all_averages():
     include.to_csv("results/expt_b_means.csv", index=False)
 
 
+def size_table(size):
+    """Look at instance sets of a specific size"""
+    # Read in data
+    dist_means = pd.read_csv("results/expt_b_means.csv")
+    # Select columns for the relevant size
+    col_names = [col for col in [col for col in list(dist_means) if len(col.split('-')) > 1] if col.split('-')[1] == str(size)]
+    output = dist_means[col_names+['id', 'notes']]
+
+    # Filter to only the rows with results
+    output = output[output[col_names].sum(axis=1) > 0]
+    output = add_settings(output)
+
+    # Save
+    output.to_csv(f"results/expt_b_{size}.csv", index=False)
+
+
 def main():
     b_all_averages()
+    for size in [10, 20, 50, 100]:
+        size_table(size)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
