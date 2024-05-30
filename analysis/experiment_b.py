@@ -32,8 +32,6 @@ def b_all_averages():
 
     # Now go through and get averages
     for index, row in include.iterrows():
-        if row["id"] > 10:  # FOR TESTING
-            continue
         with open(f'results/exp_{row["id"]}/results_b.json') as json_data:
             data = json.load(json_data)
         if pd.isna(row["notes"]):
