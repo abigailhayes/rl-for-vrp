@@ -50,9 +50,9 @@ def main():
     targets = [
         ident
         for ident in settings_df[settings_df["problem"] == "CVRP"]["id"]
-        if ident not in instances_df["id"]
+        if ident not in list(instances_df["id"])
     ]
-    targets = [1, 2]
+
     for ident in targets:
         instances_df = pd.concat([instances_df, instance_row(ident)], ignore_index=True)
 
