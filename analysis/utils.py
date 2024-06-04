@@ -15,6 +15,12 @@ def add_settings(df):
     return output
 
 
+def check_instances(table, col_name: str):
+    """Boolean indication of whether the full instance set is evaluated, returned as float"""
+    output = table[col_name] == max(table[col_name])
+    return output * 1.0
+
+
 def baseline_optima(save=False):
     """Calculate the optima for all the example solutions, using the provided route. This differs slightly from the
     distance provided in the solution."""

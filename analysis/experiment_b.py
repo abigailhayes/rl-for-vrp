@@ -1,13 +1,7 @@
 import json
 import pandas as pd
 
-from analysis.utils import add_settings
-
-
-def check_instances(table, col_name: str):
-    """Boolean indication of whether the full instance set is evaluated, returned as float"""
-    output = table[col_name] == max(table[col_name])
-    return output * 1.0
+from analysis.utils import add_settings, check_instances
 
 
 def average_distance(folder_dict: dict):
