@@ -2,10 +2,12 @@
 
 import json
 
+from statistics import mean
+
 import analysis.utils as analysis_utils
 
 
-def compare_optimum(exp_filepath):
+def a_compare_optimum(exp_filepath):
     """Compare a results file to the optimal baseline solutions."""
     # Load in data
     optima = analysis_utils.baseline_optima()
@@ -37,3 +39,11 @@ def compare_optimum(exp_filepath):
                 pass
 
     return comparison
+
+
+def a_avg_compare(compare_dict):
+    """Average the results for each instance set"""
+    output = {}
+    for key in compare_dict:
+        output[key] = mean(compare_dict[key].values())
+    return output
