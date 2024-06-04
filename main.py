@@ -17,7 +17,7 @@ def main():
     args = utils.parse_experiment()
 
     # Looking at current ids in use as folders
-    id_list = [int(str.replace(item, 'exp_', '')) for item in os.listdir('results') if 'exp' in item]
+    id_list = [int(str.replace(item, 'exp_', '')) for item in os.listdir('results') if 'exp_' in item]
 
     # Determine ID of this run
     if len(id_list) == 0:
