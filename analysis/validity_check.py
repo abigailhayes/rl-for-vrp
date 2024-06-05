@@ -3,7 +3,7 @@
 import json
 import pandas as pd
 
-from analysis.utils import validate_experiment, validate_dict
+from analysis.utils import validate_dict
 
 
 def main():
@@ -43,7 +43,7 @@ def main():
                         data = json.load(json_data)
                     for key in data:
                         output[key] = validate_dict(data[key], key)
-                except ValueError:
+                except (ValueError, OSError):
                     pass
             return pd.DataFrame.from_dict([output])
 
