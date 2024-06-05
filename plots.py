@@ -4,9 +4,17 @@ import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
 import vrplib
+import json
 
-# data = instances_utils.import_instance('instances/CVRP/A', 'A-n80-k10')
-data = vrplib.read_instance(f'instances/clusters-random-50-100-15-1.vrp')
+with open("results/exp_34/routes_b.json") as json_data:
+    route_file = json.load(json_data)
+with open("results/exp_34/results_b.json") as json_data:
+    cost_file = json.load(json_data)
+
+data = {}
+data['instance'] = vrplib.read_instance(f'instances/CVRP/generate/cluster_centre-10-30-100-42/clusters-centre-10-100-30-0.vrp')
+data['solution'] = {'routes': [route for route in route_file['cluster_centre-10-30-100-42']['clusters-centre-10-100-30-0.vrp'] if len(route)>0],
+                    'cost': cost_file['cluster_centre-10-30-100-42']['clusters-centre-10-100-30-0.vrp']}
 
 
 def plot_solution(instance, solution, name="CVRP solution", demand=False):
@@ -64,5 +72,6 @@ def plot_instance(instance, name="CVRP instance", demand=False):
             plt.text(xi, yi, instance['demand'][n], va='bottom', ha='center')
 
 
-plot_solution(data['instance'], data['solution'], name="Best known solution")
+
 plot_instance(data)
+plot_solution(data['instance'], data['solution'], name="Best known solution")
