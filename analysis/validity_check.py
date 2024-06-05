@@ -49,7 +49,6 @@ def main():
 
         # Run over new ids
     targets = [ident for ident in settings_df[settings_df["problem"] == "CVRP"]["id"] if ident not in list(valid_df["id"])]
-    targets = [1,2]
 
     for ident in targets:
         valid_df = pd.concat(
