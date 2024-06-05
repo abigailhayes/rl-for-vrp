@@ -11,7 +11,7 @@ import instances.utils as instance_utils
 def add_settings(df):
     """Add setting information to a dataframe"""
     settings_df = pd.read_csv("results/settings.csv")
-    output = pd.merge(df, settings_df, on='id', how='left')
+    output = pd.merge(df, settings_df, on="id", how="left")
     return output
 
 
@@ -65,34 +65,14 @@ def validate_routes(routes, demand, capacity):
     return 1
 
 
-def validate_experiment(ident):
-    """Carry out validation checks on all of the results for an experiment"""
-    options = ["a", "b"]
-    paths = {"a": "instances/CVRP", "b": "instances/CVRP/generate"}
-    for option in options:
-        # Run separately for each of a and b
-        output = {}
-        with open(f"results/exp_{ident}/routes_{option}.json") as json_data:
-            routes = json.load(json_data)
-        for test_set in routes:
-            output[test_set] = {}
-            if "greedy" in routes[test_set]:
-                # Procedure for Nazari results
-                splits = ["greedy", "beam"]
-                for split in splits:
-                    if len(routes[test_set][split]) > 0:
-                        # Check there are results, and then run through them
-                        output[test_set][split] = {}
-                        for instance in routes[test_set][split]:
-                            # Load instance and run validity check
-                            data = vrplib.read_instance(
-                                f"{paths[option]}/{test_set}/{instance}"
-                            )
-                            output[test_set][split][instance] = validate_routes(
-                                routes[test_set][split][instance],
-                                data["demand"],
-                                data["capacity"],
-                            )
-        # Save results
-        with open(f"results/exp_{ident}/validity_{option}.json", "w") as f:
-            json.dump(output, f, indent=2)
+def validate_dict(route_dict, test_set):
+    """Check the validity of a route dictionary for a particular folder of instances"""
+    output = 0
+    if len(test_set) > 5:
+        # Catching when the instances are from generate
+        test_set = f"generate/{test_set}"
+    for key in route_dict:
+        routes = route_dict[key]
+        data = vrplib.read_instance(f"instances/CVRP/{test_set}/{key}")
+        output += validate_routes(routes, data["demand"], data["capacity"])
+    return output
