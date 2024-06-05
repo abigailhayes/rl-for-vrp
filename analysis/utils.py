@@ -55,13 +55,11 @@ def validate_routes(routes, demand, capacity):
 
     # Check that all nodes are visited once
     if len(set([i for j in routes for i in j])) != len(demand) - 1:
-        print("Incorrect number of visited nodes")
         return 0
 
     # Check that capacity is not exceeded
     for route in routes:
         if sum(demand[route]) > capacity:
-            print("Exceeds capacity")
             return 0
 
     return 1
