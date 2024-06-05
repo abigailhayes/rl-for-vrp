@@ -88,7 +88,7 @@ def validate_experiment(ident):
                         for instance in routes[test_set][split]:
                             # Load instance and run validity check
                             data = vrplib.read_instance(
-                                f"{paths[option]}/{instance}.vrp"
+                                f"{paths[option]}/{test_set}/{instance}"
                             )
                             output[test_set][split][instance] = validate_routes(
                                 routes[test_set][split][instance],
