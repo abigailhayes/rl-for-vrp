@@ -12,9 +12,12 @@ def average_distance(folder_dict: dict):
     return sum(output) / len(output)
 
 
-def b_all_averages():
+def b_all_averages(validated=True):
     """Get the averages for all experiment B instance types"""
-    instance_count = pd.read_csv("results/instance_count.csv")
+    if validated == True:
+        instance_count = pd.read_csv("results/validate_count.csv")
+    else:
+        instance_count = pd.read_csv("results/instance_count.csv")
 
     # Get a dataframe showing where averages should be taken
     include = instance_count.drop(
@@ -39,7 +42,9 @@ def b_all_averages():
             elif row["notes"] in ["greedy", "beam"]:
                 for key in data:
                     if row[key] == 1:
-                        include.loc[index, key] = average_distance(data[key][row["notes"]])
+                        include.loc[index, key] = average_distance(
+                            data[key][row["notes"]]
+                        )
         except ValueError:
             # When none of the Expt B tests have been run
             pass
@@ -52,8 +57,12 @@ def size_table(size):
     # Read in data
     dist_means = pd.read_csv("results/expt_b_means.csv")
     # Select columns for the relevant size
-    col_names = [col for col in [col for col in list(dist_means) if len(col.split('-')) > 1] if col.split('-')[1] == str(size)]
-    output = dist_means[col_names+['id', 'notes']]
+    col_names = [
+        col
+        for col in [col for col in list(dist_means) if len(col.split("-")) > 1]
+        if col.split("-")[1] == str(size)
+    ]
+    output = dist_means[col_names + ["id", "notes"]]
 
     # Filter to only the rows with results
     output = output[output[col_names].sum(axis=1) > 0]
