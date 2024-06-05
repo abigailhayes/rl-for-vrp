@@ -77,7 +77,6 @@ def a_all_averages():
             if pd.isna(row["notes"]):
                 for key in data:
                     if row[key] == 1:
-                        print(index, row)
                         include.loc[index, key] = a_avg_compare(data[key], key)
             elif row["notes"] in ["greedy", "beam"]:
                 for key in data:
@@ -87,4 +86,4 @@ def a_all_averages():
             # When none of the Expt A tests have been run
             pass
 
-    include.to_csv("results/expt_b_means.csv", index=False)
+    include.to_csv("results/expt_a_means.csv", index=False)
