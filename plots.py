@@ -1,5 +1,3 @@
-import instances.utils as instances_utils
-
 import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
@@ -125,8 +123,3 @@ def generate_plots(expt, expt_ids: list, instance_name, instance_set, demand=Fal
             plot_solution(instance, solution, short_name, expt_id, demand)
         except (OSError, KeyError):
             pass
-
-
-generate_plots(
-    "b", [1, 2, 4], "clusters-centre-20-100-30-0.vrp", "cluster_centre-20-30-100-42"
-)
