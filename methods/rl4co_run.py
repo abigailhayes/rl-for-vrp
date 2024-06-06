@@ -39,7 +39,7 @@ class RL4CO:
         elif self.init_method == "amppo":
             self.model = AMPPO(
                 self.env,
-                train_data_size=250_000,
+                train_data_size=200_000,
                 test_data_size=10_000,
                 optimizer_kwargs={"lr": 1e-4},
             )
@@ -75,8 +75,10 @@ class RL4CO:
     def train_model(self):
         if self.init_method == "deepaco":
             epochs = 1
+        elif self.init_method == "amppo":
+            epochs = 10
         else:
-            epochs = 50
+            epochs = 20
             # Currently ignoring POMO instructions for 2000 epochs
         trainer_kwargs = {
             "accelerator": "auto",

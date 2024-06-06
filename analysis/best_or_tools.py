@@ -27,7 +27,6 @@ def main():
         except ValueError:
             pass
         if os.path.isfile(f'results/exp_{ident}/routes_b.json'):
-            no_b = False
             try:
                 with open(f'results/exp_{ident}/results_b.json') as json_data:
                     all_or[ident]['b'] = json.load(json_data)
@@ -38,8 +37,6 @@ def main():
                     routes_or[ident]['b'] = json.load(json_data)
             except ValueError:
                 pass
-        else:
-            no_b=True
 
     # Find best solution
     # Test set A
@@ -62,12 +59,12 @@ def main():
 
     # Test set B
     output_b = {}
-    if no_b == False:
-        for subdir in next(os.walk('instances/CVRP/generate'))[1]:
-            output_b[subdir] = {}
-            for example in next(os.walk(f'instances/CVRP/generate/{subdir}'))[2]:
-                output_b[subdir][example] = {}
-                for ident in or_ids:
+    for subdir in next(os.walk('instances/CVRP/generate'))[1]:
+        output_b[subdir] = {}
+        for example in next(os.walk(f'instances/CVRP/generate/{subdir}'))[2]:
+            output_b[subdir][example] = {}
+            for ident in or_ids:
+                try:
                     value = all_or[ident]['b'][subdir].get(example)
                     if value is None:
                         continue
@@ -75,6 +72,8 @@ def main():
                         output_b[subdir][example]['value'] = value
                         output_b[subdir][example]['id'] = ident
                         output_b[subdir][example]['route'] = routes_or[ident]['b'][subdir][example]
+                except KeyError:
+                    pass
 
     # Save result
     with open(f'results/or_results_a.json', 'w') as f:
