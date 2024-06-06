@@ -78,17 +78,27 @@ def plot_instance(instance, name, demand=False):
 
 
 def generate_plots(expt, expt_ids: list, instance_name, instance_set, demand=False):
+    """Generates a set of plots for a particular instance
+    - expt - the id for the overall experiment e.g. a or b
+    - expt_ids - the experiment run solutions to include
+    - instance_name - the specific name of the instance
+    - instance_set - the set the instance belongs to i.e. the next level folder
+    - demand - whether or not to include the demand of each node in the plot"""
 
+    # Remove .vrp
     short_name = instance_name.replace(".vrp", "")
 
+    # Create an instance specific folder
     if not os.path.exists(f"plots/{short_name}"):
         os.makedirs(f"plots/{short_name}")
 
+    # Make sure the folder path is complete
     if expt == "b":
         instance_folder = f"generate/{instance_set}"
     elif expt == "a":
         instance_folder = instance_set
 
+    # Plot the instance without routes, and the optimal solution if available
     instance = vrplib.read_instance(f"instances/CVRP/{instance_folder}/{instance_name}")
     plot_instance(instance, short_name, demand)
     if expt == "a":
@@ -97,22 +107,26 @@ def generate_plots(expt, expt_ids: list, instance_name, instance_set, demand=Fal
         )
         plot_solution(instance, solution, short_name, "optimum", demand)
 
+    # A solution plot for each experiment id
     for expt_id in expt_ids:
-        with open(f"results/exp_{expt_id}/routes_{expt}.json") as json_data:
-            route_file = json.load(json_data)
-        with open(f"results/exp_{expt_id}/results_{expt}.json") as json_data:
-            cost_file = json.load(json_data)
-        solution = {
-            "routes": [
-                route
-                for route in route_file[instance_set][instance_name]
-                if len(route) > 0
-            ],
-            "cost": cost_file[instance_set][instance_name],
-        }
-        plot_solution(instance, solution, short_name, expt_id, demand)
+        try:
+            with open(f"results/exp_{expt_id}/routes_{expt}.json") as json_data:
+                route_file = json.load(json_data)
+            with open(f"results/exp_{expt_id}/results_{expt}.json") as json_data:
+                cost_file = json.load(json_data)
+            solution = {
+                "routes": [
+                    route
+                    for route in route_file[instance_set][instance_name]
+                    if len(route) > 0
+                ],
+                "cost": cost_file[instance_set][instance_name],
+            }
+            plot_solution(instance, solution, short_name, expt_id, demand)
+        except (OSError, KeyError):
+            pass
 
 
 generate_plots(
-    "b", [1, 2], "clusters-centre-20-100-30-0.vrp", "cluster_centre-20-30-100-42"
+    "b", [1, 2, 4], "clusters-centre-20-100-30-0.vrp", "cluster_centre-20-30-100-42"
 )
