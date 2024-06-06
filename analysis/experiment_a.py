@@ -53,13 +53,18 @@ def a_avg_compare(compare_dict, test_set):
     optima = baseline_optima()
     output = []
     for key in compare_dict:
-        output.append((compare_dict[key] - optima[test_set][key]) / optima[test_set][key])
+        output.append(
+            (compare_dict[key] - optima[test_set][key]) / optima[test_set][key]
+        )
     return mean(output)
 
 
-def a_all_averages():
+def a_all_averages(validated=True):
     """Get the averages for all experiment A instance types"""
-    instance_count = pd.read_csv("results/instance_count.csv")
+    if validated == True:
+        instance_count = pd.read_csv("results/validate_count.csv")
+    else:
+        instance_count = pd.read_csv("results/instance_count.csv")
 
     # Get a dataframe showing where averages should be taken
     include = instance_count[["A", "B", "E", "F", "M", "P", "CMT"]]
@@ -71,6 +76,7 @@ def a_all_averages():
 
     # Now go through and get averages
     for index, row in include.iterrows():
+        print(row["id"])
         try:
             with open(f'results/exp_{row["id"]}/results_a.json') as json_data:
                 data = json.load(json_data)
@@ -81,7 +87,9 @@ def a_all_averages():
             elif row["notes"] in ["greedy", "beam"]:
                 for key in data:
                     if row[key] == 1:
-                        include.loc[index, key] = a_avg_compare(data[key][row["notes"]], key)
+                        include.loc[index, key] = a_avg_compare(
+                            data[key][row["notes"]], key
+                        )
         except ValueError:
             # When none of the Expt A tests have been run
             pass
