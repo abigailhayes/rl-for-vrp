@@ -53,6 +53,8 @@ def a_avg_compare(compare_dict, test_set):
     """Average the results for each instance set"""
     with open("instances/expt_a_solns.json") as json_data:
         optima = json.load(json_data)
+    if test_set == 'CMT':
+        compare_dict = {key: compare_dict[key] for key in ['CMT1.vrp', 'CMT2.vrp', 'CMT3.vrp', 'CMT4.vrp', 'CMT5.vrp', 'CMT11.vrp', 'CMT12.vrp']}
     output = []
     for key in compare_dict:
         output.append(
