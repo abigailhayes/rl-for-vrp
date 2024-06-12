@@ -8,6 +8,8 @@ def main():
     # Load in current counts
     settings_df = pd.read_csv("results/settings.csv")
     instances_df = pd.read_csv("results/instance_count.csv")
+    instances_df_tw = pd.read_csv("results/instance_count_tw.csv")
+    # results[test][example]
 
     # Update dataframe
     def instance_row(ident):
@@ -46,7 +48,19 @@ def main():
                     pass
             return pd.DataFrame.from_dict([output])
 
-    # Run over new ids
+    def instance_row_tw(ident):
+        """Same as for instance_row, but for CVRPTW instances"""
+        output = {"id": ident}
+        try:
+            with open(f"results/exp_{ident}/results_c.json") as json_data:
+                data = json.load(json_data)
+            for key in data:
+                output[key] = len(data[key])
+        except ValueError:
+            pass
+        return pd.DataFrame.from_dict([output])
+
+    # Run over new ids for CVRP
     targets = [
         ident
         for ident in settings_df[settings_df["problem"] == "CVRP"]["id"]
@@ -56,8 +70,21 @@ def main():
     for ident in targets:
         instances_df = pd.concat([instances_df, instance_row(ident)], ignore_index=True)
 
+    # And for CVRPTW
+    targets = [
+        ident
+        for ident in settings_df[settings_df["problem"] == "CVRPTW"]["id"]
+        if ident not in list(instances_df["id"])
+    ]
+
+    for ident in targets:
+        instances_df_tw = pd.concat(
+            [instances_df_tw, instance_row_tw(ident)], ignore_index=True
+        )
+
     # Save output
     instances_df.to_csv("results/instance_count.csv", index=False)
+    instances_df_tw.to_csv("results/instance_count_tw.csv", index=False)
 
 
 if __name__ == "__main__":
