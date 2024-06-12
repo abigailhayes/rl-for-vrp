@@ -44,14 +44,14 @@ class RL4CO:
         elif self.init_method == "symnco":
             self.model = SymNCO(
                 self.env,
-                train_data_size=250_000,
+                train_data_size=150_000, # Was 250_000
                 test_data_size=10_000,
                 optimizer_kwargs={"lr": 1e-4},
             )
         elif self.init_method == "pomo":
             self.model = POMO(
                 self.env,
-                train_data_size=100_000,
+                train_data_size=80_000, # Was 100_000
                 test_data_size=10_000,
                 optimizer_kwargs={"lr": 1e-4},
             )
@@ -73,7 +73,7 @@ class RL4CO:
     def train_model(self):
         if self.init_method == "deepaco":
             epochs = 1
-        elif self.init_method == "amppo":
+        elif self.init_method in ["amppo", "symnco", "pomo"]:
             epochs = 10
         else:
             epochs = 20
