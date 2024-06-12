@@ -52,7 +52,7 @@ def main():
         """Same as for instance_row, but for CVRPTW instances"""
         output = {"id": ident}
         try:
-            with open(f"results/exp_{ident}/results_c.json") as json_data:
+            with open(f"results/exp_{ident}/results.json") as json_data:
                 data = json.load(json_data)
             for key in data:
                 output[key] = len(data[key])
