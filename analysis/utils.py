@@ -76,3 +76,11 @@ def validate_dict(route_dict, test_set):
         data = vrplib.read_instance(f"instances/CVRP/{test_set}/{key}")
         output += validate_routes(routes, data["demand"], data["capacity"])
     return output
+
+
+def average_distance(folder_dict: dict):
+    """Given a dictionary with entries for each instance, takes the mean of the values"""
+    output = []
+    for key in folder_dict:
+        output.append(folder_dict[key])
+    return sum(output) / len(output)
