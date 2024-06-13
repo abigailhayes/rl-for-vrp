@@ -49,13 +49,15 @@ def main():
             return pd.DataFrame.from_dict([output])
 
     def instance_row_tw(ident):
-        """Same as for instance_row, but for CVRPTW instances"""
+        """Count the instances for a given id for CVRPTW"""
         output = {"id": ident}
         try:
             with open(f"results/exp_{ident}/results.json") as json_data:
                 data = json.load(json_data)
             for key in data:
-                output[key] = len(data[key])
+                for variant in ['RC1', 'RC2', 'R1', 'R2', 'C1', 'C2']:
+                    new_key = variant + "_" + str(key)
+                    output[new_key] = sum([1 for instance in data[key].keys() if instance.startswith(variant)])
         except ValueError:
             pass
         return pd.DataFrame.from_dict([output])
