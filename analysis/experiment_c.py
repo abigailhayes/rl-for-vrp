@@ -6,6 +6,12 @@ import pandas as pd
 from analysis.utils import average_distance, check_instances
 
 
+def average_distance_tw(subdict, variant):
+    temp_dict = {k: v for k, v in subdict.items() if k.startswith(variant)}
+    output = average_distance(temp_dict)
+    return output
+
+
 def c_all_averages(validated=False):
     """Get the averages for all experiment C instance types"""
     if validated:  # No validation set up yet
@@ -30,10 +36,12 @@ def c_all_averages(validated=False):
             with open(f'results/exp_{row["id"]}/results.json') as json_data:
                 data = json.load(json_data)
             for key in data:
-                if row[key] == 1:
-                    include.loc[index, key] = average_distance(data[key])
+                for variant in ['RC1', 'RC2', 'R1', 'R2', 'C1', 'C2']:
+                    new_key = variant + "_" + str(key)
+                    if row[new_key] == 1:
+                        include.loc[index, new_key] = average_distance_tw(data[key], variant)
         except ValueError:
-            # When none of the Expt B tests have been run
+            # When none of the Expt C tests have been run
             pass
 
     include.to_csv("results/expt_c_means.csv", index=False)
