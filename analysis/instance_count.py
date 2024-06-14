@@ -76,7 +76,7 @@ def main():
     targets = [
         ident
         for ident in settings_df[settings_df["problem"] == "CVRPTW"]["id"]
-        if ident not in list(instances_df["id"])
+        if ident not in list(instances_df_tw["id"])
     ]
 
     for ident in targets:
