@@ -57,7 +57,7 @@ def main():
             for key in data:
                 for variant in ['RC1', 'RC2', 'R1', 'R2', 'C1', 'C2']:
                     new_key = variant + "_" + str(key)
-                    output[new_key] = sum([1 for instance in data[key].keys() if instance.startswith(variant)])
+                    output[new_key] = sum([1 for instance in data[key].keys() if (instance.startswith(variant) and data[key][instance] is not None)])
         except ValueError:
             pass
         return pd.DataFrame.from_dict([output])
