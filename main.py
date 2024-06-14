@@ -4,6 +4,7 @@ from methods.or_tools import ORtools
 import methods.nazari.nazari as nazari
 import methods.rl4co_run as rl4co_run
 import utils
+from rl4co_cost_fix import cost_fix
 
 import os
 import random
@@ -48,8 +49,11 @@ def main():
     if args['testing'] is not None:
         print("Testing...")
         if args['problem'] == 'CVRP':
-            if args['method'] in ['nazari', 'rl4co']:
+            if args['method'] == 'nazari':
                 utils.test_cvrp(args['method'], args['method_settings'], ident, args['testing'], model)
+            elif args['method'] == 'rl4co':
+                utils.test_cvrp(args['method'], args['method_settings'], ident, args['testing'], model)
+                cost_fix(ident)
             elif args['method'] == 'ortools':
                 utils.test_cvrp(args['method'], args['method_settings'], ident, args['testing'])
         elif args['problem'] == 'CVRPTW':
