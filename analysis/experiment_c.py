@@ -20,10 +20,7 @@ def c_all_averages(validated=False):
         instance_count = pd.read_csv("results/instance_count_tw.csv")
 
     # Get a dataframe showing where averages should be taken
-    include = instance_count.drop(
-        ["id", "notes"], axis=1
-    )
-    include = include.drop(index=0, axis=0)
+    include = instance_count.drop(["id", "notes"], axis=1)
     for column_name in list(include):
         include[column_name] = check_instances(include, column_name)
     include["id"] = instance_count["id"]
@@ -31,15 +28,19 @@ def c_all_averages(validated=False):
 
     # Now go through and get averages
     for index, row in include.iterrows():
-        print(row["id"])
+        print(int(row["id"]))
+        if int(row["id"]) == 0:
+            continue
         try:
-            with open(f'results/exp_{row["id"]}/results.json') as json_data:
+            with open(f'results/exp_{int(row["id"])}/results.json') as json_data:
                 data = json.load(json_data)
             for key in data:
-                for variant in ['RC1', 'RC2', 'R1', 'R2', 'C1', 'C2']:
+                for variant in ["RC1", "RC2", "R1", "R2", "C1", "C2"]:
                     new_key = variant + "_" + str(key)
                     if row[new_key] == 1:
-                        include.loc[index, new_key] = average_distance_tw(data[key], variant)
+                        include.loc[index, new_key] = average_distance_tw(
+                            data[key], variant
+                        )
         except ValueError:
             # When none of the Expt C tests have been run
             pass

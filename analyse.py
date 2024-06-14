@@ -2,6 +2,7 @@ import analysis.validity_check as vc
 import analysis.instance_count as ic
 import analysis.experiment_a as expt_a
 import analysis.experiment_b as expt_b
+import analysis.experiment_c as expt_c
 
 
 def main():
@@ -28,6 +29,10 @@ def main():
         expt_b.size_table(size)
     print("Complete")
     print("*****")
+
+    print("Expt C - all averages")
+    expt_c.c_all_averages()
+    print("Complete")
 
 
 if __name__ == "__main__":
