@@ -73,7 +73,7 @@ class RL4CO:
     def train_model(self):
         if self.init_method == "deepaco":
             epochs = 1
-        elif self.init_method in ["amppo", "symnco", "pomo"]:
+        elif self.init_method in ["amppo", "symnco", "pomo", "mdam"]:
             epochs = 10
         else:
             epochs = 20
