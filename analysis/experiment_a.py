@@ -5,13 +5,14 @@ import pandas as pd
 
 from statistics import mean
 
-from analysis.utils import check_instances, baseline_optima
+from analysis.utils import check_instances
 
 
 def a_compare_optimum(exp_filepath):
     """Compare a results file to the optimal baseline solutions."""
     # Load in data
-    optima = baseline_optima()
+    with open("instances/expt_a_solns.json") as json_data:
+        optima = json.load(json_data)
     with open(exp_filepath) as json_data:
         results = json.load(json_data)
 
@@ -50,7 +51,10 @@ def a_compare_optimum(exp_filepath):
 
 def a_avg_compare(compare_dict, test_set):
     """Average the results for each instance set"""
-    optima = baseline_optima()
+    with open("instances/expt_a_solns.json") as json_data:
+        optima = json.load(json_data)
+    if test_set == 'CMT':
+        compare_dict = {key: compare_dict[key] for key in ['CMT1.vrp', 'CMT2.vrp', 'CMT3.vrp', 'CMT4.vrp', 'CMT5.vrp', 'CMT11.vrp', 'CMT12.vrp']}
     output = []
     for key in compare_dict:
         output.append(

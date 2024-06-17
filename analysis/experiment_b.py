@@ -1,15 +1,7 @@
 import json
 import pandas as pd
 
-from analysis.utils import add_settings, check_instances
-
-
-def average_distance(folder_dict: dict):
-    """Given a dictionary with entries for each instance, takes the mean of the values"""
-    output = []
-    for key in folder_dict:
-        output.append(folder_dict[key])
-    return sum(output) / len(output)
+from analysis.utils import add_settings, check_instances, average_distance
 
 
 def b_all_averages(validated=True):

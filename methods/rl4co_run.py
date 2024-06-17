@@ -1,13 +1,11 @@
 import torch
 from einops import repeat
-from math import ceil
+from itertools import pairwise
 
 from rl4co.envs import CVRPEnv, CVRPTWEnv
 from rl4co.models import AttentionModel, AMPPO, SymNCO, POMO, MDAM, DeepACO
 from rl4co.utils import RL4COTrainer
 from lightning.pytorch import seed_everything
-
-import methods.utils as utils
 
 
 class RL4CO:
@@ -26,7 +24,7 @@ class RL4CO:
         if self.problem == "CVRP":
             self.env = CVRPEnv(num_loc=self.customers)
         elif self.problem == "CVRPTW":
-            self.env = CVRPTWEnv(generator_params={'num_loc': self.customers})
+            self.env = CVRPTWEnv(generator_params={"num_loc": self.customers})
 
     def set_model(self):
         if self.init_method == "am":
@@ -46,14 +44,14 @@ class RL4CO:
         elif self.init_method == "symnco":
             self.model = SymNCO(
                 self.env,
-                train_data_size=250_000,
+                train_data_size=150_000, # Was 250_000
                 test_data_size=10_000,
                 optimizer_kwargs={"lr": 1e-4},
             )
         elif self.init_method == "pomo":
             self.model = POMO(
                 self.env,
-                train_data_size=100_000,
+                train_data_size=80_000, # Was 100_000
                 test_data_size=10_000,
                 optimizer_kwargs={"lr": 1e-4},
             )
@@ -75,7 +73,7 @@ class RL4CO:
     def train_model(self):
         if self.init_method == "deepaco":
             epochs = 1
-        elif self.init_method == "amppo":
+        elif self.init_method in ["amppo", "symnco", "pomo", "mdam"]:
             epochs = 10
         else:
             epochs = 20
@@ -143,9 +141,14 @@ class RL4CO:
         with torch.no_grad():
             out = policy(td.clone(), decode_type="greedy", return_actions=True)
 
-        # Calculate the cost on the original scale
-        td["locs"] = repeat(coords, "n d -> b n d", b=batch_size, d=2)
-        neg_reward = self.env.get_reward(td, out["actions"])
-        self.cost = ceil(-1 * neg_reward[0].item())
-
         self.routing(out)
+        self._get_cost(self.routes, instance)
+
+    @staticmethod
+    def _get_cost(routes, instance):
+        """Calculate the total cost of a solution to an instance"""
+        costs = 0
+        for r in routes:
+            for i, j in pairwise([0] + r + [0]):
+                costs += instance["edge_weight"][i][j]
+        return costs
