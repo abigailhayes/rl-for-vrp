@@ -10,7 +10,7 @@ import instances.utils as instance_utils
 
 def add_settings(df):
     """Add setting information to a dataframe"""
-    settings_df = pd.read_csv("results/settings.csv")
+    settings_df = pd.read_csv("results/other/settings.csv")
     output = pd.merge(df, settings_df, on="id", how="left")
     return output
 
@@ -44,7 +44,7 @@ def baseline_optima(save=False):
 
     if save:
         # Save output
-        with open(f"results/baseline_optima.json", "w") as f:
+        with open(f"results/other/baseline_optima.json", "w") as f:
             json.dump(output, f, indent=2)
 
     return output

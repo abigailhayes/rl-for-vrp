@@ -66,9 +66,9 @@ def a_avg_compare(compare_dict, test_set):
 def a_all_averages(validated=True):
     """Get the averages for all experiment A instance types"""
     if validated == True:
-        instance_count = pd.read_csv("results/validate_count.csv")
+        instance_count = pd.read_csv("results/other/validate_count.csv")
     else:
-        instance_count = pd.read_csv("results/instance_count.csv")
+        instance_count = pd.read_csv("results/other/instance_count.csv")
 
     # Get a dataframe showing where averages should be taken
     include = instance_count[["A", "B", "E", "F", "M", "P", "CMT"]]
@@ -98,4 +98,4 @@ def a_all_averages(validated=True):
             # When none of the Expt A tests have been run
             pass
 
-    include.to_csv("results/expt_a_means.csv", index=False)
+    include.to_csv("results/other/expt_a_means.csv", index=False)

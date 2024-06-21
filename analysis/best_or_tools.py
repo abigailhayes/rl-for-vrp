@@ -8,7 +8,7 @@ import pandas as pd
 
 def main():
     # Read in settings file to get OR tools ids
-    settings_df = pd.read_csv("results/settings.csv")
+    settings_df = pd.read_csv("results/other/settings.csv")
     or_ids = settings_df[settings_df["method"] == "ortools"][
         settings_df["problem"] == "CVRP"
     ]["id"].tolist()
@@ -127,11 +127,11 @@ def main():
                     pass
 
     # Save result
-    with open(f"results/or_results_a.json", "w") as f:
+    with open(f"results/other/or_results_a.json", "w") as f:
         json.dump(output_a, f, indent=2)
-    with open(f"results/or_results_b.json", "w") as f:
+    with open(f"results/other/or_results_b.json", "w") as f:
         json.dump(output_b, f, indent=2)
-    with open(f"results/or_results_c.json", "w") as f:
+    with open(f"results/other/or_results_c.json", "w") as f:
         json.dump(output_c, f, indent=2)
 
 

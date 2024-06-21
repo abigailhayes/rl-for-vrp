@@ -105,13 +105,13 @@ def main():
     print(settings)
 
     # Load dataframe that stores the results (every run adds a new row)
-    settings_df = pd.read_csv("results/settings.csv")
+    settings_df = pd.read_csv("results/other/settings.csv")
     # Store settings in data frame
     settings_df = pd.concat(
         [settings_df, pd.DataFrame.from_dict([settings])], ignore_index=True
     )
     # save updated csv file
-    settings_df.to_csv("results/settings.csv", index=False)
+    settings_df.to_csv("results/other/settings.csv", index=False)
 
 
 if __name__ == "__main__":

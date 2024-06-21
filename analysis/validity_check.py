@@ -8,8 +8,8 @@ from analysis.utils import validate_dict
 
 def main():
     # Load in current counts
-    settings_df = pd.read_csv("results/settings.csv")
-    valid_df = pd.read_csv("results/validate_count.csv")
+    settings_df = pd.read_csv("results/other/settings.csv")
+    valid_df = pd.read_csv("results/other/validate_count.csv")
 
     def validate_row(ident):
         """Count the valid routes for a given id"""
@@ -56,7 +56,7 @@ def main():
         )
 
     # Save output
-    valid_df.to_csv("results/validate_count.csv", index=False)
+    valid_df.to_csv("results/other/validate_count.csv", index=False)
 
 
 if __name__ == "__main__":
