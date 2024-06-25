@@ -5,6 +5,7 @@ from itertools import pairwise
 from rl4co.envs import CVRPEnv, CVRPTWEnv
 from rl4co.models import AttentionModel, AMPPO, SymNCO, POMO, MDAM, DeepACO
 from rl4co.utils import RL4COTrainer
+from rl4co.utils.ops import get_distance
 from lightning.pytorch import seed_everything
 
 
@@ -44,14 +45,14 @@ class RL4CO:
         elif self.init_method == "symnco":
             self.model = SymNCO(
                 self.env,
-                train_data_size=150_000, # Was 250_000
+                train_data_size=150_000,  # Was 250_000
                 test_data_size=10_000,
                 optimizer_kwargs={"lr": 1e-4},
             )
         elif self.init_method == "pomo":
             self.model = POMO(
                 self.env,
-                train_data_size=80_000, # Was 100_000
+                train_data_size=80_000,  # Was 100_000
                 test_data_size=10_000,
                 optimizer_kwargs={"lr": 1e-4},
             )
@@ -124,22 +125,60 @@ class RL4CO:
         policy = self.model.policy
         policy = policy.to(device)
 
+        # Print tensor shapes
+        print(f"coords: {coords.shape}")
+        print(f"coords_norm: {coords_norm.shape}")
+        print(f"demand: {demand.shape}")
+        print(f"durations: {durations.shape if self.problem == 'CVRPTW' else 'N/A'}")
+        print(
+            f"time_windows: {time_windows.shape if self.problem == 'CVRPTW' else 'N/A'}"
+        )
+
         # Prepare the tensordict
-        batch_size = 2
-        td = self.env.reset(batch_size=(batch_size,)).to(device)
-        td["locs"] = repeat(coords_norm, "n d -> b n d", b=batch_size, d=2)
-        td["demand"] = repeat(demand, "n -> b n", b=batch_size) / capacity
-        td["visited"] = torch.zeros((batch_size, 1, n), dtype=torch.uint8)
-        if self.problem == "CVRPTW":
-            td["durations"] = repeat(durations, "n -> b n", b=batch_size)
+        if self.problem == "CVRP":
+            batch_size = 2
+            td = self.env.reset(batch_size=(batch_size,)).to(device)
+            td["locs"] = repeat(coords_norm, "n d -> b n d", b=batch_size, d=2)
+            td["demand"] = repeat(demand, "n -> b n", b=batch_size) / capacity
+            td["visited"] = torch.zeros((batch_size, 1, n), dtype=torch.uint8)
+            action_mask = torch.ones(batch_size, n, dtype=torch.bool)
+            action_mask[:, 0] = False
+            td["action_mask"] = action_mask
+        elif self.problem == "CVRPTW":
+            # td = self.env.extract_from_solomon(instance, 1).to(device)
+            batch_size = 1
+            td = self.env.reset(batch_size=(batch_size,)).to(device)
+            td["locs"] = repeat(coords, "n d -> b n d", b=batch_size, d=2)
+            td["distances"] = get_distance(
+                td["locs"][:, 0, :], td["locs"][:, 1:, :].transpose(0, 1)
+            ).transpose(0, 1)
             td["time_windows"] = repeat(time_windows, "n d -> b n d", b=batch_size, d=2)
-        action_mask = torch.ones(batch_size, n, dtype=torch.bool)
-        action_mask[:, 0] = False
-        td["action_mask"] = action_mask
+            td["durations"] = repeat(durations, "n -> b n", b=batch_size)
+            td["demand"] = repeat(demand, "n -> b n", b=batch_size) / capacity
+            td["visited"] = torch.zeros((batch_size, 1, n), dtype=torch.uint8)
+            action_mask = torch.ones(batch_size, n, dtype=torch.bool)
+            action_mask[:, 0] = False
+            td["action_mask"] = action_mask
+            print(td)
+
+        # Print the tensordict to debug
+        print(f"td['locs']: {td['locs'].shape}")
+        print(f"td['demand']: {td['demand'].shape}")
+        print(f"td['visited']: {td['visited'].shape}")
+        print(f"td['action_mask']: {td['action_mask'].shape}")
+        if self.problem == "CVRPTW":
+            print(f"td['durations']: {td['durations'].shape}")
+            print(f"td['time_windows']: {td['time_windows'].shape}")
 
         # Get the solution from the policy
         with torch.no_grad():
-            out = policy(td.clone(), decode_type="greedy", return_actions=True)
+            if self.problem == "CVRP":
+                out = policy(td.clone(), decode_type="greedy", return_actions=True)
+            elif self.problem == "CVRPTW":
+                out = policy(
+                    td.clone(), decode_type="greedy", num_starts=0, return_actions=True
+                )
+            print(f"out['actions']: {out['actions']}")  # Print the actions to debug
 
         self.routing(out)
         self._get_cost(self.routes, instance)
