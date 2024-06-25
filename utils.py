@@ -219,7 +219,7 @@ def test_cvrptw(method, method_settings, ident, testing, model=None):
                     except SystemError:
                         continue
             elif method == "rl4co":
-                model.single_test(data)
+                model.single_test(data2)
                 results[tester][example] = model.cost
                 routes[tester][example] = model.routes
 

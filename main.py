@@ -87,8 +87,13 @@ def main():
                 )
             elif args["method"] == "rl4co":
                 utils.test_cvrptw(
-                    args["method"], args["method_settings"], ident, args["testing"], model
+                    args["method"],
+                    args["method_settings"],
+                    ident,
+                    args["testing"],
+                    model,
                 )
+                cost_fix(ident)
 
     end_time = time.time()
     # Create a dict with all variables of the current run
