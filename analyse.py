@@ -3,6 +3,7 @@ import analysis.instance_count as ic
 import analysis.experiment_a as expt_a
 import analysis.experiment_b as expt_b
 import analysis.experiment_c as expt_c
+import analysis.best_or_tools as ortools
 
 
 def main():
@@ -32,6 +33,10 @@ def main():
 
     print("Expt C - all averages")
     expt_c.c_all_averages()
+    print("Complete")
+
+    print("Best OR tools")
+    ortools.main()
     print("Complete")
 
 
