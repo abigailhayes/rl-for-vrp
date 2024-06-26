@@ -44,6 +44,7 @@ def main():
             except ValueError:
                 pass
     # Same for CVRPTW
+    or_ids_tw = [27]
     all_or_tw = {}
     routes_or_tw = {}
     for ident in or_ids_tw:
@@ -51,12 +52,12 @@ def main():
         routes_or_tw[ident] = {}
         try:
             with open(f"results/exp_{ident}/results.json") as json_data:
-                all_or[ident] = json.load(json_data)
+                all_or_tw[ident] = json.load(json_data)
         except ValueError:
             pass
         try:
             with open(f"results/exp_{ident}/routes.json") as json_data:
-                routes_or[ident] = json.load(json_data)
+                routes_or_tw[ident] = json.load(json_data)
         except ValueError:
             pass
 
@@ -106,7 +107,7 @@ def main():
                     pass
     # Test set C
     output_c = {}
-    for tester in [25, 50, 100]:
+    for tester in ['25', '50', '100']:
         output_c[tester] = {}
         for example in next(os.walk(f"instances/CVRPTW/Solomon"))[2]:
             if example.endswith("sol"):
