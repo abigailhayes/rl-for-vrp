@@ -129,7 +129,10 @@ class ORtools(utils.VRPInstance):
 
     def _min_vehicles(self):
         """Minimum number of vehicles that should be attempted"""
-        self.no_vehicles = 2 * ceil(sum(self.demand) / self.capacity)
+        if self.instance["type"] == "CVRPTW":
+            self.no_vehicles = self.instance["dimension"]
+        else:
+            self.no_vehicles = 2 * ceil(sum(self.demand) / self.capacity)
 
     def _veh_capacities(self):
         """Generate a list of the correct length from a single capacity value"""
