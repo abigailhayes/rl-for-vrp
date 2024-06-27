@@ -1,7 +1,12 @@
 import json
 import pandas as pd
 
-from analysis.utils import add_settings, check_instances, average_distance
+from analysis.utils import (
+    add_settings,
+    check_instances,
+    average_distance,
+    best_or_means,
+)
 
 
 def b_all_averages(validated=True):
@@ -40,6 +45,10 @@ def b_all_averages(validated=True):
         except ValueError:
             # When none of the Expt B tests have been run
             pass
+
+    include = pd.concat(
+        [include, best_or_means("b", instance_count)], ignore_index=True
+    )
 
     include.to_csv("results/other/expt_b_means.csv", index=False)
 

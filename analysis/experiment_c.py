@@ -3,13 +3,7 @@
 import json
 import pandas as pd
 
-from analysis.utils import average_distance, check_instances
-
-
-def average_distance_tw(subdict, variant):
-    temp_dict = {k: v for k, v in subdict.items() if k.startswith(variant)}
-    output = average_distance(temp_dict)
-    return output
+from analysis.utils import check_instances, average_distance_tw, best_or_means
 
 
 def c_all_averages(validated=False):
@@ -44,6 +38,10 @@ def c_all_averages(validated=False):
         except ValueError:
             # When none of the Expt C tests have been run
             pass
+
+    include = pd.concat(
+            [include, best_or_means('c', instance_count)], ignore_index=True
+        )
 
     include.to_csv("results/other/expt_c_means.csv", index=False)
 

@@ -5,7 +5,7 @@ import pandas as pd
 
 from statistics import mean
 
-from analysis.utils import check_instances
+from analysis.utils import check_instances, best_or_means
 
 
 def a_compare_optimum(exp_filepath):
@@ -53,8 +53,19 @@ def a_avg_compare(compare_dict, test_set):
     """Average the results for each instance set"""
     with open("instances/expt_a_solns.json") as json_data:
         optima = json.load(json_data)
-    if test_set == 'CMT':
-        compare_dict = {key: compare_dict[key] for key in ['CMT1.vrp', 'CMT2.vrp', 'CMT3.vrp', 'CMT4.vrp', 'CMT5.vrp', 'CMT11.vrp', 'CMT12.vrp']}
+    if test_set == "CMT":
+        compare_dict = {
+            key: compare_dict[key]
+            for key in [
+                "CMT1.vrp",
+                "CMT2.vrp",
+                "CMT3.vrp",
+                "CMT4.vrp",
+                "CMT5.vrp",
+                "CMT11.vrp",
+                "CMT12.vrp",
+            ]
+        }
     output = []
     for key in compare_dict:
         output.append(
@@ -97,5 +108,9 @@ def a_all_averages(validated=True):
         except ValueError:
             # When none of the Expt A tests have been run
             pass
+
+    include = pd.concat(
+        [include, best_or_means("a", instance_count)], ignore_index=True
+    )
 
     include.to_csv("results/other/expt_a_means.csv", index=False)
