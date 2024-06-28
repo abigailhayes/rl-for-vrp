@@ -89,7 +89,6 @@ def average_distance(folder_dict: dict):
 
 def average_distance_tw(subdict, variant):
     temp_dict = {k: v for k, v in subdict.items() if k.startswith(variant)}
-    print(temp_dict)
     output = average_distance(temp_dict)
     return output
 
@@ -176,7 +175,6 @@ def best_or_means(experiment, instance_count):
                     }
                 else:
                     compare_dict = {k: v['value'] for k, v in data[key].items()}
-                print(compare_dict)
                 working = []
                 for new_key in compare_dict:
                     working.append(
