@@ -76,12 +76,12 @@ def main():
                     model,
                 )
                 cost_fix(ident)
-            elif args["method"] == "ortools":
+            elif args["method"] in ["ortools", "own"]:
                 utils.test_cvrp(
                     args["method"], args["method_settings"], ident, args["testing"]
                 )
         elif args["problem"] == "CVRPTW":
-            if args["method"] == "ortools":
+            if args["method"] in ["ortools", "own"]:
                 utils.test_cvrptw(
                     args["method"], args["method_settings"], ident, args["testing"]
                 )

@@ -8,6 +8,7 @@ import numpy as np
 
 import instances.utils as instances_utils
 from methods.or_tools import ORtools
+from methods.own import Own
 
 
 def parse_experiment():
@@ -101,6 +102,11 @@ def test_cvrp(method, method_settings, ident, testing, model=None):
                             continue
                         results_b[subdir][example] = model.cost
                         routes_b[subdir][example] = model.routes
+                    elif method == "own":
+                        model = Own(data, method_settings)
+                        model.run_all()
+                        results_b[subdir][example] = model.init_model.cost
+                        routes_b[subdir][example] = model.init_model.routes
                     elif method == "rl4co":
                         model.single_test(data)
                         results_b[subdir][example] = model.cost
@@ -145,6 +151,11 @@ def test_cvrp(method, method_settings, ident, testing, model=None):
                     routes_a[test_set][example] = model.routes
                 elif method == "rl4co":
                     model.single_test(data)
+                    results_a[test_set][example] = model.cost
+                    routes_a[test_set][example] = model.routes
+                elif method == "own":
+                    model = Own(data, method_settings)
+                    model.run_all()
                     results_a[test_set][example] = model.cost
                     routes_a[test_set][example] = model.routes
                 elif method == "nazari":
