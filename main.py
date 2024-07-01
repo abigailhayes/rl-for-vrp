@@ -76,19 +76,24 @@ def main():
                     model,
                 )
                 cost_fix(ident)
-            elif args["method"] == "ortools":
+            elif args["method"] in ["ortools", "own"]:
                 utils.test_cvrp(
                     args["method"], args["method_settings"], ident, args["testing"]
                 )
         elif args["problem"] == "CVRPTW":
-            if args["method"] == "ortools":
+            if args["method"] in ["ortools", "own"]:
                 utils.test_cvrptw(
                     args["method"], args["method_settings"], ident, args["testing"]
                 )
             elif args["method"] == "rl4co":
                 utils.test_cvrptw(
-                    args["method"], args["method_settings"], ident, args["testing"], model
+                    args["method"],
+                    args["method_settings"],
+                    ident,
+                    args["testing"],
+                    model,
                 )
+                cost_fix(ident)
 
     end_time = time.time()
     # Create a dict with all variables of the current run
@@ -105,13 +110,13 @@ def main():
     print(settings)
 
     # Load dataframe that stores the results (every run adds a new row)
-    settings_df = pd.read_csv("results/settings.csv")
+    settings_df = pd.read_csv("results/other/settings.csv")
     # Store settings in data frame
     settings_df = pd.concat(
         [settings_df, pd.DataFrame.from_dict([settings])], ignore_index=True
     )
     # save updated csv file
-    settings_df.to_csv("results/settings.csv", index=False)
+    settings_df.to_csv("results/other/settings.csv", index=False)
 
 
 if __name__ == "__main__":

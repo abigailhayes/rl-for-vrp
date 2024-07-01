@@ -1,15 +1,20 @@
 import json
 import pandas as pd
 
-from analysis.utils import add_settings, check_instances, average_distance
+from analysis.utils import (
+    add_settings,
+    check_instances,
+    average_distance,
+    best_or_means,
+)
 
 
 def b_all_averages(validated=True):
     """Get the averages for all experiment B instance types"""
     if validated == True:
-        instance_count = pd.read_csv("results/validate_count.csv")
+        instance_count = pd.read_csv("results/other/validate_count.csv")
     else:
-        instance_count = pd.read_csv("results/instance_count.csv")
+        instance_count = pd.read_csv("results/other/instance_count.csv")
 
     # Get a dataframe showing where averages should be taken
     include = instance_count.drop(
@@ -41,13 +46,17 @@ def b_all_averages(validated=True):
             # When none of the Expt B tests have been run
             pass
 
-    include.to_csv("results/expt_b_means.csv", index=False)
+    include = pd.concat(
+        [include, best_or_means("b", instance_count)], ignore_index=True
+    )
+
+    include.to_csv("results/other/expt_b_means.csv", index=False)
 
 
 def size_table(size):
     """Look at instance sets of a specific size"""
     # Read in data
-    dist_means = pd.read_csv("results/expt_b_means.csv")
+    dist_means = pd.read_csv("results/other/expt_b_means.csv")
     # Select columns for the relevant size
     col_names = [
         col
@@ -61,7 +70,7 @@ def size_table(size):
     output = add_settings(output)
 
     # Save
-    output.to_csv(f"results/expt_b_{size}.csv", index=False)
+    output.to_csv(f"results/other/expt_b_{size}.csv", index=False)
 
 
 def main():

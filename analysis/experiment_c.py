@@ -3,21 +3,15 @@
 import json
 import pandas as pd
 
-from analysis.utils import average_distance, check_instances
-
-
-def average_distance_tw(subdict, variant):
-    temp_dict = {k: v for k, v in subdict.items() if k.startswith(variant)}
-    output = average_distance(temp_dict)
-    return output
+from analysis.utils import check_instances, average_distance_tw, best_or_means
 
 
 def c_all_averages(validated=False):
     """Get the averages for all experiment C instance types"""
     if validated:  # No validation set up yet
-        instance_count = pd.read_csv("results/validate_count_tw.csv")
+        instance_count = pd.read_csv("results/other/validate_count_tw.csv")
     else:
-        instance_count = pd.read_csv("results/instance_count_tw.csv")
+        instance_count = pd.read_csv("results/other/instance_count_tw.csv")
 
     # Get a dataframe showing where averages should be taken
     include = instance_count.drop(["id", "notes"], axis=1)
@@ -45,7 +39,11 @@ def c_all_averages(validated=False):
             # When none of the Expt C tests have been run
             pass
 
-    include.to_csv("results/expt_c_means.csv", index=False)
+    include = pd.concat(
+            [include, best_or_means('c', instance_count)], ignore_index=True
+        )
+
+    include.to_csv("results/other/expt_c_means.csv", index=False)
 
 
 def main():

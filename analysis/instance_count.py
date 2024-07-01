@@ -6,9 +6,9 @@ import pandas as pd
 
 def main():
     # Load in current counts
-    settings_df = pd.read_csv("results/settings.csv")
-    instances_df = pd.read_csv("results/instance_count.csv")
-    instances_df_tw = pd.read_csv("results/instance_count_tw.csv")
+    settings_df = pd.read_csv("results/other/settings.csv")
+    instances_df = pd.read_csv("results/other/instance_count.csv")
+    instances_df_tw = pd.read_csv("results/other/instance_count_tw.csv")
     # results[test][example]
 
     # Update dataframe
@@ -85,8 +85,8 @@ def main():
         )
 
     # Save output
-    instances_df.to_csv("results/instance_count.csv", index=False)
-    instances_df_tw.to_csv("results/instance_count_tw.csv", index=False)
+    instances_df.to_csv("results/other/instance_count.csv", index=False)
+    instances_df_tw.to_csv("results/other/instance_count_tw.csv", index=False)
 
 
 if __name__ == "__main__":

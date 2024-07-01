@@ -5,7 +5,7 @@ import pandas as pd
 
 from statistics import mean
 
-from analysis.utils import check_instances
+from analysis.utils import check_instances, best_or_means
 
 
 def a_compare_optimum(exp_filepath):
@@ -53,8 +53,19 @@ def a_avg_compare(compare_dict, test_set):
     """Average the results for each instance set"""
     with open("instances/expt_a_solns.json") as json_data:
         optima = json.load(json_data)
-    if test_set == 'CMT':
-        compare_dict = {key: compare_dict[key] for key in ['CMT1.vrp', 'CMT2.vrp', 'CMT3.vrp', 'CMT4.vrp', 'CMT5.vrp', 'CMT11.vrp', 'CMT12.vrp']}
+    if test_set == "CMT":
+        compare_dict = {
+            key: compare_dict[key]
+            for key in [
+                "CMT1.vrp",
+                "CMT2.vrp",
+                "CMT3.vrp",
+                "CMT4.vrp",
+                "CMT5.vrp",
+                "CMT11.vrp",
+                "CMT12.vrp",
+            ]
+        }
     output = []
     for key in compare_dict:
         output.append(
@@ -66,9 +77,9 @@ def a_avg_compare(compare_dict, test_set):
 def a_all_averages(validated=True):
     """Get the averages for all experiment A instance types"""
     if validated == True:
-        instance_count = pd.read_csv("results/validate_count.csv")
+        instance_count = pd.read_csv("results/other/validate_count.csv")
     else:
-        instance_count = pd.read_csv("results/instance_count.csv")
+        instance_count = pd.read_csv("results/other/instance_count.csv")
 
     # Get a dataframe showing where averages should be taken
     include = instance_count[["A", "B", "E", "F", "M", "P", "CMT"]]
@@ -98,4 +109,8 @@ def a_all_averages(validated=True):
             # When none of the Expt A tests have been run
             pass
 
-    include.to_csv("results/expt_a_means.csv", index=False)
+    include = pd.concat(
+        [include, best_or_means("a", instance_count)], ignore_index=True
+    )
+
+    include.to_csv("results/other/expt_a_means.csv", index=False)

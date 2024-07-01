@@ -4,13 +4,14 @@ from pathlib import Path
 from itertools import pairwise
 import vrplib
 import pandas as pd
+from statistics import mean
 
 import instances.utils as instance_utils
 
 
 def add_settings(df):
     """Add setting information to a dataframe"""
-    settings_df = pd.read_csv("results/settings.csv")
+    settings_df = pd.read_csv("results/other/settings.csv")
     output = pd.merge(df, settings_df, on="id", how="left")
     return output
 
@@ -44,7 +45,7 @@ def baseline_optima(save=False):
 
     if save:
         # Save output
-        with open(f"results/baseline_optima.json", "w") as f:
+        with open(f"results/other/baseline_optima.json", "w") as f:
             json.dump(output, f, indent=2)
 
     return output
@@ -84,3 +85,103 @@ def average_distance(folder_dict: dict):
     for key in folder_dict:
         output.append(folder_dict[key])
     return sum(output) / len(output)
+
+
+def average_distance_tw(subdict, variant):
+    temp_dict = {k: v for k, v in subdict.items() if k.startswith(variant)}
+    output = average_distance(temp_dict)
+    return output
+
+
+def best_or_means(experiment, instance_count):
+    # Load in relevant best OR tools results
+    json_path = f"results/other/or_results_{experiment}.json"
+    # When data is stored directly for each instance
+    output = {}
+    if experiment == "c":
+        try:
+            with open(json_path) as json_data:
+                data = json.load(json_data)
+            for key in data:
+                for variant in ["RC1", "RC2", "R1", "R2", "C1", "C2"]:
+                    new_key = variant + "_" + str(key)
+                    output[new_key] = sum(
+                        [
+                            1
+                            for instance in data[key].keys()
+                            if (
+                                instance.startswith(variant)
+                                and len(data[key][instance]) > 0
+                            )
+                        ]
+                    )
+        except ValueError:
+            pass
+    else:
+        instance_count = instance_count.drop(index=0, axis=0)
+        try:
+            with open(json_path) as json_data:
+                data = json.load(json_data)
+            for key in data:
+                output[key] = len(data[key])
+        except ValueError:
+            pass
+
+    # Check if there are enough solutions
+    verify = {}
+    for key in output:
+        if output[key] == max(instance_count[key]):
+            verify[key] = 1
+        else:
+            verify[key] = 0
+
+    avgs = {"id": 0, "notes": "OR tools best"}
+    if experiment == "c":
+        for key in data:
+            for variant in ["RC1", "RC2", "R1", "R2", "C1", "C2"]:
+                new_key = variant + "_" + str(key)
+                if verify[new_key] == 1:
+                    avgs[new_key] = average_distance_tw(
+                        {k: v["value"] for k, v in data[key].items() if len(v) > 0},
+                        variant,
+                    )
+                else:
+                    avgs[new_key] = 0
+    elif experiment == "b":
+        for key in data:
+            if verify[key] == 1:
+                avgs[key] = average_distance(
+                    {k: v["value"] for k, v in data[key].items() if len(v) > 0}
+                )
+            else:
+                avgs[key] = 0
+    else:
+        with open("instances/expt_a_solns.json") as json_data:
+            optima = json.load(json_data)
+        for key in data:
+            if verify[key] == 1:
+                if key == "CMT":
+                    compare_dict = {
+                        inner_key: data[key][inner_key]['value']
+                        for inner_key in [
+                            "CMT1.vrp",
+                            "CMT2.vrp",
+                            "CMT3.vrp",
+                            "CMT4.vrp",
+                            "CMT5.vrp",
+                            "CMT11.vrp",
+                            "CMT12.vrp",
+                        ]
+                    }
+                else:
+                    compare_dict = {k: v['value'] for k, v in data[key].items()}
+                working = []
+                for new_key in compare_dict:
+                    working.append(
+                        (compare_dict[new_key] - optima[key][new_key]) / optima[key][new_key]
+                    )
+                avgs[key] = mean(working)
+            else:
+                avgs[key] = 0
+
+    return pd.DataFrame.from_dict([avgs])

@@ -26,15 +26,15 @@ class ORtools(utils.VRPInstance):
 
     def __init__(self, instance, init_method, improve_method=None):
         super().__init__(instance)
-        if self.instance['type'] == 'CVRPTW':
-            self.time_window = instance['time_window']
-            self.service_time = instance['service_time']
+        if self.instance["type"] == "CVRPTW":
+            self.time_window = instance["time_window"]
+            self.service_time = instance["service_time"]
         self.search_parameters = pywrapcp.DefaultRoutingSearchParameters()
         self.depot = 0
         self.init_method = init_method
         self.improve_method = improve_method
         if self.improve_method is not None:
-            self.method = f'{self.improve_method}/{self.init_method}'
+            self.method = f"{self.improve_method}/{self.init_method}"
         else:
             self.method = self.init_method
         random.seed(self.seed)
@@ -57,9 +57,10 @@ class ORtools(utils.VRPInstance):
                 plan_output += f" {node_index} Load({route_load}) -> "
                 previous_index = index
                 index = solution.Value(self.routing.NextVar(index))
-                route_distance += self.routing.GetArcCostForVehicle(
-                    previous_index, index, vehicle_id
-                )/1000
+                route_distance += (
+                    self.routing.GetArcCostForVehicle(previous_index, index, vehicle_id)
+                    / 1000
+                )
             plan_output += f" {self.manager.IndexToNode(index)} Load({route_load})\n"
             plan_output += f"Distance of the route: {route_distance}m\n"
             plan_output += f"Load of the route: {route_load}\n"
@@ -112,10 +113,13 @@ class ORtools(utils.VRPInstance):
         # Convert from routing variable Index to distance matrix NodeIndex.
         from_node = self.manager.IndexToNode(from_index)
         to_node = self.manager.IndexToNode(to_index)
-        if self.task == 'CVRP':
-            return int(self.distance[from_node][to_node]*1000)
-        elif self.task == 'CVRPTW':
-            return int(self.distance[from_node][to_node] + self.service_time['to_index']) * 1000
+        if self.task == "CVRP":
+            return int(self.distance[from_node][to_node] * 1000)
+        elif self.task == "CVRPTW":
+            return (
+                int(self.distance[from_node][to_node] + self.service_time["to_index"])
+                * 1000
+            )
 
     def _demand_callback(self, from_index):
         """Returns the demand of the node."""
@@ -125,47 +129,62 @@ class ORtools(utils.VRPInstance):
 
     def _min_vehicles(self):
         """Minimum number of vehicles that should be attempted"""
-        self.no_vehicles = 2*ceil(sum(self.demand)/self.capacity)
+        if self.instance["type"] == "CVRPTW":
+            self.no_vehicles = self.instance["dimension"]
+        else:
+            self.no_vehicles = 2 * ceil(sum(self.demand) / self.capacity)
 
     def _veh_capacities(self):
         """Generate a list of the correct length from a single capacity value"""
-        return [self.capacity]*self.no_vehicles
+        return [self.capacity] * self.no_vehicles
 
     def setup(self):
         """Initiate all of the elements needed for running solutions"""
         # Managing indices conversion between node numbers and where the data is held
-        self.manager = pywrapcp.RoutingIndexManager(self.dimension, self.no_vehicles, self.depot)
+        self.manager = pywrapcp.RoutingIndexManager(
+            self.dimension, self.no_vehicles, self.depot
+        )
         self.routing = pywrapcp.RoutingModel(self.manager)
         # Define cost of each arc
-        self.routing.SetArcCostEvaluatorOfAllVehicles(self.routing.RegisterTransitCallback(self._distance_callback))
+        self.routing.SetArcCostEvaluatorOfAllVehicles(
+            self.routing.RegisterTransitCallback(self._distance_callback)
+        )
         # Adding in time window constraints when appropriate
-        if self.task == 'CVRPTW':
+        if self.task == "CVRPTW":
             time = "Time"
             self.routing.AddDimension(
                 self.routing.RegisterTransitCallback(self._distance_callback),
                 180,  # allow waiting time
-                int(self.time_window[self.depot][1] - self.time_window[self.depot][0]),  # maximum time per vehicle
+                int(
+                    self.time_window[self.depot][1] - self.time_window[self.depot][0]
+                ),  # maximum time per vehicle
                 True,  # Don't force start cumul to zero.
-                time)
+                time,
+            )
             time_dimension = self.routing.GetDimensionOrDie(time)
             # Add time window constraints for each location except depot.
             for location_idx, time_window in enumerate(self.time_window):
                 if location_idx == self.depot:
                     continue
                 index = self.manager.NodeToIndex(location_idx)
-                time_dimension.CumulVar(index).SetRange(int(time_window[0]), int(time_window[1]))
+                time_dimension.CumulVar(index).SetRange(
+                    int(time_window[0]), int(time_window[1])
+                )
             # Add time window constraints for each vehicle start node.
             depot_idx = self.depot
             for vehicle_id in range(self.no_vehicles):
                 index = self.routing.Start(vehicle_id)
                 time_dimension.CumulVar(index).SetRange(
-                    int(self.time_window[depot_idx][0]), int(self.time_window[depot_idx][1])
+                    int(self.time_window[depot_idx][0]),
+                    int(self.time_window[depot_idx][1]),
                 )
             for i in range(self.no_vehicles):
                 self.routing.AddVariableMinimizedByFinalizer(
                     time_dimension.CumulVar(self.routing.Start(i))
                 )
-                self.routing.AddVariableMinimizedByFinalizer(time_dimension.CumulVar(self.routing.End(i)))
+                self.routing.AddVariableMinimizedByFinalizer(
+                    time_dimension.CumulVar(self.routing.End(i))
+                )
         # Add in capacity limitations
         self.routing.AddDimensionWithVehicleCapacity(
             self.routing.RegisterUnaryTransitCallback(self._demand_callback),
@@ -177,34 +196,51 @@ class ORtools(utils.VRPInstance):
 
     def search_settings(self):
         """Set up conditions for the search"""
-        if self.init_method == 'savings':
-            self.search_parameters.first_solution_strategy = routing_enums_pb2.FirstSolutionStrategy.SAVINGS
+        if self.init_method == "savings":
+            self.search_parameters.first_solution_strategy = (
+                routing_enums_pb2.FirstSolutionStrategy.SAVINGS
+            )
             self.search_parameters.savings_parallel_routes = True
-        elif self.init_method == 'cheapest_arc':
-            self.search_parameters.first_solution_strategy = routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
-        elif self.init_method == 'christofides':
-            self.search_parameters.first_solution_strategy = routing_enums_pb2.FirstSolutionStrategy.CHRISTOFIDES
-        elif self.init_method == 'local_cheapest_insert':
-            self.search_parameters.first_solution_strategy = routing_enums_pb2.FirstSolutionStrategy.LOCAL_CHEAPEST_INSERTION
+        elif self.init_method == "cheapest_arc":
+            self.search_parameters.first_solution_strategy = (
+                routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
+            )
+        elif self.init_method == "christofides":
+            self.search_parameters.first_solution_strategy = (
+                routing_enums_pb2.FirstSolutionStrategy.CHRISTOFIDES
+            )
+        elif self.init_method == "local_cheapest_insert":
+            self.search_parameters.first_solution_strategy = (
+                routing_enums_pb2.FirstSolutionStrategy.LOCAL_CHEAPEST_INSERTION
+            )
 
-        if self.improve_method == 'guided_local':
-            self.search_parameters.local_search_metaheuristic = routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH
-        elif self.improve_method == 'sa':
-            self.search_parameters.local_search_metaheuristic = routing_enums_pb2.LocalSearchMetaheuristic.SIMULATED_ANNEALING
-        elif self.improve_method == 'tabu':
-            self.search_parameters.local_search_metaheuristic = routing_enums_pb2.LocalSearchMetaheuristic.GENERIC_TABU_SEARCH
+        if self.improve_method == "guided_local":
+            self.search_parameters.local_search_metaheuristic = (
+                routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH
+            )
+        elif self.improve_method == "sa":
+            self.search_parameters.local_search_metaheuristic = (
+                routing_enums_pb2.LocalSearchMetaheuristic.SIMULATED_ANNEALING
+            )
+        elif self.improve_method == "tabu":
+            self.search_parameters.local_search_metaheuristic = (
+                routing_enums_pb2.LocalSearchMetaheuristic.GENERIC_TABU_SEARCH
+            )
 
         self.search_parameters.log_search = False
-        self.search_parameters.time_limit.FromSeconds(60)
+        if self.task == "CVRP":
+            self.search_parameters.time_limit.FromSeconds(60)
+        else:
+            self.search_parameters.time_limit.FromSeconds(180)
 
     def run_all(self):
         self._min_vehicles()
         self.setup()
         self.search_settings()
         solution = self.routing.SolveWithParameters(self.search_parameters)
-        if self.task == 'CVRP':
+        if self.task == "CVRP":
             self.print_cvrp_solution(solution)
-        elif self.task == 'CVRPTW':
+        elif self.task == "CVRPTW":
             self.print_cvrptw_solution(solution)
         self.get_cost()
         if self.sol:
