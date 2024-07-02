@@ -18,23 +18,24 @@ class RL4CO_TSP(RL4CO):
         current = []
         for node in out["actions"][0]:
             current.append(int(node))
-        self.routes.append(current[current.index(0)+1:] + current[:current.index(0)])
+        current = current[current.index(0)+1:] + current[:current.index(0)]
+        return(current)
 
     def single_test(self, instance):
         """Test for a single instance"""
         self.routes = []
         # Cluster
         cluster_model = Sweep(instance)
-        cluster_model.run_all()
+        cluster_model.build_clusters()
         self.clusters = cluster_model.clusters
-        # Loop around all clusters
         for group in self.clusters:
-            coords = torch.tensor(instance["node_coord"]).float() # Update to limited coords
-            self.single_route(coords)
+            # Get coords limited to relevant nodes
+            coords = torch.tensor(instance["node_coord"][[0]+group]).float()
+            self.single_route(coords, group)
 
         self._get_cost(self.routes, instance)
 
-    def single_route(self, coords):
+    def single_route(self, coords, cluster):
         """Build for a single cluster"""
         coords_norm = self.normalize_coord(coords)
         n = coords.shape[0]
@@ -65,4 +66,4 @@ class RL4CO_TSP(RL4CO):
             out = policy(td.clone(), decode_type="greedy", return_actions=True)
             print(f"out['actions']: {out['actions']}")  # Print the actions to debug
 
-        self.routes.append(self.routing(out))
+        self.routes.append([cluster[i] for i in self.routing(out)])
