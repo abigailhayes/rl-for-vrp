@@ -3,6 +3,7 @@
 from methods.or_tools import ORtools
 import methods.nazari.nazari as nazari
 import methods.rl4co_run as rl4co_run
+import methods.TSP.rl4co_tsp as rl4co_tsp
 import utils
 from rl4co_cost_fix import cost_fix
 
@@ -54,6 +55,17 @@ def main():
         model.set_model()
         model.train_model()
         print("Finished training")
+    elif args["method"] == "rl4co_tsp":
+        model = rl4co_tsp.RL4CO_TSP(
+            args["problem"],
+            args["method_settings"]["init_method"],
+            args["method_settings"]["customers"],
+            args["seed"],
+            ident,
+        )
+        model.set_model()
+        model.train_model()
+        print("Finished training")
 
     # Run tests
     if args["testing"] is not None:
@@ -67,7 +79,7 @@ def main():
                     args["testing"],
                     model,
                 )
-            elif args["method"] == "rl4co":
+            elif args["method"] in ["rl4co", "rl4co_tsp"]:
                 utils.test_cvrp(
                     args["method"],
                     args["method_settings"],

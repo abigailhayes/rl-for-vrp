@@ -107,7 +107,7 @@ def test_cvrp(method, method_settings, ident, testing, model=None):
                         model.run_all()
                         results_b[subdir][example] = model.init_model.cost
                         routes_b[subdir][example] = model.init_model.routes
-                    elif method == "rl4co":
+                    elif method in ["rl4co", "rl4co_tsp"]:
                         model.single_test(data)
                         results_b[subdir][example] = model.cost
                         routes_b[subdir][example] = model.routes
@@ -149,7 +149,7 @@ def test_cvrp(method, method_settings, ident, testing, model=None):
                         continue
                     results_a[test_set][example] = model.cost
                     routes_a[test_set][example] = model.routes
-                elif method == "rl4co":
+                elif method in ["rl4co", "rl4co_tsp"]:
                     model.single_test(data)
                     results_a[test_set][example] = model.cost
                     routes_a[test_set][example] = model.routes
