@@ -215,7 +215,7 @@ def test_cvrp(method, method_settings, ident, testing, model=None, save=True):
         return results, routes
 
 
-def test_cvrptw(method, method_settings, ident, testing, model=None):
+def test_cvrptw(method, method_settings, ident, testing, model=None, save=True):
     """Function for running CVRP testing
     - method - the solution method being applied
     - method_settings - any additional settings for the method
@@ -267,9 +267,11 @@ def test_cvrptw(method, method_settings, ident, testing, model=None):
                 model.single_test(data2)
                 results[tester][example] = model.cost
                 routes[tester][example] = model.routes
-
-    # Saving results
-    with open(f"results/exp_{ident}/results.json", "w") as f:
-        json.dump(results, f, indent=2)
-    with open(f"results/exp_{ident}/routes.json", "w") as f:
-        json.dump(routes, f, indent=2)
+    if save:
+        # Saving results
+        with open(f"results/exp_{ident}/results.json", "w") as f:
+            json.dump(results, f, indent=2)
+        with open(f"results/exp_{ident}/routes.json", "w") as f:
+            json.dump(routes, f, indent=2)
+    else:
+        return results, routes
