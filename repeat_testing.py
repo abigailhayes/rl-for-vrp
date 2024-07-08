@@ -26,7 +26,7 @@ def parse_run():
 
 def main():
     args = parse_run()
-    settings_df = pd.read_csv("results/other/settings.csv").to_dict("index")
+    settings_df = pd.read_csv("results/other/settings.csv").set_index('id').to_dict("index")
     settings = settings_df[int(args["id"])]
 
     # Load in model
@@ -44,6 +44,9 @@ def main():
         model.model.load_from_checkpoint(
             f"{long_path}/{os.listdir(long_path)[0]}"
         )
+
+    if settings['problem']=='CVRP':
+        print('working')
 
 
 if __name__ == "__main__":
