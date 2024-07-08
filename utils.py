@@ -107,8 +107,9 @@ def test_cvrp_algm(method, method_settings, folder_path):
         # Get results
         try:
             model.run_all()
-        except AttributeError:
+        except (AttributeError, SystemError):
             continue
+
         results[example] = model.cost
         routes[example] = model.routes
 
@@ -205,11 +206,11 @@ def test_cvrp(method, method_settings, ident, testing, model=None, save=True):
         except NameError:
             pass
     else:
-        results = {'a': results_a}
-        routes = {'b': routes_b}
+        results = {"a": results_a}
+        routes = {"b": routes_b}
         try:
-            results['b'] = results_b
-            routes['b'] = routes_b
+            results["b"] = results_b
+            routes["b"] = routes_b
         except NameError:
             pass
         return results, routes
@@ -225,21 +226,23 @@ def test_cvrptw(method, method_settings, ident, testing, model=None, save=True):
     # Set up for saving results
     results = {}
     routes = {}
+    # Set up for different size versions of instances
     for tester in testing:
         results[tester] = {}
         routes[tester] = {}
     # Running testing
     for example in next(os.walk(f"instances/CVRPTW/Solomon"))[2]:
-        print(example)
         # Go through all test instances
         if example.endswith("sol"):
             continue
+        print(example)
         data = vrplib.read_instance(
             f"instances/CVRPTW/Solomon/{example}", instance_format="solomon"
         )
         data["type"] = "CVRPTW"
         data["dimension"] = len(data["demand"])
         for tester in testing:
+            # Rescale instances as needed
             data2 = instances_utils.shrink_twinstance(data, tester)
             if method == "ortools":
                 model = ORtools(
