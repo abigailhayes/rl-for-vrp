@@ -84,7 +84,7 @@ def test_cvrp_algm(method, method_settings, folder_path):
     """Carry out testing on all examples in a specific folder for an algorithm method"""
     results = {}
     routes = {}
-
+    print(folder_path)
     for example in next(os.walk(folder_path))[2]:
         if example.endswith("sol"):
             continue
@@ -160,7 +160,7 @@ def test_cvrp_generate(model, method, method_settings):
     routes = {}
     for subdir in next(os.walk("instances/CVRP/generate"))[1]:
         results[subdir], routes[subdir] = test_cvrp_other(
-            model, method, method_settings, f"instances/CVRP/generate/{subdir}"
+            model, method, method_settings, f"/generate/{subdir}"
         )
 
     return results, routes
