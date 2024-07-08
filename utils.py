@@ -64,6 +64,8 @@ def test_cvrp_nazari(model, folder_path):
         print(example)
         # Go through all test instances
         data = vrplib.read_instance(f"{folder_path}/{example}")
+        if data["edge_weight_type"] != "EUC_2D":
+            continue
 
         if model.args["n_nodes"] != data["dimension"]:
             continue
@@ -77,6 +79,7 @@ def test_cvrp_nazari(model, folder_path):
 
 
 def test_cvrp_algm(method, method_settings, folder_path):
+    """Carry out testing on all examples in a specific folder for an algorithm method"""
     results = {}
     routes = {}
 
@@ -84,6 +87,8 @@ def test_cvrp_algm(method, method_settings, folder_path):
         print(example)
         # Go through all test instances
         data = vrplib.read_instance(f"{folder_path}/{example}")
+        if data["edge_weight_type"] != "EUC_2D":
+            continue
 
         # Set up model
         if method == "ortools":
@@ -106,35 +111,27 @@ def test_cvrp_algm(method, method_settings, folder_path):
     return results, routes
 
 
-def test_cvrp_generate(model, method, method_settings):
-    # Running all tests for the generated test instances
-    results_b = {}
-    routes_b = {}
-    for subdir in next(os.walk("instances/CVRP/generate"))[1]:
-        results_b[subdir] = {}
-        routes_b[subdir] = {}
-        if method == "nazari":
-            results_b[subdir], routes_b[subdir] = test_cvrp_nazari(
-                model, f"instances/CVRP/generate/{subdir}"
-            )
-        elif method in ["ortools", "own"]:
-            results_b[subdir], routes_b[subdir] = test_cvrp_algm(
-                method, method_settings, f"instances/CVRP/generate/{subdir}"
-            )
+def test_cvrp_rl4co(model, folder_path):
+    """Carry out testing on all examples in a specific folder for a RL4CO model"""
+    results = {}
+    routes = {}
 
-        for example in next(os.walk(f"instances/CVRP/generate/{subdir}"))[2]:
-            print(example)
-            # Go through all test instances
-            data = vrplib.read_instance(f"instances/CVRP/generate/{subdir}/{example}")
-            if method in ["rl4co", "rl4co_tsp"]:
-                model.single_test(data)
-                results_b[subdir][example] = model.cost
-                routes_b[subdir][example] = model.routes
+    for example in next(os.walk(folder_path))[2]:
+        print(example)
+        # Go through all test instances
+        data = vrplib.read_instance(f"{folder_path}/{example}")
+        if data["edge_weight_type"] != "EUC_2D":
+            continue
 
-    return results_b, routes_b
+        model.single_test(data)
+        results[example] = model.cost
+        routes[example] = model.routes
+
+    return results, routes
 
 
 def test_cvrp_other(model, method, method_settings, test_set):
+    """Carry out testing on all examples in a specific folder for any model"""
     results = {}
     routes = {}
 
@@ -144,20 +141,23 @@ def test_cvrp_other(model, method, method_settings, test_set):
         results, routes = test_cvrp_algm(
             method, method_settings, f"instances/CVRP/{test_set}"
         )
-    for example in next(os.walk(f"instances/CVRP/{test_set}"))[2]:
-        print(example)
-        # Go through all test instances
-        if example.endswith("sol"):
-            continue
-        data = vrplib.read_instance(f"instances/CVRP/{test_set}/{example}")
-        if data["edge_weight_type"] != "EUC_2D":
-            continue
-        if method in ["rl4co", "rl4co_tsp"]:
-            model.single_test(data)
-            results[example] = model.cost
-            routes[example] = model.routes
+    elif method in ["rl4co", "rl4co_tsp"]:
+        results, routes = test_cvrp_rl4co(model, f"instances/CVRP/{test_set}")
 
     return results, routes
+
+
+def test_cvrp_generate(model, method, method_settings):
+    """Carry out testing on all examples across all generate folders for any model"""
+    # Running all tests for the generated test instances
+    results_b = {}
+    routes_b = {}
+    for subdir in next(os.walk("instances/CVRP/generate"))[1]:
+        results_b[subdir], routes_b[subdir] = test_cvrp_other(
+            model, method, method_settings, f"instances/CVRP/generate/{subdir}"
+        )
+
+    return results_b, routes_b
 
 
 def test_cvrp(method, method_settings, ident, testing, model=None, save=True):
