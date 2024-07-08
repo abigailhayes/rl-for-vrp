@@ -61,6 +61,8 @@ def test_cvrp_nazari(model, folder_path):
     routes = {"greedy": {}, "beam": {}}
 
     for example in next(os.walk(folder_path))[2]:
+        if example.endswith("sol"):
+            continue
         print(example)
         # Go through all test instances
         data = vrplib.read_instance(f"{folder_path}/{example}")
@@ -84,6 +86,8 @@ def test_cvrp_algm(method, method_settings, folder_path):
     routes = {}
 
     for example in next(os.walk(folder_path))[2]:
+        if example.endswith("sol"):
+            continue
         print(example)
         # Go through all test instances
         data = vrplib.read_instance(f"{folder_path}/{example}")
@@ -117,6 +121,8 @@ def test_cvrp_rl4co(model, folder_path):
     routes = {}
 
     for example in next(os.walk(folder_path))[2]:
+        if example.endswith("sol"):
+            continue
         print(example)
         # Go through all test instances
         data = vrplib.read_instance(f"{folder_path}/{example}")
