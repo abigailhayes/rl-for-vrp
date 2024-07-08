@@ -150,14 +150,14 @@ def test_cvrp_other(model, method, method_settings, test_set):
 def test_cvrp_generate(model, method, method_settings):
     """Carry out testing on all examples across all generate folders for any model"""
     # Running all tests for the generated test instances
-    results_b = {}
-    routes_b = {}
+    results = {}
+    routes = {}
     for subdir in next(os.walk("instances/CVRP/generate"))[1]:
-        results_b[subdir], routes_b[subdir] = test_cvrp_other(
+        results[subdir], routes[subdir] = test_cvrp_other(
             model, method, method_settings, f"instances/CVRP/generate/{subdir}"
         )
 
-    return results_b, routes_b
+    return results, routes
 
 
 def test_cvrp(method, method_settings, ident, testing, model=None, save=True):
@@ -198,6 +198,15 @@ def test_cvrp(method, method_settings, ident, testing, model=None, save=True):
                 json.dump(routes_b, f, indent=2)
         except NameError:
             pass
+    else:
+        results = {'a': results_a}
+        routes = {'b': routes_b}
+        try:
+            results['b'] = results_b
+            routes['b'] = routes_b
+        except NameError:
+            pass
+        return results, routes
 
 
 def test_cvrptw(method, method_settings, ident, testing, model=None):
