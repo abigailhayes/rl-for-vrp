@@ -55,6 +55,26 @@ def instance_to_nazari(instance):
     ).reshape(-1, instance["dimension"], 3)
 
 
+def test_cvrp_nazari(model, folder_path):
+    results = {"greedy": {}, "beam": {}}
+    routes = {"greedy": {}, "beam": {}}
+
+    for example in next(os.walk(folder_path))[2]:
+        print(example)
+        # Go through all test instances
+        data = vrplib.read_instance(f"{folder_path}/{example}")
+
+        if model.args["n_nodes"] != data["dimension"]:
+            continue
+        model.testing(instance_to_nazari(data), data)
+        results["greedy"][example] = model.cost["greedy"]
+        results["beam"][example] = model.cost["beam"]
+        routes["greedy"][example] = model.routes["greedy"]
+        routes["beam"][example] = model.routes["beam"]
+
+    return results, routes
+
+
 def test_cvrp_generate(model, method, method_settings):
     # Running all tests for the generated test instances
     results_b = {}
@@ -64,16 +84,11 @@ def test_cvrp_generate(model, method, method_settings):
         routes_b[subdir] = {}
         if method == "nazari":
             # Nazari has two variants, and these are run adjacently, so need another level of dictionary
-            results_b[subdir]["greedy"] = {}
-            results_b[subdir]["beam"] = {}
-            routes_b[subdir]["greedy"] = {}
-            routes_b[subdir]["beam"] = {}
+            results_b[subdir], routes_b[subdir] = test_cvrp_nazari(model, f"instances/CVRP/generate/{subdir}")
         for example in next(os.walk(f"instances/CVRP/generate/{subdir}"))[2]:
             print(example)
             # Go through all test instances
-            data = vrplib.read_instance(
-                f"instances/CVRP/generate/{subdir}/{example}"
-            )
+            data = vrplib.read_instance(f"instances/CVRP/generate/{subdir}/{example}")
             if method == "ortools":
                 model = ORtools(
                     data,
@@ -95,14 +110,6 @@ def test_cvrp_generate(model, method, method_settings):
                 model.single_test(data)
                 results_b[subdir][example] = model.cost
                 routes_b[subdir][example] = model.routes
-            elif method == "nazari":
-                if model.args["n_nodes"] != data["dimension"]:
-                    continue
-                model.testing(instance_to_nazari(data), data)
-                results_b[subdir]["greedy"][example] = model.cost["greedy"]
-                results_b[subdir]["beam"][example] = model.cost["beam"]
-                routes_b[subdir]["greedy"][example] = model.routes["greedy"]
-                routes_b[subdir]["beam"][example] = model.routes["beam"]
 
     return results_b, routes_b
 
@@ -112,10 +119,7 @@ def test_cvrp_other(model, method, method_settings, test_set):
     routes = {}
 
     if method == "nazari":
-        results["greedy"] = {}
-        results["beam"] = {}
-        routes["greedy"] = {}
-        routes["beam"] = {}
+        results, routes = test_cvrp_nazari(model, f"instances/CVRP/{test_set}")
     for example in next(os.walk(f"instances/CVRP/{test_set}"))[2]:
         print(example)
         # Go through all test instances
@@ -145,14 +149,6 @@ def test_cvrp_other(model, method, method_settings, test_set):
             model.run_all()
             results[example] = model.cost
             routes[example] = model.routes
-        elif method == "nazari":
-            if model.args["n_nodes"] != data["dimension"]:
-                continue
-            model.testing(instance_to_nazari(data), data)
-            results["greedy"][example] = model.cost["greedy"]
-            results["beam"][example] = model.cost["beam"]
-            routes["greedy"][example] = model.routes["greedy"]
-            routes["beam"][example] = model.routes["beam"]
 
     return results, routes
 
@@ -178,7 +174,9 @@ def test_cvrp(method, method_settings, ident, testing, model=None, save=True):
 
         else:
             # Running all tests for the general test instances
-            results_a[test_set], routes_a[test_set] = test_cvrp_other(model, method, method_settings, test_set)
+            results_a[test_set], routes_a[test_set] = test_cvrp_other(
+                model, method, method_settings, test_set
+            )
 
     if save:
         # Saving results
