@@ -56,6 +56,7 @@ def instance_to_nazari(instance):
 
 
 def test_cvrp_nazari(model, folder_path):
+    """Carry out testing on all examples in a specific folder for a Nazari model"""
     results = {"greedy": {}, "beam": {}}
     routes = {"greedy": {}, "beam": {}}
 
@@ -75,6 +76,36 @@ def test_cvrp_nazari(model, folder_path):
     return results, routes
 
 
+def test_cvrp_algm(method, method_settings, folder_path):
+    results = {}
+    routes = {}
+
+    for example in next(os.walk(folder_path))[2]:
+        print(example)
+        # Go through all test instances
+        data = vrplib.read_instance(f"{folder_path}/{example}")
+
+        # Set up model
+        if method == "ortools":
+            model = ORtools(
+                data,
+                method_settings["init_method"],
+                method_settings["improve_method"],
+            )
+        elif method == "own":
+            model = Own(data, method_settings)
+
+        # Get results
+        try:
+            model.run_all()
+        except AttributeError:
+            continue
+        results[example] = model.cost
+        routes[example] = model.routes
+
+    return results, routes
+
+
 def test_cvrp_generate(model, method, method_settings):
     # Running all tests for the generated test instances
     results_b = {}
@@ -83,30 +114,19 @@ def test_cvrp_generate(model, method, method_settings):
         results_b[subdir] = {}
         routes_b[subdir] = {}
         if method == "nazari":
-            # Nazari has two variants, and these are run adjacently, so need another level of dictionary
-            results_b[subdir], routes_b[subdir] = test_cvrp_nazari(model, f"instances/CVRP/generate/{subdir}")
+            results_b[subdir], routes_b[subdir] = test_cvrp_nazari(
+                model, f"instances/CVRP/generate/{subdir}"
+            )
+        elif method in ["ortools", "own"]:
+            results_b[subdir], routes_b[subdir] = test_cvrp_algm(
+                method, method_settings, f"instances/CVRP/generate/{subdir}"
+            )
+
         for example in next(os.walk(f"instances/CVRP/generate/{subdir}"))[2]:
             print(example)
             # Go through all test instances
             data = vrplib.read_instance(f"instances/CVRP/generate/{subdir}/{example}")
-            if method == "ortools":
-                model = ORtools(
-                    data,
-                    method_settings["init_method"],
-                    method_settings["improve_method"],
-                )
-                try:
-                    model.run_all()
-                except AttributeError:
-                    continue
-                results_b[subdir][example] = model.cost
-                routes_b[subdir][example] = model.routes
-            elif method == "own":
-                model = Own(data, method_settings)
-                model.run_all()
-                results_b[subdir][example] = model.init_model.cost
-                routes_b[subdir][example] = model.init_model.routes
-            elif method in ["rl4co", "rl4co_tsp"]:
+            if method in ["rl4co", "rl4co_tsp"]:
                 model.single_test(data)
                 results_b[subdir][example] = model.cost
                 routes_b[subdir][example] = model.routes
@@ -120,6 +140,10 @@ def test_cvrp_other(model, method, method_settings, test_set):
 
     if method == "nazari":
         results, routes = test_cvrp_nazari(model, f"instances/CVRP/{test_set}")
+    elif method in ["ortools", "own"]:
+        results, routes = test_cvrp_algm(
+            method, method_settings, f"instances/CVRP/{test_set}"
+        )
     for example in next(os.walk(f"instances/CVRP/{test_set}"))[2]:
         print(example)
         # Go through all test instances
@@ -128,25 +152,8 @@ def test_cvrp_other(model, method, method_settings, test_set):
         data = vrplib.read_instance(f"instances/CVRP/{test_set}/{example}")
         if data["edge_weight_type"] != "EUC_2D":
             continue
-        if method == "ortools":
-            model = ORtools(
-                data,
-                method_settings["init_method"],
-                method_settings["improve_method"],
-            )
-            try:
-                model.run_all()
-            except AttributeError:
-                continue
-            results[example] = model.cost
-            routes[example] = model.routes
-        elif method in ["rl4co", "rl4co_tsp"]:
+        if method in ["rl4co", "rl4co_tsp"]:
             model.single_test(data)
-            results[example] = model.cost
-            routes[example] = model.routes
-        elif method == "own":
-            model = Own(data, method_settings)
-            model.run_all()
             results[example] = model.cost
             routes[example] = model.routes
 
