@@ -45,7 +45,7 @@ def main():
             settings["problem"],
             settings["init_method"],
             settings["customers"],
-            settings["id"],
+            settings["seed"],
             args["id"],
         )
         model.set_model()
