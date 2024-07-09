@@ -126,13 +126,11 @@ class RL4CO:
         policy = policy.to(device)
 
         # Print tensor shapes
-        print(f"coords: {coords.shape}")
-        print(f"coords_norm: {coords_norm.shape}")
-        print(f"demand: {demand.shape}")
-        print(f"durations: {durations.shape if self.problem == 'CVRPTW' else 'N/A'}")
-        print(
-            f"time_windows: {time_windows.shape if self.problem == 'CVRPTW' else 'N/A'}"
-        )
+        #print(f"coords: {coords.shape}")
+        #print(f"coords_norm: {coords_norm.shape}")
+        #print(f"demand: {demand.shape}")
+        #print(f"durations: {durations.shape if self.problem == 'CVRPTW' else 'N/A'}")
+        #print(f"time_windows: {time_windows.shape if self.problem == 'CVRPTW' else 'N/A'}")
 
         # Prepare the tensordict
         if self.problem == "CVRP":
@@ -162,13 +160,13 @@ class RL4CO:
             print(td)
 
         # Print the tensordict to debug
-        print(f"td['locs']: {td['locs'].shape}")
-        print(f"td['demand']: {td['demand'].shape}")
-        print(f"td['visited']: {td['visited'].shape}")
-        print(f"td['action_mask']: {td['action_mask'].shape}")
-        if self.problem == "CVRPTW":
-            print(f"td['durations']: {td['durations'].shape}")
-            print(f"td['time_windows']: {td['time_windows'].shape}")
+        #print(f"td['locs']: {td['locs'].shape}")
+        #print(f"td['demand']: {td['demand'].shape}")
+        #print(f"td['visited']: {td['visited'].shape}")
+        #print(f"td['action_mask']: {td['action_mask'].shape}")
+        #if self.problem == "CVRPTW":
+        #    print(f"td['durations']: {td['durations'].shape}")
+        #    print(f"td['time_windows']: {td['time_windows'].shape}")
 
         # Get the solution from the policy
         with torch.no_grad():
@@ -178,10 +176,10 @@ class RL4CO:
                 out = policy(
                     td.clone(), decode_type="greedy", num_starts=0, return_actions=True
                 )
-            print(f"out['actions']: {out['actions']}")  # Print the actions to debug
+            #print(f"out['actions']: {out['actions']}")  # Print the actions to debug
 
         self.routing(out)
-        self._get_cost(self.routes, instance)
+        self.cost = self._get_cost(self.routes, instance)
 
     @staticmethod
     def _get_cost(routes, instance):

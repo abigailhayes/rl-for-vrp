@@ -87,7 +87,6 @@ def main():
                     args["testing"],
                     model,
                 )
-                cost_fix(ident)
             elif args["method"] in ["ortools", "own"]:
                 utils.test_cvrp(
                     args["method"], args["method_settings"], ident, args["testing"]
@@ -105,7 +104,6 @@ def main():
                     args["testing"],
                     model,
                 )
-                cost_fix(ident)
 
     end_time = time.time()
     # Create a dict with all variables of the current run
