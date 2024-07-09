@@ -207,7 +207,7 @@ def test_cvrp(method, method_settings, ident, testing, model=None, save=True):
             pass
     else:
         results = {"a": results_a}
-        routes = {"b": routes_b}
+        routes = {"a": routes_a}
         try:
             results["b"] = results_b
             routes["b"] = routes_b
