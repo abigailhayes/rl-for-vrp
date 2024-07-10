@@ -6,6 +6,7 @@ import json
 
 from lightning.pytorch import seed_everything
 
+import methods.nazari.nazari as nazari
 import methods.rl4co_run as rl4co_run
 import utils
 
@@ -53,6 +54,15 @@ def main():
         root_path = f"results/exp_{args['id']}/lightning_logs"
         long_path = f"{root_path}/{os.listdir(root_path)[0]}/checkpoints"
         model.model.load_from_checkpoint(f"{long_path}/{os.listdir(long_path)[0]}")
+
+    elif settings["method"] == "nazari":
+        model = nazari.Nazari(
+            args["id"],
+            settings["task"]
+        )
+        root_path = f"results/exp_{args['id']}/logs"
+        model.agent.args['load_path'] = f"{root_path}/{os.listdir(root_path)[0]}/model"
+        model.agent.load_model()
 
     results = {}
     for seed in args["seeds"]:
