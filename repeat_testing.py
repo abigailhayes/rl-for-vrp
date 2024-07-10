@@ -38,6 +38,7 @@ def main():
         pd.read_csv("results/other/settings.csv").set_index("id").to_dict("index")
     )
     settings = settings_df[int(args["id"])]
+    model = None
 
     # Load in model
     if settings["method"] == "rl4co":
