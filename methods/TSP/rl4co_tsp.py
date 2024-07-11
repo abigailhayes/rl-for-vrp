@@ -56,9 +56,12 @@ class RL4CO_TSP(RL4CO):
         td["action_mask"] = torch.ones(batch_size, coords_norm.shape[0], dtype=torch.bool)
 
         # Get the solution from the policy
-        with torch.no_grad():
-            out = policy(
-                td.clone(), phase="test", decode_type="greedy", return_actions=True
-            )
-            #print(f"out['actions']: {out['actions']}")  # Print the actions to debug
-        self.routes.append([cluster[i-1] for i in self.routing(out)])
+        try:
+            with torch.no_grad():
+                out = policy(
+                    td.clone(), phase="test", decode_type="greedy", return_actions=True
+                )
+                #print(f"out['actions']: {out['actions']}")  # Print the actions to debug
+            self.routes.append([cluster[i-1] for i in self.routing(out)])
+        except AssertionError:
+            self.routes.append(cluster[1:])
