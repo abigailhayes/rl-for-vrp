@@ -45,8 +45,8 @@ class RL4CO_TSP(RL4CO):
         policy = policy.to(device)
 
         # Print tensor shapes
-        print(f"coords: {coords.shape}, {coords}")
-        print(f"coords_norm: {coords_norm.shape}, {coords_norm}")
+        #print(f"coords: {coords.shape}, {coords}")
+        #print(f"coords_norm: {coords_norm.shape}, {coords_norm}")
 
         # Prepare the tensordict
         batch_size = 2
@@ -60,5 +60,5 @@ class RL4CO_TSP(RL4CO):
             out = policy(
                 td.clone(), phase="test", decode_type="greedy", return_actions=True
             )
-            print(f"out['actions']: {out['actions']}")  # Print the actions to debug
+            #print(f"out['actions']: {out['actions']}")  # Print the actions to debug
         self.routes.append([cluster[i-1] for i in self.routing(out)])
