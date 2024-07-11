@@ -3,6 +3,7 @@ import pandas as pd
 import os
 import ast
 import json
+from datetime import datetime
 
 from lightning.pytorch import seed_everything
 
@@ -56,12 +57,24 @@ def main():
         model.model.load_from_checkpoint(f"{long_path}/{os.listdir(long_path)[0]}")
 
     elif settings["method"] == "nazari":
-        model = nazari.Nazari(
-            args["id"],
-            settings["task"]
-        )
+
+        def get_earliest_date_option(options):
+            # Define a function to extract the date and time from the option string
+            def extract_datetime(option):
+                # Split the string and take the part containing the date and time
+                date_time_str = (
+                    option.split("-")[1] + "-" + option.split("-")[2] + "-" + option.split("-")[3].split("_")[0] + " " + option.split("_")[2].replace("-", ":")
+                )
+                # Convert the date_time_str to a datetime object
+                return datetime.strptime(date_time_str, "%Y-%m-%d %H:%M:%S")
+
+            # Find the option with the earliest date
+            earliest_option = min(options, key=extract_datetime)
+            return earliest_option
+
+        model = nazari.Nazari(args["id"], settings["task"])
         root_path = f"results/exp_{args['id']}/logs"
-        model.agent.args['load_path'] = f"{root_path}/{os.listdir(root_path)[0]}/model"
+        model.agent.args["load_path"] = f"{root_path}/{get_earliest_date_option(os.listdir(root_path))}/model"
         model.agent.load_model()
 
     results = {}
