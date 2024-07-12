@@ -34,7 +34,7 @@ class RL4CO_TSP(RL4CO):
             coords = torch.tensor(instance["node_coord"][[0] + group]).float()
             self.single_route(coords, group)
 
-        self._get_cost(self.routes, instance)
+        self.cost = self._get_cost(self.routes, instance)
 
     def single_route(self, coords, cluster):
         """Build for a single cluster"""
