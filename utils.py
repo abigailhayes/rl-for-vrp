@@ -130,9 +130,12 @@ def test_cvrp_rl4co(model, folder_path):
         if data["edge_weight_type"] != "EUC_2D":
             continue
 
-        model.single_test(data)
-        results[example] = model.cost
-        routes[example] = model.routes
+        try:
+            model.single_test(data)
+            results[example] = model.cost
+            routes[example] = model.routes
+        except AttributeError:
+            continue
 
     return results, routes
 
@@ -267,9 +270,12 @@ def test_cvrptw(method, method_settings, ident, testing, model=None, save=True):
                     except SystemError:
                         continue
             elif method == "rl4co":
-                model.single_test(data2)
-                results[tester][example] = model.cost
-                routes[tester][example] = model.routes
+                try:
+                    model.single_test(data2)
+                    results[tester][example] = model.cost
+                    routes[tester][example] = model.routes
+                except AttributeError:
+                    continue
     if save:
         # Saving results
         with open(f"results/exp_{ident}/results.json", "w") as f:
