@@ -30,6 +30,7 @@ def main():
         ident = 1
     else:
         ident = max(id_list) + 1
+    print("IDENTITY:", ident)
 
     # Set up folder to save experiment results
     experiment_dir = f"results/exp_{str(ident)}"
