@@ -45,23 +45,35 @@ def main():
         model.train_model()
         print("Finished training")
     elif args["method"] == "rl4co":
+        try:
+            args["method_settings"]["decode"]
+        except NameError:
+            args["method_settings"]["decode"] = "greedy"
+
         model = rl4co_run.RL4CO(
             args["problem"],
             args["method_settings"]["init_method"],
             args["method_settings"]["customers"],
             args["seed"],
             ident,
+            args["method_settings"]["decode"],
         )
         model.set_model()
         model.train_model()
         print("Finished training")
     elif args["method"] == "rl4co_tsp":
+        try:
+            args["method_settings"]["decode"]
+        except NameError:
+            args["method_settings"]["decode"] = "greedy"
+
         model = rl4co_tsp.RL4CO_TSP(
             args["problem"],
             args["method_settings"]["init_method"],
             args["method_settings"]["customers"],
             args["seed"],
             ident,
+            args["method_settings"]["decode"],
         )
         model.set_model()
         model.train_model()

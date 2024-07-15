@@ -44,6 +44,11 @@ def main():
 
     # Load in model
     if settings["method"] == "rl4co":
+        try:
+            args["method_settings"]["decode"]
+        except NameError:
+            args["method_settings"]["decode"] = "greedy"
+
         model = rl4co_run.RL4CO(
             settings["problem"],
             settings["init_method"],
