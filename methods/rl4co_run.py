@@ -77,6 +77,8 @@ class RL4CO:
             epochs = 1
         elif self.init_method in ["amppo", "symnco", "pomo", "mdam"]:
             epochs = 10
+        elif self.init_method == "am" & self.problem == "CVRPTW" & self.customers > 10:
+            epochs = 10
         else:
             epochs = 20
             # Currently ignoring POMO instructions for 2000 epochs
@@ -158,7 +160,7 @@ class RL4CO:
             action_mask = torch.ones(batch_size, n, dtype=torch.bool)
             action_mask[:, 0] = False
             td["action_mask"] = action_mask
-            print(td)
+            # print(td)
 
         # Print the tensordict to debug
         # print(f"td['locs']: {td['locs'].shape}")
