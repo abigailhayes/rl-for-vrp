@@ -48,7 +48,7 @@ def main():
     elif args["method"] == "rl4co":
         try:
             args["method_settings"]["decode"]
-        except NameError:
+        except KeyError:
             args["method_settings"]["decode"] = "greedy"
 
         model = rl4co_run.RL4CO(
@@ -65,7 +65,7 @@ def main():
     elif args["method"] == "rl4co_tsp":
         try:
             args["method_settings"]["decode"]
-        except NameError:
+        except KeyError:
             args["method_settings"]["decode"] = "greedy"
 
         model = rl4co_tsp.RL4CO_TSP(
