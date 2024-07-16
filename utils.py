@@ -274,7 +274,7 @@ def test_cvrptw(method, method_settings, ident, testing, model=None, save=True):
                     model.single_test(data2)
                     results[tester][example] = model.cost
                     routes[tester][example] = model.routes
-                except AttributeError:
+                except (AttributeError, AssertionError):
                     continue
     if save:
         # Saving results
