@@ -77,7 +77,7 @@ class RL4CO:
             epochs = 1
         elif self.init_method in ["amppo", "symnco", "pomo", "mdam"]:
             epochs = 10
-        elif self.init_method == "am" & self.problem == "CVRPTW" & self.customers > 10:
+        elif self.init_method == "am" and self.problem == "CVRPTW" and self.customers > 10:
             epochs = 10
         else:
             epochs = 20
@@ -174,7 +174,7 @@ class RL4CO:
         # Get the solution from the policy
         with torch.no_grad():
             if self.problem == "CVRP":
-                out = policy(td.clone(), decode_type=self.decode, return_actions=True)
+                out = policy(td.clone(), phase="test", decode_type=self.decode, return_actions=True)
             elif self.problem == "CVRPTW":
                 out = policy(
                     td.clone(),
