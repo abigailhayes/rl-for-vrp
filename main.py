@@ -40,6 +40,27 @@ def main():
     # set experiment seed
     random.seed(args["seed"])  # May need to look at more
 
+    # Create a dict with all variables of the current run
+    inits = {**args, **args["method_settings"]}
+    inits.update(
+        {
+            "id": ident,
+            "date": date.today(),
+            "testing": str(inits["testing"]),
+        }
+    )
+    del inits["method_settings"]
+    print(inits)
+
+    # Load dataframe that stores the results (every run adds a new row)
+    inits_df = pd.read_csv("results/other/inits.csv")
+    # Store settings in data frame
+    inits_df = pd.concat(
+        [inits_df, pd.DataFrame.from_dict([inits])], ignore_index=True
+    )
+    # save updated csv file
+    inits_df.to_csv("results/other/inits.csv", index=False)
+
     # Set up/train model (and save where appropriate)
     if args["method"] == "nazari":
         model = nazari.Nazari(ident, task=args["method_settings"]["task"])
