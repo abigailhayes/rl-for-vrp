@@ -24,7 +24,7 @@ class RL4CO:
         self.problem = problem
         self.decode = decode
         if self.problem == "CVRP":
-            self.env = CVRPEnv(num_loc=self.customers)
+            self.env = CVRPEnv(generator_params={"num_loc": self.customers})
         elif self.problem == "CVRPTW":
             self.env = CVRPTWEnv(generator_params={"num_loc": self.customers})
 
