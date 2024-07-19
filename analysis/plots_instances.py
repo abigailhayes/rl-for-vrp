@@ -39,7 +39,7 @@ def plot_solution(instance, solution, name, experiment_id, demand=False):
         for n, [xi, yi] in enumerate(instance["node_coord"][1:]):
             plt.text(xi, yi, instance["demand"][n], va="bottom", ha="center")
 
-    plt.savefig(f"plots/{name}/expt_{experiment_id}.jpg")
+    plt.savefig(f"analysis/plots/{name}/expt_{experiment_id}.jpg")
 
 
 def plot_instance(instance, name, demand=False):
@@ -72,7 +72,7 @@ def plot_instance(instance, name, demand=False):
         for n, [xi, yi] in enumerate(instance["node_coord"][1:]):
             plt.text(xi, yi, instance["demand"][n], va="bottom", ha="center")
 
-    plt.savefig(f"plots/{name}/instance.jpg")
+    plt.savefig(f"analysis/plots/{name}/instance.jpg")
 
 
 def generate_plots(expt, expt_ids: list, instance_name, instance_set, demand=False):
