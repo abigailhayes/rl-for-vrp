@@ -4,6 +4,25 @@ import numpy as np
 import vrplib
 import json
 import os
+import argparse
+
+
+def parse_plots():
+    """Parse arguments for plot generation
+    expt, expt_ids: list, instance_name, instance_set, demand=False"""
+    parser = argparse.ArgumentParser(description="Plot arguments")
+    parser.add_argument("--expt", help="Experiment - a, b or c")
+    parser.add_argument(
+        "--expt_ids", default=[], help="Experiment ids to plot", type=str, nargs="*"
+    )
+    parser.add_argument("--instance_name", help="Instance name including file type")
+    parser.add_argument("--instance_set", help="Folder containing the instance")
+    parser.add_argument("--demand", default=False, help="Whether demand is on plots")
+
+    args, unknown = parser.parse_known_args()
+    args = vars(args)
+
+    return args
 
 
 def plot_solution(instance, solution, name, experiment_id, demand=False):
@@ -81,7 +100,7 @@ def generate_plots(expt, expt_ids: list, instance_name, instance_set, demand=Fal
     - expt_ids - the experiment run solutions to include
     - instance_name - the specific name of the instance
     - instance_set - the set the instance belongs to i.e. the next level folder
-    - demand - whether or not to include the demand of each node in the plot"""
+    - demand - whether to include the demand of each node in the plot"""
 
     # Remove .vrp
     short_name = instance_name.replace(".vrp", "")
@@ -123,3 +142,12 @@ def generate_plots(expt, expt_ids: list, instance_name, instance_set, demand=Fal
             plot_solution(instance, solution, short_name, expt_id, demand)
         except (OSError, KeyError):
             pass
+
+
+def main():
+    args = parse_plots()
+    generate_plots(args['expt'], args['expt_ids'], args['instance_name'], args['instance_set'], args['demand'])
+
+
+if __name__ == "__main__":
+    main()
