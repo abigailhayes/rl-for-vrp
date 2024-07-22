@@ -11,7 +11,7 @@ from analysis.utils import (
 
 
 def b_best():
-    print('b_best')
+    """Gather the best routes and their length for each example"""
     best_b = pd.read_csv("results/other/best_b.csv")["id"].to_list()
     settings_df = pd.read_csv("results/other/settings.csv")
     working_df = settings_df[settings_df["problem"] == "CVRP"]
@@ -19,8 +19,10 @@ def b_best():
     try:
         with open(f"results/other/optima_b.json") as json_data:
             optima_b = json.load(json_data)
+        new = False
     except OSError:
         optima_b = {}
+        new = True
 
     for ident in working_df["id"]:
         # Skip ids already checked
@@ -40,9 +42,11 @@ def b_best():
                 continue
         # Run through instances
         for subdir in next(os.walk("instances/CVRP/generate"))[1]:
-            optima_b[subdir] = {}
+            if new:
+                optima_b[subdir] = {}
             for example in next(os.walk(f"instances/CVRP/generate/{subdir}"))[2]:
-                optima_b[subdir][example] = {}
+                if new:
+                    optima_b[subdir][example] = {}
                 try:
                     value = results[subdir].get(example)
                     if value is None:
@@ -61,6 +65,24 @@ def b_best():
         json.dump(optima_b, f, indent=2)
     df = pd.DataFrame(best_b, columns=["id"])
     df.to_csv("results/other/best_b.csv", index=False)
+
+def best_b_means():
+    # Load in relevant best b results
+    json_path = f"results/other/optima_b.json"
+    # When data is stored directly for each instance
+    try:
+        with open(json_path) as json_data:
+            data = json.load(json_data)
+    except ValueError:
+        pass
+
+    avgs = {"id": 0, "notes": "Experiment b best"}
+    for key in data:
+        avgs[key] = average_distance(
+            {k: v["value"] for k, v in data[key].items() if len(v) > 0}
+        )
+
+    return pd.DataFrame.from_dict([avgs])
 
 
 def b_all_averages(validated=True):
@@ -101,7 +123,7 @@ def b_all_averages(validated=True):
             pass
 
     include = pd.concat(
-        [include, best_or_means("b", instance_count)], ignore_index=True
+        [include, best_or_means("b", instance_count), best_b_means()], ignore_index=True
     )
 
     include.to_csv("results/other/expt_b_means.csv", index=False)
