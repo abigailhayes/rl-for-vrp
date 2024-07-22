@@ -21,6 +21,9 @@ def main():
     expt_a.a_all_averages()
     print("Complete")
 
+    print("Expt B - best values")
+    expt_b.b_best()
+    print("Complete")
     print("Expt B - all averages")
     expt_b.b_all_averages()
     print("Complete")
