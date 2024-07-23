@@ -77,7 +77,11 @@ class RL4CO:
             epochs = 1
         elif self.init_method in ["amppo", "symnco", "pomo", "mdam"]:
             epochs = 10
-        elif self.init_method == "am" and self.problem == "CVRPTW" and self.customers > 10:
+        elif (
+            self.init_method == "am"
+            and self.problem == "CVRPTW"
+            and self.customers > 10
+        ):
             epochs = 10
         else:
             epochs = 20
@@ -151,7 +155,7 @@ class RL4CO:
             td = self.env.reset(batch_size=(batch_size,)).to(device)
             td["locs"] = repeat(coords, "n d -> b n d", b=batch_size, d=2)
             td["distances"] = get_distance(
-                td["locs"][:, 0, :], td["locs"][:, 1:, :].transpose(0, 1)
+                td["locs"][:, 0, :], td["locs"].transpose(0, 1)
             ).transpose(0, 1)
             td["time_windows"] = repeat(time_windows, "n d -> b n d", b=batch_size, d=2)
             td["durations"] = repeat(durations, "n -> b n", b=batch_size)
@@ -160,6 +164,8 @@ class RL4CO:
             action_mask = torch.ones(batch_size, n, dtype=torch.bool)
             action_mask[:, 0] = False
             td["action_mask"] = action_mask
+            td["depot"] = coords[0].unsqueeze(0)
+            td["current_loc"] = coords[0].unsqueeze(0)
             # print(td)
 
         # Print the tensordict to debug
@@ -174,7 +180,12 @@ class RL4CO:
         # Get the solution from the policy
         with torch.no_grad():
             if self.problem == "CVRP":
-                out = policy(td.clone(), phase="test", decode_type=self.decode, return_actions=True)
+                out = policy(
+                    td.clone(),
+                    phase="test",
+                    decode_type=self.decode,
+                    return_actions=True,
+                )
             elif self.problem == "CVRPTW":
                 out = policy(
                     td.clone(),
