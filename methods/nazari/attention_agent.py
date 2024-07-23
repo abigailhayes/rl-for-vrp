@@ -307,6 +307,7 @@ class RLAgent(object):
         latest_ckpt = tf.train.latest_checkpoint(self.args['load_path'])
         if latest_ckpt is not None:
             self.saver.restore(self.sess, latest_ckpt)
+            print('model loaded')
 
     def evaluate_single(self, eval_type='greedy'):
         start_time = time.time()

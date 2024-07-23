@@ -3,6 +3,7 @@
 from methods.or_tools import ORtools
 import methods.nazari.nazari as nazari
 import methods.rl4co_run as rl4co_run
+import methods.TSP.rl4co_tsp as rl4co_tsp
 import utils
 from rl4co_cost_fix import cost_fix
 
@@ -29,6 +30,7 @@ def main():
         ident = 1
     else:
         ident = max(id_list) + 1
+    print("IDENTITY:", ident)
 
     # Set up folder to save experiment results
     experiment_dir = f"results/exp_{str(ident)}"
@@ -38,18 +40,62 @@ def main():
     # set experiment seed
     random.seed(args["seed"])  # May need to look at more
 
+    # Create a dict with all variables of the current run
+    inits = {**args, **args["method_settings"]}
+    inits.update(
+        {
+            "id": ident,
+            "date": date.today(),
+            "testing": str(inits["testing"]),
+        }
+    )
+    del inits["method_settings"]
+    print(inits)
+
+    # Load dataframe that stores the results (every run adds a new row)
+    inits_df = pd.read_csv("results/other/inits.csv")
+    # Store settings in data frame
+    inits_df = pd.concat(
+        [inits_df, pd.DataFrame.from_dict([inits])], ignore_index=True
+    )
+    # save updated csv file
+    inits_df.to_csv("results/other/inits.csv", index=False)
+
     # Set up/train model (and save where appropriate)
     if args["method"] == "nazari":
         model = nazari.Nazari(ident, task=args["method_settings"]["task"])
         model.train_model()
         print("Finished training")
     elif args["method"] == "rl4co":
+        try:
+            args["method_settings"]["decode"]
+        except KeyError:
+            args["method_settings"]["decode"] = "greedy"
+
         model = rl4co_run.RL4CO(
             args["problem"],
             args["method_settings"]["init_method"],
             args["method_settings"]["customers"],
             args["seed"],
             ident,
+            args["method_settings"]["decode"],
+        )
+        model.set_model()
+        model.train_model()
+        print("Finished training")
+    elif args["method"] == "rl4co_tsp":
+        try:
+            args["method_settings"]["decode"]
+        except KeyError:
+            args["method_settings"]["decode"] = "greedy"
+
+        model = rl4co_tsp.RL4CO_TSP(
+            args["problem"],
+            args["method_settings"]["init_method"],
+            args["method_settings"]["customers"],
+            args["seed"],
+            ident,
+            args["method_settings"]["decode"],
         )
         model.set_model()
         model.train_model()
@@ -67,7 +113,7 @@ def main():
                     args["testing"],
                     model,
                 )
-            elif args["method"] == "rl4co":
+            elif args["method"] in ["rl4co", "rl4co_tsp"]:
                 utils.test_cvrp(
                     args["method"],
                     args["method_settings"],
@@ -75,7 +121,6 @@ def main():
                     args["testing"],
                     model,
                 )
-                cost_fix(ident)
             elif args["method"] in ["ortools", "own"]:
                 utils.test_cvrp(
                     args["method"], args["method_settings"], ident, args["testing"]
@@ -93,7 +138,6 @@ def main():
                     args["testing"],
                     model,
                 )
-                cost_fix(ident)
 
     end_time = time.time()
     # Create a dict with all variables of the current run

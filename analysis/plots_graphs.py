@@ -1,6 +1,7 @@
 from matplotlib import pyplot as plt
 import pandas as pd
 import numpy as np
+from itertools import product
 
 
 def plot_max_demand(size, cust_distn, depot_locatn):
@@ -106,3 +107,20 @@ def plot_dstn_sets(size, max_demand):
     ax.legend(loc="best")
 
     plt.savefig(f"analysis/plots/ds_{max_demand}_{size}.svg")
+
+
+def main():
+    size = [10, 20, 50, 100]
+    cust_distn = ["random", "cluster"]
+    depot_locatn = ["centre", "random", "outer"]
+    max_demand = [90, 50, 30]
+
+    for size, cust, depot in product(*[size, cust_distn, depot_locatn]):
+        plot_max_demand(size, cust, depot)
+
+    for size, demand in product(*[size, max_demand]):
+        plot_dstn_sets(size, demand)
+
+
+if __name__ == "__main__":
+    main()

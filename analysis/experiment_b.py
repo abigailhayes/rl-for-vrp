@@ -1,5 +1,6 @@
 import json
 import pandas as pd
+import os
 
 from analysis.utils import (
     add_settings,
@@ -9,9 +10,84 @@ from analysis.utils import (
 )
 
 
+def b_best():
+    """Gather the best routes and their length for each example"""
+    best_b = pd.read_csv("results/other/best_b.csv")["id"].to_list()
+    settings_df = pd.read_csv("results/other/settings.csv")
+    working_df = settings_df[settings_df["problem"] == "CVRP"]
+
+    try:
+        with open(f"results/other/optima_b.json") as json_data:
+            optima_b = json.load(json_data)
+        new = False
+    except OSError:
+        optima_b = {}
+        new = True
+
+    for ident in working_df["id"]:
+        # Skip ids already checked
+        if ident in best_b:
+            continue
+        # Load data
+        if os.path.isfile(f"results/exp_{ident}/routes_b.json"):
+            try:
+                with open(f"results/exp_{ident}/results_b.json") as json_data:
+                    results = json.load(json_data)
+            except ValueError:
+                continue
+            try:
+                with open(f"results/exp_{ident}/routes_b.json") as json_data:
+                    routes = json.load(json_data)
+            except ValueError:
+                continue
+        # Run through instances
+        for subdir in next(os.walk("instances/CVRP/generate"))[1]:
+            if new:
+                optima_b[subdir] = {}
+            for example in next(os.walk(f"instances/CVRP/generate/{subdir}"))[2]:
+                if new:
+                    optima_b[subdir][example] = {}
+                try:
+                    value = results[subdir].get(example)
+                    if value is None:
+                        continue
+                    elif optima_b[subdir][example].get(
+                        "id"
+                    ) is None or value < optima_b[subdir][example].get("value"):
+                        optima_b[subdir][example]["value"] = value
+                        optima_b[subdir][example]["id"] = ident
+                        optima_b[subdir][example]["route"] = routes[subdir][example]
+                except KeyError:
+                    pass
+        best_b.append(ident)
+    # Save result
+    with open(f"results/other/optima_b.json", "w") as f:
+        json.dump(optima_b, f, indent=2)
+    df = pd.DataFrame(best_b, columns=["id"])
+    df.to_csv("results/other/best_b.csv", index=False)
+
+def best_b_means():
+    # Load in relevant best b results
+    json_path = f"results/other/optima_b.json"
+    # When data is stored directly for each instance
+    try:
+        with open(json_path) as json_data:
+            data = json.load(json_data)
+    except ValueError:
+        pass
+
+    avgs = {"id": 0, "notes": "Experiment b best"}
+    for key in data:
+        avgs[key] = average_distance(
+            {k: v["value"] for k, v in data[key].items() if len(v) > 0}
+        )
+
+    return pd.DataFrame.from_dict([avgs])
+
+
 def b_all_averages(validated=True):
     """Get the averages for all experiment B instance types"""
-    if validated == True:
+    if validated:
         instance_count = pd.read_csv("results/other/validate_count.csv")
     else:
         instance_count = pd.read_csv("results/other/instance_count.csv")
@@ -47,7 +123,7 @@ def b_all_averages(validated=True):
             pass
 
     include = pd.concat(
-        [include, best_or_means("b", instance_count)], ignore_index=True
+        [include, best_or_means("b", instance_count), best_b_means()], ignore_index=True
     )
 
     include.to_csv("results/other/expt_b_means.csv", index=False)
@@ -74,6 +150,7 @@ def size_table(size):
 
 
 def main():
+    b_best()
     b_all_averages()
     for size in [10, 20, 50, 100]:
         size_table(size)
