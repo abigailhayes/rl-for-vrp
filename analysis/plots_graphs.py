@@ -109,6 +109,53 @@ def plot_dstn_sets(size, max_demand):
     plt.savefig(f"analysis/plots/ds_{max_demand}_{size}.svg")
 
 
+def plot_seed(variant):
+    """Compares the variation when models are trained from different seeds"""
+    raw_data = pd.read_csv(f"results/other/expt_b_10.csv").replace(0.0, np.NaN)
+    raw_data["id"] = raw_data["id"].replace(np.nan, 0)
+    raw_data["init_method"] = raw_data["init_method"].replace(np.nan, "best")
+    raw_data.loc[raw_data["id"].isin([74, 77]), "notes"] = "Seed A"
+    raw_data.loc[raw_data["id"].isin([78, 91]), "notes"] = "Seed B"
+    raw_data.loc[raw_data["id"].isin([84, 92]), "notes"] = "Seed C"
+    raw_data = raw_data[
+        (raw_data["id"].isin([0, 74, 78, 84, 77, 91, 92]))
+        & (~raw_data["notes"].isin(["OR tools best"]))
+    ]
+
+    use_data = raw_data.copy().melt(
+        id_vars=["notes", "init_method"],
+        value_vars=[i for i in list(raw_data) if i.startswith(variant)],
+    )
+    use_data = use_data.groupby(["init_method", "variable"], as_index=False).value.agg(
+        ["mean", "min", "max"]
+    )
+    use_data["split"] = (
+        use_data["variable"].str.split("-").str[0].str.replace(variant + "_", "")
+        + "\n"
+        + use_data["variable"].str.split("-").str[2]
+        + " "
+        + use_data["variable"].str.split("-").str[3]
+    )
+
+    fig, ax = plt.subplots()
+    for name in set(use_data["init_method"]):
+        subset = use_data[use_data["init_method"] == name]
+        plt.errorbar(
+            subset["split"],
+            subset["mean"],
+            yerr=[subset["mean"] - subset["min"], subset["max"] - subset["mean"]],
+            fmt="x",
+            label=name,
+        )
+    ax.legend(loc="best")
+    ax.set_xlabel("Problem set")
+    ax.set_ylabel("Average distance")
+
+    plt.subplots_adjust(bottom=0.2)
+
+    plt.savefig(f"analysis/plots/seed_{variant}.svg")
+
+
 def main():
     size = [10, 20, 50, 100]
     cust_distn = ["random", "cluster"]
@@ -120,6 +167,9 @@ def main():
 
     for size, demand in product(*[size, max_demand]):
         plot_dstn_sets(size, demand)
+
+    plot_seed("random")
+    plot_seed("centre")
 
 
 if __name__ == "__main__":
