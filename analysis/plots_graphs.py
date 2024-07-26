@@ -156,6 +156,50 @@ def plot_seed(variant):
     plt.savefig(f"analysis/plots/seed_{variant}.svg")
 
 
+def plot_epochs():
+    """Looks at how average results change with more epochs of training"""
+    with open(f"results/am_epochs/results_am_10.json") as json_data:
+        data = json.load(json_data)
+
+    data["20"] = {}
+    with open(f"results/exp_74/results_a.json") as json_data:
+        data["20"]["a"] = json.load(json_data)
+    with open(f"results/exp_74/results_b.json") as json_data:
+        data["20"]["b"] = json.load(json_data)
+
+    averages_a = {}
+    averages_b = {}
+    for key in data:
+        averages_a[key] = {}
+        averages_b[key] = {}
+        for key2 in data[key]["a"]:
+            averages_a[key][key2] = average_distance(data[key]["a"][key2])
+        for key2 in data[key]["b"]:
+            averages_b[key][key2] = average_distance(data[key]["b"][key2])
+    table_a = pd.DataFrame.from_dict(averages_a, orient="index")
+    table_b = pd.DataFrame.from_dict(averages_b, orient="index")
+
+    fig, ax = plt.subplots()
+    for column in table_a.columns:
+        ax.plot(table_a[column], label=column)
+    ax.legend(loc="best")
+    plt.title("Standard test sets")
+    ax.set_xlabel("Training epochs")
+    ax.set_ylabel("Average distance")
+
+    plt.savefig(f"analysis/plots/epochs_a.svg")
+
+    for size in ["10", "20", "50", "100"]:
+        fig, ax = plt.subplots()
+        for column in [i for i in table_b if i.split("-")[1] == size]:
+            ax.plot(table_b[column])
+        plt.title(f"Generated test sets - {size} customers")
+        ax.set_xlabel("Training epochs")
+        ax.set_ylabel("Average distance")
+
+        plt.savefig(f"analysis/plots/epochs_b_{size}.svg")
+
+
 def main():
     size = [10, 20, 50, 100]
     cust_distn = ["random", "cluster"]
@@ -170,6 +214,8 @@ def main():
 
     plot_seed("random")
     plot_seed("centre")
+
+    plot_epochs()
 
 
 if __name__ == "__main__":
