@@ -7,13 +7,13 @@ import json
 from analysis.utils import average_distance
 
 
-def plot_max_demand(size, cust_distn, depot_locatn):
+def plot_max_demand(size, cust_distn, depot_locatn, cust_train):
     """A plot of each method, running over varying maximum demand for the problem"""
 
     raw_data = pd.read_csv(f"results/other/expt_b_{size}.csv").replace(0.0, np.NaN)
     raw_data = raw_data[~raw_data["training"].isin(["old", "Old"])]
 
-    plot_data = raw_data[
+    plot_data = raw_data[(raw_data['customers']==cust_train)|(raw_data['customers'].isna())][
         [col for col in raw_data if col.startswith(f"{cust_distn}_{depot_locatn}")]
         + ["method", "init_method"]
     ].melt(
@@ -71,7 +71,9 @@ def plot_dstn_sets(size, max_demand):
     ].melt(
         id_vars=["method", "init_method"], var_name="prob_set", value_name="avg_dist"
     )
-    plot_data["prob_set"] = plot_data["prob_set"].str.split("-").str[0]
+    plot_data["prob_set"] = (
+        plot_data["prob_set"].str.split("-").str[0].str.replace("_", "\n")
+    )
 
     plot_data.dropna(subset=["avg_dist"], inplace=True)
 
@@ -120,6 +122,8 @@ def plot_dstn_sets(size, max_demand):
     ax.set_xlabel("Problem set")
     ax.set_ylabel("Average distance")
     ax.legend(loc="best")
+
+    plt.subplots_adjust(bottom=0.2)
 
     plt.savefig(f"analysis/plots/ds_{max_demand}_{size}.svg")
     plt.close()
@@ -224,9 +228,10 @@ def main():
     cust_distn = ["random", "cluster"]
     depot_locatn = ["centre", "random", "outer"]
     max_demand = [90, 50, 30]
+    cust_train = [10, 25, 50]
 
-    for size, cust, depot in product(*[sizes, cust_distn, depot_locatn]):
-        plot_max_demand(size, cust, depot)
+    for size, cust, depot, train in product(*[sizes, cust_distn, depot_locatn, cust_train]):
+        plot_max_demand(size, cust, depot, train)
 
     for size, demand in product(*[sizes, max_demand]):
         plot_dstn_sets(size, demand)
