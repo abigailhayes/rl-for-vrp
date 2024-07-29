@@ -12,8 +12,12 @@ def plot_max_demand(size, cust_distn, depot_locatn, cust_train):
 
     raw_data = pd.read_csv(f"results/other/expt_b_{size}.csv").replace(0.0, np.NaN)
     raw_data = raw_data[~raw_data["training"].isin(["old", "Old"])]
+    raw_data.loc[raw_data["method"] == "rl4co_tsp", "init_method"] = "am tsp"
+    raw_data.loc[raw_data["method"] == "rl4co_tsp", "method"] = "rl4co"
 
-    plot_data = raw_data[(raw_data['customers']==cust_train)|(raw_data['customers'].isna())][
+    plot_data = raw_data[
+        (raw_data["customers"] == cust_train) | (raw_data["customers"].isna())
+    ][raw_data["seed"] == 1][
         [col for col in raw_data if col.startswith(f"{cust_distn}_{depot_locatn}")]
         + ["method", "init_method"]
     ].melt(
@@ -50,7 +54,9 @@ def plot_max_demand(size, cust_distn, depot_locatn, cust_train):
     ax.set_ylabel("Average distance")
     ax.legend(loc="best")
 
-    plt.savefig(f"analysis/plots/md_{cust_distn}_{depot_locatn}_{size}_{cust_train}.svg")
+    plt.savefig(
+        f"analysis/plots/md_{cust_distn}_{depot_locatn}_{size}_{cust_train}.svg"
+    )
     plt.close()
 
 
@@ -230,7 +236,9 @@ def main():
     max_demand = [90, 50, 30]
     cust_train = [10, 25, 50]
 
-    for size, cust, depot, train in product(*[sizes, cust_distn, depot_locatn, cust_train]):
+    for size, cust, depot, train in product(
+        *[sizes, cust_distn, depot_locatn, cust_train]
+    ):
         plot_max_demand(size, cust, depot, train)
 
     for size, demand in product(*[sizes, max_demand]):
