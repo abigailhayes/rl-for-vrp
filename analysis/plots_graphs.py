@@ -2,6 +2,9 @@ from matplotlib import pyplot as plt
 import pandas as pd
 import numpy as np
 from itertools import product
+import json
+
+from analysis.utils import average_distance
 
 
 def plot_max_demand(size, cust_distn, depot_locatn):
@@ -23,6 +26,7 @@ def plot_max_demand(size, cust_distn, depot_locatn):
         (3, 5),  # dashed
         (1, 5),  # dotted
         (3, 5, 1, 5),  # dashdot
+        (5, 5),
     ]
     linestyle_mapping = {
         style: dash_patterns[i % len(dash_patterns)]
@@ -33,6 +37,9 @@ def plot_max_demand(size, cust_distn, depot_locatn):
 
     for name in set(plot_data["init_method"]):
         subset = plot_data[plot_data["init_method"] == name]
+        if subset.empty:
+            print(f"No data for init_method: {name}")
+            continue
         line_style = linestyle_mapping[subset["method"].iloc[0]]
         (line,) = ax.plot(subset["max_demand"], subset["avg_dist"], label=name)
         if line_style[0] is not None:
@@ -43,6 +50,7 @@ def plot_max_demand(size, cust_distn, depot_locatn):
     ax.legend(loc="best")
 
     plt.savefig(f"analysis/plots/md_{cust_distn}_{depot_locatn}_{size}.svg")
+    plt.close()
 
 
 def plot_dstn_sets(size, max_demand):
@@ -91,6 +99,9 @@ def plot_dstn_sets(size, max_demand):
 
     for name in set(plot_data["init_method"]):
         subset = plot_data[plot_data["init_method"] == name]
+        if subset.empty:
+            print(f"No data for init_method: {name}")
+            continue
         style_key = subset["method"].iloc[0]
         marker = marker_mapping.get(style_key, "o")  # Default to 'o' if not found
         ax.scatter(
@@ -107,6 +118,7 @@ def plot_dstn_sets(size, max_demand):
     ax.legend(loc="best")
 
     plt.savefig(f"analysis/plots/ds_{max_demand}_{size}.svg")
+    plt.close()
 
 
 def plot_seed(variant):
@@ -154,6 +166,7 @@ def plot_seed(variant):
     plt.subplots_adjust(bottom=0.2)
 
     plt.savefig(f"analysis/plots/seed_{variant}.svg")
+    plt.close()
 
 
 def plot_epochs():
@@ -188,6 +201,7 @@ def plot_epochs():
     ax.set_ylabel("Average distance")
 
     plt.savefig(f"analysis/plots/epochs_a.svg")
+    plt.close()
 
     for size in ["10", "20", "50", "100"]:
         fig, ax = plt.subplots()
@@ -198,18 +212,19 @@ def plot_epochs():
         ax.set_ylabel("Average distance")
 
         plt.savefig(f"analysis/plots/epochs_b_{size}.svg")
+        plt.close()
 
 
 def main():
-    size = [10, 20, 50, 100]
+    sizes = [10, 20, 50, 100]
     cust_distn = ["random", "cluster"]
     depot_locatn = ["centre", "random", "outer"]
     max_demand = [90, 50, 30]
 
-    for size, cust, depot in product(*[size, cust_distn, depot_locatn]):
+    for size, cust, depot in product(*[sizes, cust_distn, depot_locatn]):
         plot_max_demand(size, cust, depot)
 
-    for size, demand in product(*[size, max_demand]):
+    for size, demand in product(*[sizes, max_demand]):
         plot_dstn_sets(size, demand)
 
     plot_seed("random")
