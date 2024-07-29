@@ -50,7 +50,7 @@ def plot_max_demand(size, cust_distn, depot_locatn, cust_train):
     ax.set_ylabel("Average distance")
     ax.legend(loc="best")
 
-    plt.savefig(f"analysis/plots/md_{cust_distn}_{depot_locatn}_{size}.svg")
+    plt.savefig(f"analysis/plots/md_{cust_distn}_{depot_locatn}_{size}_{cust_train}.svg")
     plt.close()
 
 
