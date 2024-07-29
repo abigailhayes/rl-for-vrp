@@ -229,7 +229,6 @@ def main():
         plot_max_demand(size, cust, depot)
 
     for size, demand in product(*[sizes, max_demand]):
-        print(size, demand)
         plot_dstn_sets(size, demand)
 
     plot_seed("random")
