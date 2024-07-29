@@ -73,6 +73,8 @@ def plot_dstn_sets(size, max_demand):
     )
     plot_data["prob_set"] = plot_data["prob_set"].str.split("-").str[0]
 
+    plot_data.dropna(subset=["avg_dist"], inplace=True)
+
     fig, ax = plt.subplots()
 
     unique_styles = plot_data["method"].unique()
@@ -227,6 +229,7 @@ def main():
         plot_max_demand(size, cust, depot)
 
     for size, demand in product(*[sizes, max_demand]):
+        print(size, demand)
         plot_dstn_sets(size, demand)
 
     plot_seed("random")
