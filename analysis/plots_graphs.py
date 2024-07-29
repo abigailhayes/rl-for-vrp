@@ -228,7 +228,7 @@ def main():
         plot_dstn_sets(size, demand)
 
     plot_seed("random")
-    plot_seed("centre")
+    plot_seed("cluster")
 
     plot_epochs()
 
