@@ -11,6 +11,7 @@ def plot_max_demand(size, cust_distn, depot_locatn):
     """A plot of each method, running over varying maximum demand for the problem"""
 
     raw_data = pd.read_csv(f"results/other/expt_b_{size}.csv").replace(0.0, np.NaN)
+    raw_data = raw_data[~raw_data["training"].isin(["old", "Old"])]
 
     plot_data = raw_data[
         [col for col in raw_data if col.startswith(f"{cust_distn}_{depot_locatn}")]
@@ -56,6 +57,7 @@ def plot_max_demand(size, cust_distn, depot_locatn):
 def plot_dstn_sets(size, max_demand):
 
     raw_data = pd.read_csv(f"results/other/expt_b_{size}.csv").replace(0.0, np.NaN)
+    raw_data = raw_data[~raw_data["training"].isin(["old", "Old"])]
 
     plot_data = raw_data.copy()[
         [
