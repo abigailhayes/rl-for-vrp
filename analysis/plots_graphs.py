@@ -55,7 +55,7 @@ def plot_max_demand(size, cust_distn, depot_locatn, cust_train):
     ax.legend(loc="best")
 
     plt.savefig(
-        f"analysis/plots/md_{cust_distn}_{depot_locatn}_{size}_{cust_train}.svg"
+        f"analysis/plots/md_{cust_distn}_{depot_locatn}_{size}_{cust_train}.png"
     )
     plt.close()
 
@@ -131,7 +131,7 @@ def plot_dstn_sets(size, max_demand):
 
     plt.subplots_adjust(bottom=0.2)
 
-    plt.savefig(f"analysis/plots/ds_{max_demand}_{size}.svg")
+    plt.savefig(f"analysis/plots/ds_{max_demand}_{size}.png")
     plt.close()
 
 
@@ -179,7 +179,7 @@ def plot_seed(variant):
 
     plt.subplots_adjust(bottom=0.2)
 
-    plt.savefig(f"analysis/plots/seed_{variant}.svg")
+    plt.savefig(f"analysis/plots/seed_{variant}.png")
     plt.close()
 
 
@@ -214,7 +214,7 @@ def plot_epochs():
     ax.set_xlabel("Training epochs")
     ax.set_ylabel("Average distance")
 
-    plt.savefig(f"analysis/plots/epochs_a.svg")
+    plt.savefig(f"analysis/plots/epochs_a.png")
     plt.close()
 
     for size in ["10", "20", "50", "100"]:
@@ -225,7 +225,7 @@ def plot_epochs():
         ax.set_xlabel("Training epochs")
         ax.set_ylabel("Average distance")
 
-        plt.savefig(f"analysis/plots/epochs_b_{size}.svg")
+        plt.savefig(f"analysis/plots/epochs_b_{size}.png")
         plt.close()
 
 
