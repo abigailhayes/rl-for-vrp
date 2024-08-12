@@ -17,6 +17,10 @@ def main():
     print("Complete")
     print("*****")
 
+    print("Best OR tools")
+    ortools.main()
+    print("Complete")
+
     print("Expt A - all averages")
     expt_a.a_all_averages()
     print("Complete")
@@ -36,10 +40,6 @@ def main():
 
     print("Expt C - all averages")
     expt_c.c_all_averages()
-    print("Complete")
-
-    print("Best OR tools")
-    ortools.main()
     print("Complete")
 
 
