@@ -44,7 +44,6 @@ def main():
             except ValueError:
                 pass
     # Same for CVRPTW
-    or_ids_tw = [27]
     all_or_tw = {}
     routes_or_tw = {}
     for ident in or_ids_tw:
