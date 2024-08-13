@@ -7,6 +7,7 @@ from analysis.utils import (
     check_instances,
     average_distance,
     best_or_means,
+    average_distance_multi,
 )
 
 
@@ -65,6 +66,7 @@ def b_best():
         json.dump(optima_b, f, indent=2)
     df = pd.DataFrame(best_b, columns=["id"])
     df.to_csv("results/other/best_b.csv", index=False)
+
 
 def best_b_means():
     # Load in relevant best b results
@@ -127,6 +129,65 @@ def b_all_averages(validated=True):
     )
 
     include.to_csv("results/other/expt_b_means.csv", index=False)
+
+
+def b_group_averages(validated=True):
+    """Get the averages for all experiment B instance types"""
+    if validated:
+        instance_count = pd.read_csv("results/other/validate_count.csv")
+    else:
+        instance_count = pd.read_csv("results/other/instance_count.csv")
+
+    # Get a dataframe showing where averages should be taken
+    include = instance_count.drop(
+        ["A", "B", "E", "F", "M", "P", "CMT", "id", "notes"], axis=1
+    )
+    include = include.drop(index=0, axis=0)
+    for column_name in list(include):
+        include[column_name] = check_instances(include, column_name)
+
+    # dictionary to define relations
+    defns = {
+        "cust_random": list(include.filter(regex="random_")),
+        "cust_clustered": list(include.filter(regex="cluster_")),
+        "depot_random": list(include.filter(regex="_random")),
+        "depot_centre": list(include.filter(regex="_centre")),
+        "depot_edge": list(include.filter(regex="_outer")),
+        "cust_10": list(include.filter(regex=".*-10-\d+-\d+-\d+")),
+        "cust_20": list(include.filter(regex=".*-20-\d+-\d+-\d+")),
+        "cust_50": list(include.filter(regex=".*-50-\d+-\d+-\d+")),
+        "cust_100": list(include.filter(regex=".*-100-\d+-\d+-\d+")),
+        "demand_30": list(include.filter(regex=".*-\d+-30-\d+-\d+")),
+        "demand_50": list(include.filter(regex=".*-\d+-50-\d+-\d+")),
+        "demand_90": list(include.filter(regex=".*-\d+-90-\d+-\d+")),
+    }
+
+    include2 = instance_count[["id", "notes"]].copy()
+    include2 = include2.drop(index=0, axis=0)
+    # Need to sum over relevant columns
+    for key, item in defns.items():
+        include2[key] = include[item].sum(axis=1)
+
+    # Now convert to binary
+    include2.iloc[:, 2:] = include2.iloc[:, 2:].apply(
+        lambda x: (x == x.max()).astype(int)
+    )
+
+    # Now go through and get averages
+    for index, row in include2.iterrows():
+        print(row["id"])
+        try:
+            with open(f'results/exp_{row["id"]}/results_b.json') as json_data:
+                data = json.load(json_data)
+            if pd.isna(row["notes"]):
+                for key, item in defns.items():
+                    if row[key] == 1:
+                        include2.loc[index, key] = average_distance_multi(data, item)
+        except ValueError:
+            # When none of the Expt B tests have been run
+            pass
+
+    include2.to_csv("results/other/expt_b_group_means.csv", index=False)
 
 
 def size_table(size):

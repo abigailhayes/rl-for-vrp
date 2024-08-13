@@ -86,6 +86,14 @@ def average_distance(folder_dict: dict):
         output.append(folder_dict[key])
     return sum(output) / len(output)
 
+def average_distance_multi(dict, keys):
+    """Given a dictionary with entries for each instance, takes the mean of the values"""
+    output = []
+    for key in keys:
+        for key2 in dict[key]:
+            output.append(dict[key][key2])
+    return sum(output) / len(output)
+
 
 def average_distance_tw(subdict, variant):
     temp_dict = {k: v for k, v in subdict.items() if k.startswith(variant)}

@@ -31,6 +31,9 @@ def main():
     print("Expt B - all averages")
     expt_b.b_all_averages()
     print("Complete")
+    print("Expt B - grouped averages")
+    expt_b.b_group_averages()
+    print("Complete")
     print("Expt B - tables")
     for size in [10, 20, 50, 100]:
         print(size)
