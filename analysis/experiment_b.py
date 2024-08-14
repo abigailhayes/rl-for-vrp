@@ -8,6 +8,7 @@ from analysis.utils import (
     average_distance,
     best_or_means,
     average_distance_multi,
+    best_or_means_group_b,
 )
 
 
@@ -186,6 +187,10 @@ def b_group_averages(validated=True):
         except ValueError:
             # When none of the Expt B tests have been run
             pass
+
+    include2 = pd.concat(
+        [include2, best_or_means_group_b(defns)], ignore_index=True
+    )
 
     include2.to_csv("results/other/expt_b_group_means.csv", index=False)
 

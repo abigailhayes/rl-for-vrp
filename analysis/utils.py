@@ -86,6 +86,7 @@ def average_distance(folder_dict: dict):
         output.append(folder_dict[key])
     return sum(output) / len(output)
 
+
 def average_distance_multi(dict, keys):
     """Given a dictionary with entries for each instance, takes the mean of the values"""
     output = []
@@ -170,7 +171,7 @@ def best_or_means(experiment, instance_count):
             if verify[key] == 1:
                 if key == "CMT":
                     compare_dict = {
-                        inner_key: data[key][inner_key]['value']
+                        inner_key: data[key][inner_key]["value"]
                         for inner_key in [
                             "CMT1.vrp",
                             "CMT2.vrp",
@@ -182,14 +183,45 @@ def best_or_means(experiment, instance_count):
                         ]
                     }
                 else:
-                    compare_dict = {k: v['value'] for k, v in data[key].items()}
+                    compare_dict = {k: v["value"] for k, v in data[key].items()}
                 working = []
                 for new_key in compare_dict:
                     working.append(
-                        (compare_dict[new_key] - optima[key][new_key]) / optima[key][new_key]
+                        (compare_dict[new_key] - optima[key][new_key])
+                        / optima[key][new_key]
                     )
                 avgs[key] = mean(working)
             else:
                 avgs[key] = 0
+
+    return pd.DataFrame.from_dict([avgs])
+
+
+def best_or_means_group_b(defns):
+    json_path = f"results/other/or_results_b.json"
+    output = {}
+    try:
+        with open(json_path) as json_data:
+            data = json.load(json_data)
+        for key in data:
+            output[key] = len(data[key])
+    except ValueError:
+        pass
+
+    verify = {}
+    for key, item in defns.items():
+        test = 1
+        for col in item:
+            if output[col] < 100:
+                test = 0
+        else:
+            verify[key] = test
+
+    avgs = {"id": 0, "notes": "OR tools best"}
+    for key, item in defns.items():
+        if verify[key] == 1:
+            avgs[key] = average_distance_multi(
+                {j: {k: v["value"] for k, v in data[j].items() if len(v) > 0} for j in data}, item
+            )
 
     return pd.DataFrame.from_dict([avgs])
