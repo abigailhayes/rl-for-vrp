@@ -62,8 +62,12 @@ def plot_max_demand(size, cust_distn, depot_locatn, cust_train):
 
 def plot_dstn_sets(size, max_demand):
 
-    raw_data = pd.read_csv(f"results/other/expt_b_{size}.csv").replace(0.0, np.NaN)
-    raw_data = raw_data[~raw_data["training"].isin(["old", "Old"])]
+    raw_data = pd.read_csv(f"results/other/expt_b_{size}.csv").replace(0.0, np.NaN) # Replace 0 with na
+    raw_data = raw_data[~raw_data["training"].isin(["old", "Old"])] # Old flawed runs
+    raw_data = raw_data[~raw_data['method'].isin(['rl4co_tsp'])] # Appear as duplicates, worse performing anyway
+    raw_data = raw_data[raw_data['customers'].isin([size, np.NaN])] # Keep heuristics and models trained for the same size, for simplicity
+    raw_data = raw_data[raw_data['seed']==1] # Keep only the first run of each
+    raw_data = raw_data[raw_data['init_method']!='mdam'] # Much worse performing so makes graphs wrong scale
 
     plot_data = raw_data.copy()[
         [
@@ -115,7 +119,9 @@ def plot_dstn_sets(size, max_demand):
             print(f"No data for init_method: {name}")
             continue
         style_key = subset["method"].iloc[0]
+        print(style_key)
         marker = marker_mapping.get(style_key, "o")  # Default to 'o' if not found
+        print(marker)
         ax.scatter(
             subset["prob_set"],
             subset["avg_dist"],
