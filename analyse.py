@@ -4,6 +4,7 @@ import analysis.experiment_a as expt_a
 import analysis.experiment_b as expt_b
 import analysis.experiment_c as expt_c
 import analysis.best_or_tools as ortools
+import analysis.vehicles as vehicles
 
 
 def main():
@@ -43,6 +44,15 @@ def main():
 
     print("Expt C - all averages")
     expt_c.c_all_averages()
+    print("Complete")
+
+    print("Vehicle counts")
+    print("A:")
+    vehicles.all_vehicle_counts("a")
+    print("B:")
+    vehicles.all_vehicle_counts("b")
+    print("C:")
+    vehicles.all_vehicle_counts("c")
     print("Complete")
 
 
