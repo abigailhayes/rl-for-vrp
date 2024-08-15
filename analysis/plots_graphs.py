@@ -159,8 +159,6 @@ def plot_seed(variant):
         use_data["variable"].str.split("-").str[0].str.replace(variant + "_", "")
         + "\n"
         + use_data["variable"].str.split("-").str[2]
-        + " "
-        + use_data["variable"].str.split("-").str[3]
     )
 
     fig, ax = plt.subplots()
