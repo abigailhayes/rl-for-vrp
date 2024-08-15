@@ -52,7 +52,7 @@ def main():
     print("B:")
     vehicles.all_vehicle_counts("b")
     print("C:")
-    vehicles.all_vehicle_counts("c")
+    vehicles.all_vehicle_counts_c()
     print("Complete")
 
 

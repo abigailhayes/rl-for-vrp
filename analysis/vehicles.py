@@ -18,26 +18,26 @@ def avg_vehicle_count(folder):
         count.append(vehicle_count(folder[key]))
     return sum(count) / len(count)
 
+def avg_vehicle_count_tw(subdict, variant):
+    temp_dict = {k: v for k, v in subdict.items() if k.startswith(variant)}
+    output = avg_vehicle_count(temp_dict)
+    return output
+
 
 def all_vehicle_counts(experiment, validated=True):
-    if validated and experiment != "c":
+    if validated:
         instance_count = pd.read_csv("results/other/validate_count.csv")
-    elif experiment != "c":
-        instance_count = pd.read_csv("results/other/instance_count.csv")
     else:
-        instance_count = pd.read_csv("results/other/instance_count_tw.csv")
+        instance_count = pd.read_csv("results/other/instance_count.csv")
 
     if experiment == "a":
         include = instance_count[["A", "B", "E", "F", "M", "P", "CMT"]]
-        include = include.drop(index=0, axis=0)
     elif experiment == "b":
         include = instance_count.drop(
             ["A", "B", "E", "F", "M", "P", "CMT", "id", "notes"], axis=1
         )
-        include = include.drop(index=0, axis=0)
-    elif experiment == "c":
-        include = instance_count.drop(["id", "notes"], axis=1)
 
+    include = include.drop(index=0, axis=0)
     for column_name in list(include):
         include[column_name] = check_instances(include, column_name)
     include["id"] = instance_count["id"]
@@ -45,10 +45,7 @@ def all_vehicle_counts(experiment, validated=True):
 
     for index, row in include.iterrows():
         print(row["id"])
-        if experiment == "c":
-            json_path = f"results/exp_{row['id']}/routes.json"
-        else:
-            json_path = f"results/exp_{row['id']}/routes_{experiment}.json"
+        json_path = f"results/exp_{row['id']}/routes_{experiment}.json"
         try:
             with open(json_path) as json_data:
                 data = json.load(json_data)
@@ -68,3 +65,35 @@ def all_vehicle_counts(experiment, validated=True):
             pass
 
     include.to_csv(f"results/other/expt_{experiment}_vehicles.csv", index=False)
+
+
+def all_vehicle_counts_c():
+    instance_count = pd.read_csv("results/other/instance_count_tw.csv")
+
+    include = instance_count.drop(["id", "notes"], axis=1)
+    for column_name in list(include):
+        include[column_name] = check_instances(include, column_name)
+    include["id"] = instance_count["id"]
+    include["notes"] = instance_count["notes"]
+
+    for index, row in include.iterrows():
+        print(row["id"])
+        json_path = f"results/exp_{int(row['id'])}/routes.json"
+        if int(row["id"]) == 0:
+            continue
+        try:
+            with open(json_path) as json_data:
+                data = json.load(json_data)
+            for key in data:
+                for variant in ["RC1", "RC2", "R1", "R2", "C1", "C2"]:
+                    new_key = variant + "_" + str(key)
+                    if row[new_key] == 1:
+                        include.loc[index, new_key] = avg_vehicle_count_tw(
+                            data[key], variant
+                        )
+
+        except (ValueError, FileNotFoundError):
+            # When none of the tests have been run
+            pass
+
+    include.to_csv(f"results/other/expt_c_vehicles.csv", index=False)
