@@ -20,10 +20,12 @@ def avg_vehicle_count(folder):
 
 
 def all_vehicle_counts(experiment, validated=True):
-    if validated and experiment != 'c':
+    if validated and experiment != "c":
         instance_count = pd.read_csv("results/other/validate_count.csv")
-    else:
+    elif experiment != "c":
         instance_count = pd.read_csv("results/other/instance_count.csv")
+    else:
+        instance_count = pd.read_csv("results/other/instance_count_tw.csv")
 
     if experiment == "a":
         include = instance_count[["A", "B", "E", "F", "M", "P", "CMT"]]
@@ -61,7 +63,7 @@ def all_vehicle_counts(experiment, validated=True):
                             data[key][row["notes"]]
                         )
 
-        except ValueError:
+        except (ValueError, FileNotFoundError):
             # When none of the tests have been run
             pass
 
