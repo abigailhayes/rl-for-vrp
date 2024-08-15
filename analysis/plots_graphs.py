@@ -119,9 +119,7 @@ def plot_dstn_sets(size, max_demand):
             print(f"No data for init_method: {name}")
             continue
         style_key = subset["method"].iloc[0]
-        print(style_key)
         marker = marker_mapping.get(style_key, "o")  # Default to 'o' if not found
-        print(marker)
         ax.scatter(
             subset["prob_set"],
             subset["avg_dist"],
