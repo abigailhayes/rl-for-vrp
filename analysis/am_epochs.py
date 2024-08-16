@@ -25,14 +25,24 @@ model = rl4co_run.RL4CO(
 )
 model.set_model()
 
-test_results[0], test_routes[0] = utils.test_cvrp(
-    args["method"],
-    args["method_settings"],
-    ident,
-    args["testing"],
-    model,
-    save=False,
-)
+if args["problem"] == "CVRP":
+    test_results[0], test_routes[0] = utils.test_cvrp(
+        args["method"],
+        args["method_settings"],
+        ident,
+        args["testing"],
+        model,
+        save=False,
+    )
+else:
+    test_results[0], test_routes[0] = utils.test_cvrptw(
+        args["method"],
+        args["method_settings"],
+        ident,
+        args["testing"],
+        model,
+        save=False,
+    )
 
 # Checkpointing callback: save models when validation reward improves
 checkpoint_callback = ModelCheckpoint(dirpath="./checkpoints/last.ckpt")
@@ -57,18 +67,36 @@ for epoch in [1, 2, 5, 10]:
         "greedy",
     )
     model.set_model()
-    model.trainer = RL4COTrainer(max_epochs=epoch, **trainer_kwargs, callbacks=callbacks)
-    model.trainer.fit(model.model, ckpt_path="last")
-    test_results[epoch], test_routes[epoch] = utils.test_cvrp(
-        args["method"],
-        args["method_settings"],
-        ident,
-        args["testing"],
-        model,
-        save=False,
+    model.trainer = RL4COTrainer(
+        max_epochs=epoch, **trainer_kwargs, callbacks=callbacks
     )
+    model.trainer.fit(model.model, ckpt_path="last")
+    if args["problem"] == 'CVRP':
+        test_results[epoch], test_routes[epoch] = utils.test_cvrp(
+            args["method"],
+            args["method_settings"],
+            ident,
+            args["testing"],
+            model,
+            save=False,
+        )
+    else:
+        test_results[epoch], test_routes[epoch] = utils.test_cvrptw(
+            args["method"],
+            args["method_settings"],
+            ident,
+            args["testing"],
+            model,
+            save=False,
+        )
 
-with open(f"results/am_epochs/results_{args['method_settings']['init_method']}_{args['method_settings']['customers']}.json", "w") as f:
+with open(
+    f"results/am_epochs/results_{args['method_settings']['init_method']}_{args['method_settings']['customers']}.json",
+    "w",
+) as f:
     json.dump(test_results, f, indent=2)
-with open(f"results/am_epochs/routes_{args['method_settings']['init_method']}_{args['method_settings']['customers']}.json", "w") as f:
+with open(
+    f"results/am_epochs/routes_{args['method_settings']['init_method']}_{args['method_settings']['customers']}.json",
+    "w",
+) as f:
     json.dump(test_routes, f, indent=2)
