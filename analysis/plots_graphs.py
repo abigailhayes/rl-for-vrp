@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from itertools import product
 import json
+from scipy import stats
 
 from analysis.utils import average_distance
 
@@ -252,7 +253,7 @@ def data_b_sizes(ident):
     extracted_df = melted_df["column"].str.extract(
         r"([^_]+)_([^_]+)-(\d+)-(\d+)-\d+-\d+"
     )
-    extracted_df.columns = ["depot", "distn", "cust", "demand"]
+    extracted_df.columns = ["distn", "depot", "cust", "demand"]
 
     # Combine to dataframe ready for plotting
     plot_df = pd.concat([extracted_df, melted_df[["value"]]], axis=1)
@@ -304,6 +305,45 @@ def plot_b_sizes(ident):
 
         plt.savefig(f"analysis/plots/size_b_{ident}_{x_variable}_{colour_variable}.png")
         plt.close()
+
+
+def stats_b_sizes(ident):
+    start_df = data_b_sizes(ident)
+
+    start_df = pd.get_dummies(start_df, columns=["depot", "distn"], drop_first=True)
+
+    # Define independent variables (features) and dependent variable (target)
+    X = start_df.drop(columns=["value"])
+    y = start_df["value"]
+
+    X = X.astype(np.float64)
+    y = y.astype(np.float64)
+
+    # Add a constant (intercept) to the model
+    X = np.column_stack((np.ones(X.shape[0]), X))
+
+    variable_names = ["Intercept"] + list(start_df.drop(columns=["value"]).columns)
+
+    # Compute regression coefficients
+    XtX = X.T @ X
+    XtX_inv = np.linalg.inv(XtX)
+    XtY = X.T @ y
+    coefficients = XtX_inv @ XtY
+
+    # Compute predicted values and residuals
+    y_pred = X @ coefficients
+    residuals = y - y_pred
+
+    # Compute R-squared
+    SS_tot = np.sum((y - np.mean(y)) ** 2)
+    SS_res = np.sum(residuals**2)
+    r2 = 1 - (SS_res / SS_tot)
+
+    print("Regression Coefficients:")
+    for name, coef in zip(variable_names, coefficients):
+        print(f"{name}: {coef:.4f}")
+
+    print(f"R-squared: {r2:.4f}")
 
 
 def main():
