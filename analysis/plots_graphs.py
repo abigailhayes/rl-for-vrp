@@ -239,11 +239,11 @@ def plot_epochs():
         plt.close()
 
 
-def plot_b_sizes(ident):
-    """Looking at the influences on solution size"""
+def data_b_sizes(ident):
+    """Organise data for the related plot function"""
     # Read in all means, and keep relevant id
     raw_data = pd.read_csv(f"results/other/expt_b_means.csv").replace(0.0, np.NaN)
-    raw_data = raw_data[raw_data["id"] == ident].drop('notes', axis=1)
+    raw_data = raw_data[raw_data["id"] == ident].drop("notes", axis=1)
 
     # Flip so that each column is a row
     melted_df = raw_data.melt(id_vars=["id"], var_name="column", value_name="value")
@@ -256,8 +256,54 @@ def plot_b_sizes(ident):
 
     # Combine to dataframe ready for plotting
     plot_df = pd.concat([extracted_df, melted_df[["value"]]], axis=1)
+    plot_df["cust"] = pd.to_numeric(plot_df["cust"])
+    plot_df["demand"] = pd.to_numeric(plot_df["demand"])
+
+    return plot_df
 
 
+def plot_b_sizes(ident):
+    """Looking at the influences on solution size"""
+    plot_df = data_b_sizes(ident)
+    # Plot all variations
+    x_variables = ["cust", "demand"]
+    colour_variables = ["distn", "depot"]
+    for x_variable, colour_variable in product(*[x_variables, colour_variables]):
+        # Set up colours
+        unique_values = plot_df[colour_variable].unique()
+        colours = plt.cm.get_cmap("viridis", len(unique_values)).colors
+        colour_map = {value: colours[i] for i, value in enumerate(unique_values)}
+
+        # Plot each category with a specific colour
+        plt.figure(figsize=(10, 6))
+
+        for value, color in colour_map.items():
+            subset = plot_df[plot_df[colour_variable] == value]
+            plt.scatter(
+                x=subset[x_variable],
+                y=subset["value"],
+                color=color,
+                label=value,
+                s=100,
+                alpha=0.75,
+            )
+
+        # Add labels and title
+        if x_variable == "cust":
+            plt.xticks([10, 20, 50, 100])
+            plt.xlabel("Number of customers")
+        elif x_variable == "demand":
+            plt.xticks([30, 50, 90])
+            plt.xlabel("Maximum customer demand")
+        plt.ylabel("Average solution distance")
+
+        if colour_variable == "distn":
+            plt.legend(title="Customer distribution")
+        elif colour_variable == "depot":
+            plt.legend(title="Depot location")
+
+        plt.savefig(f"analysis/plots/size_b_{ident}_{x_variable}_{colour_variable}.png")
+        plt.close()
 
 
 def main():
