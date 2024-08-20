@@ -5,7 +5,7 @@ from itertools import product
 import json
 from scipy import stats
 
-from analysis.utils import average_distance
+from analysis.utils import average_distance, average_distance_tw
 
 
 def plot_max_demand(size, cust_distn, depot_locatn, cust_train):
@@ -196,55 +196,95 @@ def plot_seed(variant):
 
 def plot_epochs():
     """Looks at how average results change with more epochs of training"""
-    with open(f"results/am_epochs/results_am_10.json") as json_data:
-        data = json.load(json_data)
+    paths = [
+        f"results/am_epochs/results_am_10.json",
+        f"results/am_epochs/results_am_10_tw.json",
+    ]
+    for path in paths:
+        with open(path) as json_data:
+            data = json.load(json_data)
 
-    data["20"] = {}
-    with open(f"results/exp_74/results_a.json") as json_data:
-        data["20"]["a"] = json.load(json_data)
-    with open(f"results/exp_74/results_b.json") as json_data:
-        data["20"]["b"] = json.load(json_data)
+        if path == f"results/am_epochs/results_am_10.json":
+            data["20"] = {}
+            with open(f"results/exp_74/results_a.json") as json_data:
+                data["20"]["a"] = json.load(json_data)
+            with open(f"results/exp_74/results_b.json") as json_data:
+                data["20"]["b"] = json.load(json_data)
 
-    averages_a = {}
-    averages_b = {}
-    for key in data:
-        averages_a[key] = {}
-        averages_b[key] = {}
-        for key2 in data[key]["a"]:
-            averages_a[key][key2] = average_distance(data[key]["a"][key2])
-        for key2 in data[key]["b"]:
-            averages_b[key][key2] = average_distance(data[key]["b"][key2])
-    table_a = pd.DataFrame.from_dict(averages_a, orient="index")
-    table_b = pd.DataFrame.from_dict(averages_b, orient="index")
+            averages_a = {}
+            averages_b = {}
+            for key in data:
+                averages_a[key] = {}
+                averages_b[key] = {}
+                for key2 in data[key]["a"]:
+                    averages_a[key][key2] = average_distance(data[key]["a"][key2])
+                for key2 in data[key]["b"]:
+                    averages_b[key][key2] = average_distance(data[key]["b"][key2])
+            table_a = pd.DataFrame.from_dict(averages_a, orient="index")
+            table_b = pd.DataFrame.from_dict(averages_b, orient="index")
 
-    fig, ax = plt.subplots()
-    for column in table_a.columns:
-        ax.plot(table_a[column], label=column)
-    ax.legend(loc="best")
-    plt.title("Standard test sets")
-    ax.set_xlabel("Training epochs")
-    ax.set_ylabel("Average distance")
+            fig, ax = plt.subplots()
+            for column in table_a.columns:
+                ax.plot(table_a[column], label=column)
+            ax.legend(loc="best")
+            plt.title("Standard test sets")
+            ax.set_xlabel("Training epochs")
+            ax.set_ylabel("Average distance")
 
-    plt.savefig(f"analysis/plots/epochs_a.png")
-    plt.close()
+            plt.savefig(f"analysis/plots/epochs_a.png")
+            plt.close()
 
-    for size in ["10", "20", "50", "100"]:
-        fig, ax = plt.subplots()
-        for column in [i for i in table_b if i.split("-")[1] == size]:
-            ax.plot(table_b[column])
-        plt.title(f"Generated test sets - {size} customers")
-        ax.set_xlabel("Training epochs")
-        ax.set_ylabel("Average distance")
+            for size in ["10", "20", "50", "100"]:
+                fig, ax = plt.subplots()
+                for column in [i for i in table_b if i.split("-")[1] == size]:
+                    ax.plot(table_b[column])
+                plt.title(f"Generated test sets - {size} customers")
+                ax.set_xlabel("Training epochs")
+                ax.set_ylabel("Average distance")
 
-        plt.savefig(f"analysis/plots/epochs_b_{size}.png")
-        plt.close()
+                plt.savefig(f"analysis/plots/epochs_b_{size}.png")
+                plt.close()
+
+        else:
+            with open(f"results/exp_46/results.json") as json_data:
+                data["20"] = json.load(json_data)
+
+            groups = ["RC1", "RC2", "R1", "R2", "C1", "C2"]
+            averages_c = {}
+            sizes = ['25', '50', '100']
+            for size in sizes:
+                averages_c[size] = {}
+                for key in data:
+                    averages_c[size][key] = {}
+                    for group in groups:
+                        averages_c[size][key][group] = average_distance_tw(
+                            data[key][size], group
+                        )
+                table_c = pd.DataFrame.from_dict(averages_c[size], orient="index")
+
+                fig, ax = plt.subplots()
+                for column in table_c.columns:
+                    ax.plot(table_c[column], label=column)
+                ax.legend(loc="best")
+                plt.title("Standard test sets")
+                ax.set_xlabel("Training epochs")
+                ax.set_ylabel("Average distance")
+
+                plt.savefig(f"analysis/plots/epochs_c_{size}.png")
+                plt.close()
 
 
 def data_b_sizes(ident):
     """Organise data for the related plot function"""
     # Read in all means, and keep relevant id
-    raw_data = pd.read_csv(f"results/other/expt_b_means.csv").replace(0.0, np.NaN)
-    raw_data = raw_data[raw_data["id"] == ident].drop("notes", axis=1)
+    raw_data = (
+        pd.read_csv(f"results/other/expt_b_means.csv")
+        .replace(0.0, np.NaN)
+        .drop("notes", axis=1)
+    )
+    raw_data = raw_data.loc[~(raw_data.iloc[:, 1:] == 0).any(axis=1)].dropna()
+    if ident > 0:
+        raw_data = raw_data[raw_data["id"] == ident]
 
     # Flip so that each column is a row
     melted_df = raw_data.melt(id_vars=["id"], var_name="column", value_name="value")
@@ -307,8 +347,8 @@ def plot_b_sizes(ident):
         plt.close()
 
 
-def stats_b_sizes(ident):
-    start_df = data_b_sizes(ident)
+def stats_b_sizes():
+    start_df = data_b_sizes(-1)
 
     start_df = pd.get_dummies(start_df, columns=["depot", "distn"], drop_first=True)
 
