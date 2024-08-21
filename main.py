@@ -66,13 +66,14 @@ def main():
         model = nazari.Nazari(ident, task=args["method_settings"]["task"])
         model.train_model()
         print("Finished training")
-    elif args["method"] == "rl4co":
+    elif args["method"] in ["rl4co", "rl4co_mini"]:
         try:
             args["method_settings"]["decode"]
         except KeyError:
             args["method_settings"]["decode"] = "greedy"
 
         model = rl4co_run.RL4CO(
+            args["method"],
             args["problem"],
             args["method_settings"]["init_method"],
             args["method_settings"]["customers"],
@@ -113,7 +114,7 @@ def main():
                     args["testing"],
                     model,
                 )
-            elif args["method"] in ["rl4co", "rl4co_tsp"]:
+            elif args["method"] in ["rl4co", "rl4co_tsp", "rl4co_mini"]:
                 utils.test_cvrp(
                     args["method"],
                     args["method_settings"],
@@ -130,7 +131,7 @@ def main():
                 utils.test_cvrptw(
                     args["method"], args["method_settings"], ident, args["testing"]
                 )
-            elif args["method"] == "rl4co":
+            elif args["method"] in ["rl4co", "rl4co_mini"]:
                 utils.test_cvrptw(
                     args["method"],
                     args["method_settings"],

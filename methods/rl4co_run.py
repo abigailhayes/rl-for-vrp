@@ -12,11 +12,12 @@ from lightning.pytorch import seed_everything
 class RL4CO:
     """A class for implementing the methods included in RL4CO on a VRP instance."""
 
-    def __init__(self, problem, init_method, customers, seed, ident, decode="greedy"):
+    def __init__(self, method, problem, init_method, customers, seed, ident, decode="greedy"):
         self.routes = None
         self.cost = None
         self.trainer = None
         self.model = None
+        self.method = method
         self.ident = ident
         seed_everything(seed, workers=True)
         self.init_method = init_method
@@ -73,19 +74,18 @@ class RL4CO:
             )
 
     def train_model(self):
-        if self.init_method == "deepaco":
-            epochs = 1
-        elif self.init_method in ["amppo", "symnco", "pomo", "mdam"]:
-            epochs = 10
-        elif (
-            self.init_method == "am"
-            and self.problem == "CVRPTW"
-            and self.customers > 10
-        ):
-            epochs = 10
-        else:
-            epochs = 20
-            # Currently ignoring POMO instructions for 2000 epochs
+        if self.method == "rl4co":
+            if self.init_method == "deepaco":
+                epochs = 1
+            elif self.init_method in ["amppo", "symnco", "pomo", "mdam"]:
+                epochs = 10
+            else:
+                epochs = 20
+        elif self.method == "rl4co_mini":
+            if self.init_method == "deepaco":
+                epochs = 1
+            else:
+                epochs = 2
         trainer_kwargs = {
             "accelerator": "auto",
             "default_root_dir": f"results/exp_{self.ident}",
