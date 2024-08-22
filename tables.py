@@ -3,14 +3,14 @@ import pandas as pd
 
 def make_table(filename, problem):
     if problem == "cvrp":
-        items = [74, 100, 90, 76, 101, 99, 80, 103, 77, 102, 97, 81, 64, 104]
+        items = [0, 74, 100, 90, 76, 101, 99, 80, 103, 77, 102, 97, 81, 64, 104]
     elif problem == "cvrptw":
-        items = [46, 49, 108, 83, 65, 89, 67]
+        items = [0, 46, 49, 108, 83, 65, 89, 67]
 
     data = pd.merge(
         pd.read_csv("results/other/settings.csv")[["id", "method", "init_method", "customers"]],
         pd.read_csv(f"results/other/{filename}.csv"),
-        on="id",
+        on="id", how='outer'
     )
     data = data[data["id"].isin(items)]
     data["id"] = pd.Categorical(data["id"], categories=items, ordered=True)
