@@ -132,7 +132,7 @@ def b_all_averages(validated=True):
     include.to_csv("results/other/expt_b_means.csv", index=False)
 
 
-def b_group_averages(validated=True):
+def b_group_averages(size, validated=True):
     """Get the averages for all experiment B instance types"""
     if validated:
         instance_count = pd.read_csv("results/other/validate_count.csv")
@@ -149,18 +149,24 @@ def b_group_averages(validated=True):
 
     # dictionary to define relations
     defns = {
-        "cust_random": list(include.filter(regex="random_")),
-        "cust_clustered": list(include.filter(regex="cluster_")),
-        "depot_random": list(include.filter(regex="_random")),
-        "depot_centre": list(include.filter(regex="_centre")),
-        "depot_edge": list(include.filter(regex="_outer")),
-        "cust_10": list(include.filter(regex=".*-10-\d+-\d+-\d+")),
-        "cust_20": list(include.filter(regex=".*-20-\d+-\d+-\d+")),
-        "cust_50": list(include.filter(regex=".*-50-\d+-\d+-\d+")),
-        "cust_100": list(include.filter(regex=".*-100-\d+-\d+-\d+")),
-        "demand_30": list(include.filter(regex=".*-\d+-30-\d+-\d+")),
-        "demand_50": list(include.filter(regex=".*-\d+-50-\d+-\d+")),
-        "demand_90": list(include.filter(regex=".*-\d+-90-\d+-\d+")),
+        "random_random": list(include.filter(regex=f"random_random-{size}-\d+-\d+-\d+")),
+        "cluster_random": list(
+            include.filter(regex=f"cluster_random-{size}-\d+-\d+-\d+")
+        ),
+        "random_centre": list(include.filter(regex=f"random_centre-{size}-\d+-\d+-\d+")),
+        "cluster_centre": list(
+            include.filter(regex=f"cluster_centre-{size}-\d+-\d+-\d+")
+        ),
+        "random_edge": list(include.filter(regex=f"random_outer-{size}-\d+-\d+-\d+")),
+        "cluster_edge": list(
+            include.filter(regex=f"cluster_outer-{size}-\d+-\d+-\d+")
+        ),
+        "random_30": list(include.filter(regex=f"random_.*-{size}-30-\d+-\d+")),
+        "cluster_30": list(include.filter(regex=f"cluster_.*-{size}-30-\d+-\d+")),
+        "random_50": list(include.filter(regex=f"random_.*-{size}-50-\d+-\d+")),
+        "cluster_50": list(include.filter(regex=f"cluster_.*-{size}-50-\d+-\d+")),
+        "random_90": list(include.filter(regex=f"random_.*-{size}-90-\d+-\d+")),
+        "cluster_90": list(include.filter(regex=f"cluster_.*-{size}-90-\d+-\d+")),
     }
 
     include2 = instance_count[["id", "notes"]].copy()
@@ -188,11 +194,9 @@ def b_group_averages(validated=True):
             # When none of the Expt B tests have been run
             pass
 
-    include2 = pd.concat(
-        [include2, best_or_means_group_b(defns)], ignore_index=True
-    )
+    include2 = pd.concat([include2, best_or_means_group_b(defns)], ignore_index=True)
 
-    include2.to_csv("results/other/expt_b_group_means.csv", index=False)
+    include2.to_csv(f"results/other/expt_b_group_means_{size}.csv", index=False)
 
 
 def size_table(size):
@@ -220,6 +224,7 @@ def main():
     b_all_averages()
     for size in [10, 20, 50, 100]:
         size_table(size)
+        b_group_averages(size)
 
 
 if __name__ == "__main__":
