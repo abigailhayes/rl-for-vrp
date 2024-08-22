@@ -74,7 +74,7 @@ class RL4CO:
             )
 
     def train_model(self):
-        if self.method == "rl4co":
+        if self.method in ["rl4co", "rl4co_tsp"]:
             if self.init_method == "deepaco":
                 epochs = 1
             elif self.init_method in ["amppo", "symnco", "pomo", "mdam"]:
