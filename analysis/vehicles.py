@@ -18,9 +18,45 @@ def avg_vehicle_count(folder):
         count.append(vehicle_count(folder[key]))
     return sum(count) / len(count)
 
+
 def avg_vehicle_count_tw(subdict, variant):
     temp_dict = {k: v for k, v in subdict.items() if k.startswith(variant)}
     output = avg_vehicle_count(temp_dict)
+    return output
+
+
+def avg_vehicle_count_bestor(expt):
+    json_path = f"results/other/or_results_{expt}.json"
+    with open(json_path) as json_data:
+        data = json.load(json_data)
+
+    output = {}
+    for folder in data:
+        count = []
+        try:
+            for key in folder:
+                count.append(vehicle_count(folder[key]["route"]))
+            output[folder] = sum(count) / len(count)
+        except KeyError:
+            output[folder] = 0
+
+    return pd.DataFrame.from_dict([output])
+
+
+def avg_vehicle_count_tw_bestor():
+    json_path = f"results/other/or_results_c.json"
+    with open(json_path) as json_data:
+        data = json.load(json_data)
+
+    output = {}
+    for key in data:
+        for variant in ["RC1", "RC2", "R1", "R2", "C1", "C2"]:
+            new_key = variant + "_" + str(key)
+            try:
+                temp_dict = {k: v["route"] for k, v in data[key].items() if k.startswith(variant)}
+                output[new_key] = avg_vehicle_count(temp_dict)
+            except KeyError:
+                output[new_key] = 0
     return output
 
 
@@ -64,6 +100,10 @@ def all_vehicle_counts(experiment, validated=True):
             # When none of the tests have been run
             pass
 
+    include = pd.concat(
+        [include, avg_vehicle_count_bestor(experiment)], ignore_index=True
+    )
+
     include.to_csv(f"results/other/expt_{experiment}_vehicles.csv", index=False)
 
 
@@ -95,5 +135,7 @@ def all_vehicle_counts_c():
         except (ValueError, FileNotFoundError):
             # When none of the tests have been run
             pass
+
+    include = pd.concat([include, avg_vehicle_count_tw_bestor()], ignore_index=True)
 
     include.to_csv(f"results/other/expt_c_vehicles.csv", index=False)
