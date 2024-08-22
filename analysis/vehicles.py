@@ -30,7 +30,7 @@ def avg_vehicle_count_bestor(expt):
     with open(json_path) as json_data:
         data = json.load(json_data)
 
-    output = {}
+    output = {'id': 0}
     for folder in data:
         count = []
         try:
@@ -48,7 +48,7 @@ def avg_vehicle_count_tw_bestor():
     with open(json_path) as json_data:
         data = json.load(json_data)
 
-    output = {}
+    output = {'id': 0}
     for key in data:
         for variant in ["RC1", "RC2", "R1", "R2", "C1", "C2"]:
             new_key = variant + "_" + str(key)
