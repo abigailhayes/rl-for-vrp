@@ -34,8 +34,8 @@ def avg_vehicle_count_bestor(expt):
     for folder in data:
         count = []
         try:
-            for key in folder:
-                count.append(vehicle_count(folder[key]["route"]))
+            for key in data[folder]:
+                count.append(vehicle_count(data[folder][key]["route"]))
             output[folder] = sum(count) / len(count)
         except KeyError:
             output[folder] = 0
@@ -57,7 +57,7 @@ def avg_vehicle_count_tw_bestor():
                 output[new_key] = avg_vehicle_count(temp_dict)
             except KeyError:
                 output[new_key] = 0
-    return output
+    return pd.DataFrame.from_dict([output])
 
 
 def all_vehicle_counts(experiment, validated=True):
