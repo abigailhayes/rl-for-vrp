@@ -3,7 +3,7 @@ import pandas as pd
 
 def make_table(filename, problem):
     if problem == "cvrp":
-        items = [0, 74, 100, 90, 76, 101, 99, 80, 103, 77, 102, 97, 81, 64, 104]
+        items = [0, 74, 100, 90, 76, 101, 99, 77, 102, 97, 80, 103, 81, 64, 104]
     elif problem == "cvrptw":
         items = [0, 46, 49, 108, 83, 65, 89, 67]
 
