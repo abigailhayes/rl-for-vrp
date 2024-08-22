@@ -10,9 +10,10 @@ from vrplib import write_solution
 class VRPInstance:
     """A class for storing a VRP instance.
     - instance: need to provide an instance as input when creating"""
+
     def __init__(self, instance):
         self.method = None
-        self.task = instance['type']
+        self.task = instance["type"]
         self.perc = None
         self.sol_routes = None
         self.sol_cost = None
@@ -20,12 +21,12 @@ class VRPInstance:
         self.polars = None
         self.seed = 0
         self.instance = instance
-        self.capacity = instance['capacity']
-        self.demand = instance['demand']
-        self.distance = instance['edge_weight']
-        self.dimension = instance['dimension']
-        self.coords = instance['node_coord']
-        self.name = instance['name']
+        self.capacity = instance["capacity"]
+        self.demand = instance["demand"]
+        self.distance = instance["edge_weight"]
+        self.dimension = instance["dimension"]
+        self.coords = instance["node_coord"]
+        self.name = instance["name"]
         self.routes = []
         self.sol = False
 
@@ -37,7 +38,7 @@ class VRPInstance:
         """Calculate the total cost of a solution to an instance"""
         costs = 0
         for r in routes:
-            for i, j in pairwise([0]+r+[0]):
+            for i, j in pairwise([0] + r + [0]):
                 costs += self.distance[i][j]
         return costs
 
@@ -48,39 +49,47 @@ class VRPInstance:
     def add_sol(self, solution):
         """Add solution data for the instance"""
         self.sol = True
-        self.sol_cost = solution['cost']
-        self.sol_routes = solution['routes']
+        self.sol_cost = solution["cost"]
+        self.sol_routes = solution["routes"]
 
     def compare_cost(self):
         """Compare the current solution to the optimum"""
         self.get_cost()
-        self.perc = (self.cost-self.sol_cost)/self.sol_cost
+        self.perc = (self.cost - self.sol_cost) / self.sol_cost
 
     def _gen_tsp_instance(self, cluster, tsp_type):
         """Takes a list of nodes and prepares an instance for giving to TSPInstance"""
         cluster = [0] + cluster
-        instance = {'cluster': cluster,
-                    'dimension': len(cluster),
-                    'distance': self.distance[np.ix_(cluster, cluster)],
-                    'coords': self.coords[cluster]}
-        if tsp_type == 'standard':
+        instance = {
+            "cluster": cluster,
+            "dimension": len(cluster),
+            "distance": self.distance[np.ix_(cluster, cluster)],
+            "coords": self.coords[cluster],
+        }
+        if tsp_type == "standard":
             return TSPInstance(instance)
-        if tsp_type == 'GENI':
+        if tsp_type == "GENI":
             return GENI(instance)
 
     def polar_coord(self):
-        """Calculate the polar co-ordinate, and sort with a reference to the node id."""
-        depot = self.coords[0]
-        polars = np.append(0, np.arctan((self.coords[1:, 1] - depot[1]) / (self.coords[1:, 0] - depot[0])))
-        index = np.arange(polars.shape[0])  # create index array for indexing
+        """Calculate the polar co-ordinates, and sort with a reference to the node id."""
+        depot = self.coords[0]  # Reference point for polar coordinates
+        polars = np.arctan2(self.coords[1:, 1] - depot[1], self.coords[1:, 0] - depot[0])
+
+        # Combine polar angles and indices, and sort by angles
+        index = np.arange(1, polars.shape[0] + 1)
         polars2 = np.c_[polars, index]
         self.polars = polars2[polars2[:, 0].argsort()]
 
     def save_solution(self):
         """Save the solution, can then be used for plotting."""
-        filepath = f'results/{self.task}/{self.method}/solutions'
+        filepath = f"results/{self.task}/{self.method}/solutions"
         os.makedirs(filepath, exist_ok=True)
-        write_solution(path=f'{filepath}/{self.name}-{self.seed}.sol', routes=self.routes, data={'cost': self.cost})
+        write_solution(
+            path=f"{filepath}/{self.name}-{self.seed}.sol",
+            routes=self.routes,
+            data={"cost": self.cost},
+        )
 
 
 class NodePair:
@@ -91,7 +100,9 @@ class NodePair:
         self.j = j
         self.routes = routes
         self.route_i, self.route_j = self._get_route(self.i), self._get_route(self.j)
-        self.pos_i, self.pos_j = self._pos_check(self.route_i, self.i), self._pos_check(self.route_j, self.j)
+        self.pos_i, self.pos_j = self._pos_check(self.route_i, self.i), self._pos_check(
+            self.route_j, self.j
+        )
 
     def _get_route(self, node):
         """Get the current route the nodes of interest are in"""
