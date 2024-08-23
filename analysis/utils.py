@@ -107,12 +107,12 @@ def validate_dict(route_dict, test_set):
     return output
 
 
-def validate_dict_tw(route_dict):
+def validate_dict_tw(route_dict, size):
     """Check the validity of a route dictionary for a particular folder of instances"""
     output = 0
     for key in route_dict:
         routes = route_dict[key]
-        data = vrplib.read_instance(f"instances/CVRPTW/Solomon/{key}", instance_format='solomon')
+        data = instance_utils.shrink_twinstance(vrplib.read_instance(f"instances/CVRPTW/Solomon/{key}", instance_format='solomon'), size)
         output += validate_routes_tw(routes, data)
     return output
 

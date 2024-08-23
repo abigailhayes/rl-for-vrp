@@ -55,7 +55,7 @@ def validate_row_tw(ident):
                 temp_dict = {
                     k: v for k, v in data[key].items() if k.startswith(variant)
                 }
-                output[new_key] = validate_dict_tw(temp_dict)
+                output[new_key] = validate_dict_tw(temp_dict, key)
     except (ValueError, OSError):
         pass
     return pd.DataFrame.from_dict([output])
