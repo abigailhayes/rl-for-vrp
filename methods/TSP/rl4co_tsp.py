@@ -10,8 +10,8 @@ from methods.sweep import Sweep
 class RL4CO_TSP(RL4CO):
     """Adapting the RL4CO setup for when the problem is treated as 2-step."""
 
-    def __init__(self, problem, init_method, customers, seed, ident, decode="greedy"):
-        super().__init__(problem, init_method, customers, seed, ident, decode)
+    def __init__(self, method, problem, init_method, customers, seed, ident, decode="greedy"):
+        super().__init__(method, problem, init_method, customers, seed, ident, decode)
         self.clusters = None
         self.env = TSPEnv(generator_params={"num_loc": self.customers})
 

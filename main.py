@@ -91,6 +91,7 @@ def main():
             args["method_settings"]["decode"] = "greedy"
 
         model = rl4co_tsp.RL4CO_TSP(
+            args["method"],
             args["problem"],
             args["method_settings"]["init_method"],
             args["method_settings"]["customers"],
