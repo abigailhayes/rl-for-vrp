@@ -55,7 +55,7 @@ def validate_row_tw(ident):
                 temp_dict = {
                     k: v for k, v in data[key].items() if k.startswith(variant)
                 }
-                output[new_key] = validate_dict_tw(temp_dict, key)
+                output[new_key] = validate_dict_tw(temp_dict)
     except (ValueError, OSError):
         pass
     return pd.DataFrame.from_dict([output])
@@ -96,7 +96,7 @@ def validate_cvrptw():
 
     for ident in targets:
         valid_df = pd.concat(
-            [valid_df, validate_row(settings_df, ident)], ignore_index=True
+            [valid_df, validate_row_tw(ident)], ignore_index=True
         )
 
     # Save output

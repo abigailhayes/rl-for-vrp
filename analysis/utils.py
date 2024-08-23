@@ -112,7 +112,7 @@ def validate_dict_tw(route_dict):
     output = 0
     for key in route_dict:
         routes = route_dict[key]
-        data = vrplib.read_instance(f"instances/CVRPTW/Solomon/{key}")
+        data = vrplib.read_instance(f"instances/CVRPTW/Solomon/{key}", instance_format='solomon')
         output += validate_routes_tw(routes, data)
     return output
 
