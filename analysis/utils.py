@@ -66,6 +66,34 @@ def validate_routes(routes, demand, capacity):
     return 1
 
 
+def validate_routes_tw(routes, data):
+    # First check basic demand requirements
+    if validate_routes(routes, data["demand"], data["capacity"]) == 0:
+        return 0
+    # Since demand is compliant, now check time windows
+    else:
+        # Route by route
+        for route in routes:
+            current_time = 0
+            working_route = [0] + route + [0]
+            # Move through nodes on route
+            for i in range(len(working_route)):
+                if i == 0:
+                    continue
+                # Add on travel time and check if within time window, waiting if needed
+                current_time += data["edge_weight"][
+                    working_route[i], working_route[i - 1]
+                ]
+                if current_time > data["time_window"][working_route[i], 1]:
+                    return 0
+                elif current_time < data["time_window"][working_route[i], 0]:
+                    current_time = data["time_window"][working_route[i], 0]
+                # Add on service time
+                current_time += data["service_time"][working_route[i]]
+        # When no time violations
+        return 1
+
+
 def validate_dict(route_dict, test_set):
     """Check the validity of a route dictionary for a particular folder of instances"""
     output = 0
@@ -76,6 +104,16 @@ def validate_dict(route_dict, test_set):
         routes = route_dict[key]
         data = vrplib.read_instance(f"instances/CVRP/{test_set}/{key}")
         output += validate_routes(routes, data["demand"], data["capacity"])
+    return output
+
+
+def validate_dict_tw(route_dict):
+    """Check the validity of a route dictionary for a particular folder of instances"""
+    output = 0
+    for key in route_dict:
+        routes = route_dict[key]
+        data = vrplib.read_instance(f"instances/CVRPTW/Solomon/{key}")
+        output += validate_routes_tw(routes, data)
     return output
 
 
@@ -221,7 +259,11 @@ def best_or_means_group_b(defns):
     for key, item in defns.items():
         if verify[key] == 1:
             avgs[key] = average_distance_multi(
-                {j: {k: v["value"] for k, v in data[j].items() if len(v) > 0} for j in data}, item
+                {
+                    j: {k: v["value"] for k, v in data[j].items() if len(v) > 0}
+                    for j in data
+                },
+                item,
             )
 
     return pd.DataFrame.from_dict([avgs])
