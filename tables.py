@@ -8,9 +8,12 @@ def make_table(filename, problem):
         items = [0, 46, 49, 108, 83, 65, 89, 67]
 
     data = pd.merge(
-        pd.read_csv("results/other/settings.csv")[["id", "method", "init_method", "customers"]],
+        pd.read_csv("results/other/settings.csv")[
+            ["id", "method", "init_method", "customers"]
+        ],
         pd.read_csv(f"results/other/{filename}.csv"),
-        on="id", how='outer'
+        on="id",
+        how="outer",
     )
     data = data[data["id"].isin(items)]
     data["id"] = pd.Categorical(data["id"], categories=items, ordered=True)
@@ -20,6 +23,9 @@ def make_table(filename, problem):
 
 
 def make_tables():
+    make_table("validate_count", "cvrp")
+    make_table("validate_count_tw", "cvrptw")
+
     make_table("expt_b_group_means_10", "cvrp")
     make_table("expt_b_group_means_20", "cvrp")
     make_table("expt_b_group_means_50", "cvrp")
