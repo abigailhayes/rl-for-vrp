@@ -6,7 +6,7 @@ import pandas as pd
 from analysis.utils import check_instances, average_distance_tw, best_or_means
 
 
-def c_all_averages(validated=False):
+def c_all_averages(validated=True):
     """Get the averages for all experiment C instance types"""
     if validated:  # No validation set up yet
         instance_count = pd.read_csv("results/other/validate_count_tw.csv")

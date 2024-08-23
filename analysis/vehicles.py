@@ -30,7 +30,7 @@ def avg_vehicle_count_bestor(expt):
     with open(json_path) as json_data:
         data = json.load(json_data)
 
-    output = {'id': 0}
+    output = {"id": 0}
     for folder in data:
         count = []
         try:
@@ -48,12 +48,14 @@ def avg_vehicle_count_tw_bestor():
     with open(json_path) as json_data:
         data = json.load(json_data)
 
-    output = {'id': 0}
+    output = {"id": 0}
     for key in data:
         for variant in ["RC1", "RC2", "R1", "R2", "C1", "C2"]:
             new_key = variant + "_" + str(key)
             try:
-                temp_dict = {k: v["route"] for k, v in data[key].items() if k.startswith(variant)}
+                temp_dict = {
+                    k: v["route"] for k, v in data[key].items() if k.startswith(variant)
+                }
                 output[new_key] = avg_vehicle_count(temp_dict)
             except KeyError:
                 output[new_key] = 0
@@ -107,8 +109,11 @@ def all_vehicle_counts(experiment, validated=True):
     include.to_csv(f"results/other/expt_{experiment}_vehicles.csv", index=False)
 
 
-def all_vehicle_counts_c():
-    instance_count = pd.read_csv("results/other/instance_count_tw.csv")
+def all_vehicle_counts_c(validated=True):
+    if validated:
+        instance_count = pd.read_csv("results/other/validate_count_tw.csv")
+    else:
+        instance_count = pd.read_csv("results/other/instance_count_tw.csv")
 
     include = instance_count.drop(["id", "notes"], axis=1)
     for column_name in list(include):
