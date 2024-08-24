@@ -251,7 +251,7 @@ def plot_epochs():
 
             groups = ["RC1", "RC2", "R1", "R2", "C1", "C2"]
             averages_c = {}
-            sizes = ['25', '50', '100']
+            sizes = ["25", "50", "100"]
             for size in sizes:
                 averages_c[size] = {}
                 for key in data:
@@ -386,6 +386,68 @@ def stats_b_sizes():
     print(f"R-squared: {r2:.4f}")
 
 
+def distance_vs_vehicles(expt):
+    if expt in ["a", "c"]:
+        distances = pd.read_csv(f"analysis/tables/expt_{expt}_means.csv").drop(
+            ["notes"], axis=1
+        )
+        vehicles = pd.read_csv(f"analysis/tables/expt_{expt}_vehicles.csv").drop(
+            ["notes"], axis=1
+        )
+
+    distances_long = pd.melt(
+        distances,
+        id_vars=["id", "method", "init_method", "customers"],
+        var_name="variable",
+        value_name="distances",
+    )
+    vehicles_long = pd.melt(
+        vehicles,
+        id_vars=["id", "method", "init_method", "customers"],
+        var_name="variable",
+        value_name="vehicles",
+    )
+
+    merged_df = pd.merge(
+        distances_long,
+        vehicles_long,
+        on=["id", "method", "init_method", "customers", "variable"],
+    )
+    merged_df["init_method"] = merged_df["init_method"].fillna("ortools")
+    merged_df = merged_df[merged_df["vehicles"] != 0]
+    merged_df = merged_df[merged_df["init_method"] != "mdam"]
+
+    unique_methods = merged_df["init_method"].unique()
+    colors = plt.cm.get_cmap("viridis", len(unique_methods)).colors
+    color_map = {method: colors[i] for i, method in enumerate(unique_methods)}
+
+    plt.figure(figsize=(10, 6))
+    for method, color in color_map.items():
+        subset = merged_df[merged_df["init_method"] == method]
+        plt.scatter(
+            x=subset["distances"],
+            y=subset["vehicles"],
+            color=color,
+            label=method,
+            s=100,
+            alpha=0.75,
+        )
+    if expt != "a":
+        plt.title(
+            f"Average distances vs Average number of vehicles for Experiment {expt.upper()}"
+        )
+        plt.xlabel("Average distances")
+    else:
+        plt.title(
+            f"Average proportion worse than optima vs Average number of vehicles for Experiment {expt.upper()}"
+        )
+        plt.xlabel("Average proportion")
+    plt.ylabel("Average number of vehicles")
+    plt.legend(title="Method")
+    plt.savefig(f"analysis/plots/distance_vs_vehicles_{expt}.png")
+    plt.close()
+
+
 def main():
     sizes = [10, 20, 50, 100]
     cust_distn = ["random", "cluster"]
@@ -405,6 +467,9 @@ def main():
     plot_seed("cluster")
 
     plot_epochs()
+
+    distance_vs_vehicles("a")
+    distance_vs_vehicles('c')
 
 
 if __name__ == "__main__":
