@@ -38,6 +38,11 @@ class ORtools(utils.VRPInstance):
         else:
             self.method = self.init_method
         random.seed(self.seed)
+        if self.task == "CVRPTW":
+            self.scaler = 500
+            self.distance = (self.distance * self.scaler).astype(int)
+            self.time_window = self.time_window * self.scaler
+            self.service_time = self.service_time * self.scaler
 
     def print_cvrp_solution(self, solution):
         """Prints solution on console."""
@@ -74,7 +79,7 @@ class ORtools(utils.VRPInstance):
 
     def print_cvrptw_solution(self, solution):
         """Prints solution on console."""
-        print(f"Objective: {solution.ObjectiveValue()/1000}")
+        print(f"Objective: {solution.ObjectiveValue()/self.scaler}")
         time_dimension = self.routing.GetDimensionOrDie("Time")
         total_time = 0
         total_load = 0
@@ -116,10 +121,7 @@ class ORtools(utils.VRPInstance):
         if self.task == "CVRP":
             return int(self.distance[from_node][to_node] * 1000)
         elif self.task == "CVRPTW":
-            return (
-                int(self.distance[from_node][to_node] + self.service_time["to_index"])
-                * 1000
-            )
+            return int(self.distance[from_node][to_node] + self.service_time[from_node])
 
     def _demand_callback(self, from_index):
         """Returns the demand of the node."""
@@ -130,7 +132,7 @@ class ORtools(utils.VRPInstance):
     def _min_vehicles(self):
         """Minimum number of vehicles that should be attempted"""
         if self.instance["type"] == "CVRPTW":
-            self.no_vehicles = self.instance["dimension"]
+            self.no_vehicles = int(self.instance["dimension"] / 2)
         else:
             self.no_vehicles = 2 * ceil(sum(self.demand) / self.capacity)
 
@@ -154,11 +156,9 @@ class ORtools(utils.VRPInstance):
             time = "Time"
             self.routing.AddDimension(
                 self.routing.RegisterTransitCallback(self._distance_callback),
-                180,  # allow waiting time
-                int(
-                    self.time_window[self.depot][1] - self.time_window[self.depot][0]
-                ),  # maximum time per vehicle
-                True,  # Don't force start cumul to zero.
+                1000000000000000,  # allow waiting time
+                1000000000000000,  # maximum time per vehicle
+                False,  # Don't force start cumul to zero.
                 time,
             )
             time_dimension = self.routing.GetDimensionOrDie(time)
@@ -228,10 +228,7 @@ class ORtools(utils.VRPInstance):
             )
 
         self.search_parameters.log_search = False
-        if self.task == "CVRP":
-            self.search_parameters.time_limit.FromSeconds(60)
-        else:
-            self.search_parameters.time_limit.FromSeconds(180)
+        self.search_parameters.time_limit.FromSeconds(60)
 
     def run_all(self):
         self._min_vehicles()
@@ -242,6 +239,10 @@ class ORtools(utils.VRPInstance):
             self.print_cvrp_solution(solution)
         elif self.task == "CVRPTW":
             self.print_cvrptw_solution(solution)
+        if self.task == "CVRPTW":
+            self.distance = self.distance/self.scaler
+            self.time_window = self.time_window/self.scaler
+            self.service_time = self.service_time/self.scaler
         self.get_cost()
         if self.sol:
             self.compare_cost()
