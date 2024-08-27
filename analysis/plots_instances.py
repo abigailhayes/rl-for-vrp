@@ -106,8 +106,8 @@ def generate_plots(expt, expt_ids: list, instance_name, instance_set, demand=Fal
     short_name = instance_name.replace(".vrp", "")
 
     # Create an instance specific folder
-    if not os.path.exists(f"plots/{short_name}"):
-        os.makedirs(f"plots/{short_name}")
+    if not os.path.exists(f"analysis/plots/{short_name}"):
+        os.makedirs(f"analysis/plots/{short_name}")
 
     # Make sure the folder path is complete
     if expt == "b":
