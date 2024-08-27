@@ -5,6 +5,7 @@ import vrplib
 import json
 import os
 import argparse
+import pandas as pd
 
 
 def parse_plots():
@@ -25,7 +26,7 @@ def parse_plots():
     return args
 
 
-def plot_solution(instance, solution, name, experiment_id, demand=False):
+def plot_solution(instance, solution, name, experiment_id, expt_desc, demand=False):
     """
     Plot the routes of the passed-in solution.
     Adapted from https://alns.readthedocs.io/en/stable/examples/capacitated_vehicle_routing_problem.html
@@ -50,9 +51,7 @@ def plot_solution(instance, solution, name, experiment_id, demand=False):
         **kwargs,
     )
 
-    ax.set_title(f"{name}: Expt {experiment_id}\n Total distance: {solution['cost']}")
-    ax.set_xlabel("X-coordinate")
-    ax.set_ylabel("Y-coordinate")
+    ax.set_title(f"{name}: {expt_desc}\n Total distance: {int(solution['cost'])}")
 
     if demand:
         for n, [xi, yi] in enumerate(instance["node_coord"][1:]):
@@ -65,7 +64,8 @@ def plot_instance(instance, name, demand=False):
     """
     Plot the nodes of the passed-in instance.
     """
-    fig, ax = plt.subplots(figsize=(12, 10))
+    fig, ax = plt.subplots(figsize=(6, 5))
+    plt.rcParams.update({"font.size": 16})
     cmap = matplotlib.cm.rainbow(np.linspace(0, 1, 1))
 
     ax.scatter(
@@ -84,14 +84,34 @@ def plot_instance(instance, name, demand=False):
     )
 
     ax.set_title(f"{name}\n Customers: {instance['dimension'] - 1}")
-    ax.set_xlabel("X-coordinate")
-    ax.set_ylabel("Y-coordinate")
 
     if demand:
         for n, [xi, yi] in enumerate(instance["node_coord"][1:]):
             plt.text(xi, yi, instance["demand"][n], va="bottom", ha="center")
 
     plt.savefig(f"analysis/plots/{name}/instance.jpg")
+
+
+def gen_expt_desc(settings_df, expt_id):
+    """Generating the description of the method"""
+    row = settings_df[settings_df["id"] == int(expt_id)].iloc[0]
+
+    if row["method"] == "ortools" and pd.isna(row["improve_method"]):
+        return row["init_method"].replace("_", " ").title()
+    elif row["method"] == "ortools":
+        return (
+            row["init_method"].replace("_", " ").title()
+            + " & "
+            + row["improve_method"].replace("_", " ").title()
+        )
+    elif row["method"] == "rl4co":
+        return row["init_method"].upper() + " " + str(row["customers"])
+    elif row["method"] == "rl4co_tsp":
+        return row["init_method"].upper() + " TSP " + str(row["customers"])
+    elif row["method"] == "rl4co_mini":
+        return row["init_method"].upper() + " " + str(row["customers"]) + " Mini"
+    elif row["method"] == "nazari":
+        return "Nazari " + str(row["customers"])
 
 
 def generate_plots(expt, expt_ids: list, instance_name, instance_set, demand=False):
@@ -122,10 +142,14 @@ def generate_plots(expt, expt_ids: list, instance_name, instance_set, demand=Fal
         solution = vrplib.read_solution(
             f"instances/CVRP/{instance_folder}/{short_name}.sol"
         )
-        plot_solution(instance, solution, short_name, "optimum", demand)
+        plot_solution(instance, solution, short_name, "optimum", "Optimum", demand)
+
+    # Load settings
+    settings_df = pd.read_csv("results/other/settings.csv")
 
     # A solution plot for each experiment id
     for expt_id in expt_ids:
+        print("Expt: ", expt_id)
         try:
             with open(f"results/exp_{expt_id}/routes_{expt}.json") as json_data:
                 route_file = json.load(json_data)
@@ -139,14 +163,21 @@ def generate_plots(expt, expt_ids: list, instance_name, instance_set, demand=Fal
                 ],
                 "cost": cost_file[instance_set][instance_name],
             }
-            plot_solution(instance, solution, short_name, expt_id, demand)
+            expt_desc = gen_expt_desc(settings_df, expt_id)
+            plot_solution(instance, solution, short_name, expt_id, expt_desc, demand)
         except (OSError, KeyError):
             pass
 
 
 def main():
     args = parse_plots()
-    generate_plots(args['expt'], args['expt_ids'], args['instance_name'], args['instance_set'], args['demand'])
+    generate_plots(
+        args["expt"],
+        args["expt_ids"],
+        args["instance_name"],
+        args["instance_set"],
+        args["demand"],
+    )
 
 
 if __name__ == "__main__":
