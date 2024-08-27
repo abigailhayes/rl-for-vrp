@@ -57,7 +57,9 @@ def plot_solution(instance, solution, name, experiment_id, expt_desc, demand=Fal
         for n, [xi, yi] in enumerate(instance["node_coord"][1:]):
             plt.text(xi, yi, instance["demand"][n], va="bottom", ha="center")
 
+    plt.tight_layout()
     plt.savefig(f"analysis/plots/{name}/expt_{experiment_id}.jpg")
+    plt.close(fig)
 
 
 def plot_instance(instance, name, demand=False):
