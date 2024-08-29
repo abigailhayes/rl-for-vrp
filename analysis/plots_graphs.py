@@ -448,6 +448,69 @@ def distance_vs_vehicles(expt):
     plt.close()
 
 
+def expt_c_sizes():
+
+    df = (
+        pd.read_csv(f"analysis/tables/expt_c_means.csv")
+        .drop(["notes"], axis=1)
+        .drop(index=0)
+        .reset_index(drop=True)
+    )
+    df["init_method"] = df["init_method"].fillna("OR tools")
+
+    df_long = pd.melt(
+        df,
+        id_vars=["id", "method", "init_method", "customers"],
+        var_name="Metric",
+        value_name="Value",
+    )
+    df_long = df_long[df_long["Value"] != 0].reset_index(drop=True)
+
+    # Extract the base metric name (RC1, RC2, etc.) and the size (25, 50, 100)
+    df_long[["Metric", "Size"]] = df_long["Metric"].str.extract(r"([A-Z]+[0-9]*)_(\d+)")
+
+    # Convert the Size to numeric
+    df_long["Size"] = df_long["Size"].astype(int)
+
+    # Now, plot each metric separately using plain Matplotlib
+    metrics = df_long["Metric"].unique()
+    init_methods = df_long["init_method"].unique()
+    color_map = {method: plt.cm.tab10(i) for i, method in enumerate(init_methods)}
+
+    # Loop through each metric
+    for metric in metrics:
+        plt.figure(figsize=(10, 6))
+
+        # Loop through each unique id
+        for ident in df_long["id"].unique():
+            # Filter data for the current metric and id
+            model_data = df_long[
+                (df_long["Metric"] == metric) & (df_long["id"] == ident)
+            ]
+
+            # Get the color based on init_method
+            color = color_map[model_data["init_method"].iloc[0]]
+
+            # Plot with shared color based on init_method
+            plt.plot(
+                model_data["Size"],
+                model_data["Value"],
+                label=model_data["init_method"].iloc[0],
+                color=color,
+            )
+
+        # Create a custom legend with unique init_method values
+        handles, labels = plt.gca().get_legend_handles_labels()
+        by_label = dict(zip(labels, handles))
+        plt.legend(by_label.values(), by_label.keys(), title="init_method")
+
+        plt.title(f"{metric} vs Size")
+        plt.xlabel("Size")
+        plt.ylabel(f"{metric} Value")
+        plt.savefig(f"analysis/plots/expt_c_{metric}.png")
+        plt.close()
+
+
 def main():
     sizes = [10, 20, 50, 100]
     cust_distn = ["random", "cluster"]
@@ -469,7 +532,9 @@ def main():
     plot_epochs()
 
     distance_vs_vehicles("a")
-    distance_vs_vehicles('c')
+    distance_vs_vehicles("c")
+
+    expt_c_sizes()
 
 
 if __name__ == "__main__":
