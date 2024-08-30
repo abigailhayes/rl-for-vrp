@@ -18,7 +18,7 @@ def main():
     ]["id"].tolist()
     or_ids_tw = settings_df[settings_df["method"] == "ortools"][
         settings_df["problem"] == "CVRPTW"
-    ]["id"].tolist()
+    ][settings_df["id"]>140]["id"].tolist()
 
     # Load in results for all OR tools CVRP experiments
     all_or = {}
