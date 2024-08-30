@@ -477,24 +477,49 @@ def expt_c_sizes():
     init_methods = df_long["init_method"].unique()
     color_map = {method: plt.cm.tab10(i) for i, method in enumerate(init_methods)}
 
-    # Loop through each metric
     for metric in metrics:
         plt.figure(figsize=(10, 6))
 
+        # Filter the baseline data for 'OR tools'
+        or_tools_data = df_long[
+            (df_long["Metric"] == metric) & (df_long["init_method"] == "OR tools")
+        ]
+        or_tools_data = or_tools_data.set_index("Size")
+
         # Loop through each unique id
         for ident in df_long["id"].unique():
+            if ident == 0:
+                continue
+
             # Filter data for the current metric and id
             model_data = df_long[
                 (df_long["Metric"] == metric) & (df_long["id"] == ident)
             ]
+
+            # Extract the Size indices for both dataframes
+            model_size_index = model_data["Size"].values
+            or_tools_size_index = or_tools_data.index.values
+
+            # Find common sizes
+            common_sizes = pd.Index(model_size_index).intersection(or_tools_size_index)
+
+            # Filter the data to include only the common sizes
+            model_data = model_data.set_index("Size").loc[common_sizes]
+            or_tools_data_aligned = or_tools_data.loc[common_sizes]
+
+            # Calculate the percentage difference compared to OR tools
+            percentage_diff = (
+                100 * (model_data["Value"] - or_tools_data_aligned["Value"])
+                / or_tools_data_aligned["Value"]
+            )
 
             # Get the color based on init_method
             color = color_map[model_data["init_method"].iloc[0]]
 
             # Plot with shared color based on init_method
             plt.plot(
-                model_data["Size"],
-                model_data["Value"],
+                model_data.index,
+                percentage_diff,
                 label=model_data["init_method"].iloc[0],
                 color=color,
             )
@@ -502,11 +527,11 @@ def expt_c_sizes():
         # Create a custom legend with unique init_method values
         handles, labels = plt.gca().get_legend_handles_labels()
         by_label = dict(zip(labels, handles))
-        plt.legend(by_label.values(), by_label.keys(), title="init_method")
+        plt.legend(by_label.values(), by_label.keys(), title="Method")
 
         plt.title(f"{metric} vs Size")
         plt.xlabel("Size")
-        plt.ylabel(f"{metric} Value")
+        plt.ylabel(f"Percentage above 'OR tools'")
         plt.savefig(f"analysis/plots/expt_c_{metric}.png")
         plt.close()
 
