@@ -1,3 +1,5 @@
+"""Code for implementing RL4CO methods on the TSP problem after clustering."""
+
 import torch
 from einops import repeat
 
@@ -16,6 +18,7 @@ class RL4CO_TSP(RL4CO):
         self.env = TSPEnv(generator_params={"num_loc": self.customers})
 
     def routing(self, out):
+        """Extracting the route from the model output."""
         current = []
         for node in out["actions"][0]:
             current.append(int(node))

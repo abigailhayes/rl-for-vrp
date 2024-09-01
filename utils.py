@@ -12,6 +12,7 @@ from methods.own import Own
 
 
 def parse_experiment():
+    """Parsing details for an experiment using main.py"""
     # To handle dictionary input
     class ParseKwargs(argparse.Action):
         def __call__(self, parser, namespace, values, option_string=None):

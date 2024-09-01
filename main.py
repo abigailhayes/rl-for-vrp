@@ -1,3 +1,5 @@
+"""Code for running the main experiments. Should be run from the commandline, specifying arguments for parse_experiment()."""
+
 # Import
 
 from methods.or_tools import ORtools
