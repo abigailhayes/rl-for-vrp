@@ -4,6 +4,7 @@ import analysis.experiment_a as expt_a
 import analysis.experiment_b as expt_b
 import analysis.experiment_c as expt_c
 import analysis.best_or_tools as ortools
+import analysis.vehicles as vehicles
 
 
 def main():
@@ -16,6 +17,10 @@ def main():
     ic.main()
     print("Complete")
     print("*****")
+
+    print("Best OR tools")
+    ortools.main()
+    print("Complete")
 
     print("Expt A - all averages")
     expt_a.a_all_averages()
@@ -31,6 +36,7 @@ def main():
     for size in [10, 20, 50, 100]:
         print(size)
         expt_b.size_table(size)
+        expt_b.b_group_averages(size)
     print("Complete")
     print("*****")
 
@@ -38,8 +44,13 @@ def main():
     expt_c.c_all_averages()
     print("Complete")
 
-    print("Best OR tools")
-    ortools.main()
+    print("Vehicle counts")
+    print("A:")
+    vehicles.all_vehicle_counts("a")
+    print("B:")
+    vehicles.all_vehicle_counts("b")
+    print("C:")
+    vehicles.all_vehicle_counts_c()
     print("Complete")
 
 

@@ -66,6 +66,34 @@ def validate_routes(routes, demand, capacity):
     return 1
 
 
+def validate_routes_tw(routes, data):
+    # First check basic demand requirements
+    if validate_routes(routes, data["demand"], data["capacity"]) == 0:
+        return 0
+    # Since demand is compliant, now check time windows
+    else:
+        # Route by route
+        for route in routes:
+            current_time = 0
+            working_route = [0] + route + [0]
+            # Move through nodes on route
+            for i in range(len(working_route)):
+                if i == 0:
+                    continue
+                # Add on travel time and check if within time window, waiting if needed
+                current_time += data["edge_weight"][
+                    working_route[i], working_route[i - 1]
+                ]
+                if current_time > data["time_window"][working_route[i], 1]:
+                    return 0
+                elif current_time < data["time_window"][working_route[i], 0]:
+                    current_time = data["time_window"][working_route[i], 0]
+                # Add on service time
+                current_time += data["service_time"][working_route[i]]
+        # When no time violations
+        return 1
+
+
 def validate_dict(route_dict, test_set):
     """Check the validity of a route dictionary for a particular folder of instances"""
     output = 0
@@ -79,11 +107,30 @@ def validate_dict(route_dict, test_set):
     return output
 
 
+def validate_dict_tw(route_dict, size):
+    """Check the validity of a route dictionary for a particular folder of instances"""
+    output = 0
+    for key in route_dict:
+        routes = route_dict[key]
+        data = instance_utils.shrink_twinstance(vrplib.read_instance(f"instances/CVRPTW/Solomon/{key}", instance_format='solomon'), size)
+        output += validate_routes_tw(routes, data)
+    return output
+
+
 def average_distance(folder_dict: dict):
     """Given a dictionary with entries for each instance, takes the mean of the values"""
     output = []
     for key in folder_dict:
         output.append(folder_dict[key])
+    return sum(output) / len(output)
+
+
+def average_distance_multi(dict, keys):
+    """Given a dictionary with entries for each instance, takes the mean of the values"""
+    output = []
+    for key in keys:
+        for key2 in dict[key]:
+            output.append(dict[key][key2])
     return sum(output) / len(output)
 
 
@@ -162,7 +209,7 @@ def best_or_means(experiment, instance_count):
             if verify[key] == 1:
                 if key == "CMT":
                     compare_dict = {
-                        inner_key: data[key][inner_key]['value']
+                        inner_key: data[key][inner_key]["value"]
                         for inner_key in [
                             "CMT1.vrp",
                             "CMT2.vrp",
@@ -174,14 +221,49 @@ def best_or_means(experiment, instance_count):
                         ]
                     }
                 else:
-                    compare_dict = {k: v['value'] for k, v in data[key].items()}
+                    compare_dict = {k: v["value"] for k, v in data[key].items()}
                 working = []
                 for new_key in compare_dict:
                     working.append(
-                        (compare_dict[new_key] - optima[key][new_key]) / optima[key][new_key]
+                        (compare_dict[new_key] - optima[key][new_key])
+                        / optima[key][new_key]
                     )
                 avgs[key] = mean(working)
             else:
                 avgs[key] = 0
+
+    return pd.DataFrame.from_dict([avgs])
+
+
+def best_or_means_group_b(defns):
+    json_path = f"results/other/or_results_b.json"
+    output = {}
+    try:
+        with open(json_path) as json_data:
+            data = json.load(json_data)
+        for key in data:
+            output[key] = len(data[key])
+    except ValueError:
+        pass
+
+    verify = {}
+    for key, item in defns.items():
+        test = 1
+        for col in item:
+            if output[col] < 100:
+                test = 0
+        else:
+            verify[key] = test
+
+    avgs = {"id": 0, "notes": "OR tools best"}
+    for key, item in defns.items():
+        if verify[key] == 1:
+            avgs[key] = average_distance_multi(
+                {
+                    j: {k: v["value"] for k, v in data[j].items() if len(v) > 0}
+                    for j in data
+                },
+                item,
+            )
 
     return pd.DataFrame.from_dict([avgs])

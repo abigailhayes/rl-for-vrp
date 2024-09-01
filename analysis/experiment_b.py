@@ -7,6 +7,8 @@ from analysis.utils import (
     check_instances,
     average_distance,
     best_or_means,
+    average_distance_multi,
+    best_or_means_group_b,
 )
 
 
@@ -65,6 +67,7 @@ def b_best():
         json.dump(optima_b, f, indent=2)
     df = pd.DataFrame(best_b, columns=["id"])
     df.to_csv("results/other/best_b.csv", index=False)
+
 
 def best_b_means():
     # Load in relevant best b results
@@ -129,6 +132,73 @@ def b_all_averages(validated=True):
     include.to_csv("results/other/expt_b_means.csv", index=False)
 
 
+def b_group_averages(size, validated=True):
+    """Get the averages for all experiment B instance types"""
+    if validated:
+        instance_count = pd.read_csv("results/other/validate_count.csv")
+    else:
+        instance_count = pd.read_csv("results/other/instance_count.csv")
+
+    # Get a dataframe showing where averages should be taken
+    include = instance_count.drop(
+        ["A", "B", "E", "F", "M", "P", "CMT", "id", "notes"], axis=1
+    )
+    include = include.drop(index=0, axis=0)
+    for column_name in list(include):
+        include[column_name] = check_instances(include, column_name)
+
+    # dictionary to define relations
+    defns = {
+        "random_random": list(include.filter(regex=f"random_random-{size}-\d+-\d+-\d+")),
+        "cluster_random": list(
+            include.filter(regex=f"cluster_random-{size}-\d+-\d+-\d+")
+        ),
+        "random_centre": list(include.filter(regex=f"random_centre-{size}-\d+-\d+-\d+")),
+        "cluster_centre": list(
+            include.filter(regex=f"cluster_centre-{size}-\d+-\d+-\d+")
+        ),
+        "random_edge": list(include.filter(regex=f"random_outer-{size}-\d+-\d+-\d+")),
+        "cluster_edge": list(
+            include.filter(regex=f"cluster_outer-{size}-\d+-\d+-\d+")
+        ),
+        "random_30": list(include.filter(regex=f"random_.*-{size}-30-\d+-\d+")),
+        "cluster_30": list(include.filter(regex=f"cluster_.*-{size}-30-\d+-\d+")),
+        "random_50": list(include.filter(regex=f"random_.*-{size}-50-\d+-\d+")),
+        "cluster_50": list(include.filter(regex=f"cluster_.*-{size}-50-\d+-\d+")),
+        "random_90": list(include.filter(regex=f"random_.*-{size}-90-\d+-\d+")),
+        "cluster_90": list(include.filter(regex=f"cluster_.*-{size}-90-\d+-\d+")),
+    }
+
+    include2 = instance_count[["id", "notes"]].copy()
+    include2 = include2.drop(index=0, axis=0)
+    # Need to sum over relevant columns
+    for key, item in defns.items():
+        include2[key] = include[item].sum(axis=1)
+
+    # Now convert to binary
+    include2.iloc[:, 2:] = include2.iloc[:, 2:].apply(
+        lambda x: (x == x.max()).astype(int)
+    )
+
+    # Now go through and get averages
+    for index, row in include2.iterrows():
+        print(row["id"])
+        try:
+            with open(f'results/exp_{row["id"]}/results_b.json') as json_data:
+                data = json.load(json_data)
+            if pd.isna(row["notes"]):
+                for key, item in defns.items():
+                    if row[key] == 1:
+                        include2.loc[index, key] = average_distance_multi(data, item)
+        except ValueError:
+            # When none of the Expt B tests have been run
+            pass
+
+    include2 = pd.concat([include2, best_or_means_group_b(defns)], ignore_index=True)
+
+    include2.to_csv(f"results/other/expt_b_group_means_{size}.csv", index=False)
+
+
 def size_table(size):
     """Look at instance sets of a specific size"""
     # Read in data
@@ -154,6 +224,7 @@ def main():
     b_all_averages()
     for size in [10, 20, 50, 100]:
         size_table(size)
+        b_group_averages(size)
 
 
 if __name__ == "__main__":
