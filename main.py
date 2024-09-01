@@ -5,7 +5,6 @@ import methods.nazari.nazari as nazari
 import methods.rl4co_run as rl4co_run
 import methods.TSP.rl4co_tsp as rl4co_tsp
 import utils
-from rl4co_cost_fix import cost_fix
 
 import os
 import random
