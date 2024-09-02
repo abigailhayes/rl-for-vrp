@@ -26,7 +26,7 @@ def parse_experiment():
     parser.add_argument("--seed", help="Specify random seed")
     parser.add_argument("--problem", help="Specify task. Options: 'CVRP', 'CVRPTW")
     parser.add_argument("--training", default=None, help="Specify training data - not used")
-    parser.add_argument("--method", default="nazari", help="Specify solution method. Options: 'nazari', 'ortools', 'rl4co', 'rl4co_tsp'")
+    parser.add_argument("--method", default="nazari", help="Specify solution method. Options: 'nazari', 'ortools', 'rl4co', 'rl4co_tsp', 'rl4co_mini' (reduced epochs)")
     parser.add_argument(
         "--method_settings",
         default={},
