@@ -1,3 +1,5 @@
+"""Code for running most of the analysis, apart from graph plotting. Generates results csvs."""
+
 import analysis.validity_check as vc
 import analysis.instance_count as ic
 import analysis.experiment_a as expt_a

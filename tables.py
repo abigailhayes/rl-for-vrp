@@ -1,3 +1,5 @@
+"""Code for simplifying the results data to just the required information. Need to update the ids used."""
+
 import pandas as pd
 
 

@@ -12,6 +12,7 @@ from methods.own import Own
 
 
 def parse_experiment():
+    """Parsing details for an experiment using main.py"""
     # To handle dictionary input
     class ParseKwargs(argparse.Action):
         def __call__(self, parser, namespace, values, option_string=None):
@@ -23,9 +24,9 @@ def parse_experiment():
     """Parse arguments for an experiment run"""
     parser = argparse.ArgumentParser(description="Experiment arguments")
     parser.add_argument("--seed", help="Specify random seed")
-    parser.add_argument("--problem", help="Specify task. Options: 'CVRP'")
-    parser.add_argument("--training", default=None, help="Specify training data")
-    parser.add_argument("--method", default="nazari", help="Specify solution method")
+    parser.add_argument("--problem", help="Specify task. Options: 'CVRP', 'CVRPTW")
+    parser.add_argument("--training", default=None, help="Specify training data - not used")
+    parser.add_argument("--method", default="nazari", help="Specify solution method. Options: 'nazari', 'ortools', 'rl4co', 'rl4co_tsp', 'rl4co_mini' (reduced epochs)")
     parser.add_argument(
         "--method_settings",
         default={},
@@ -34,7 +35,7 @@ def parse_experiment():
         action=ParseKwargs,
     )
     parser.add_argument(
-        "--testing", default=[], help="Specify test sets", type=str, nargs="*"
+        "--testing", default=[], help="Specify test sets. Options: A, B, E, F, P, M, CMT and generate for CVRP, 25, 50 and 100 for CVRP-TW", type=str, nargs="*"
     )
     parser.add_argument(
         "--device",

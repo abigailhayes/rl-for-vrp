@@ -1,6 +1,6 @@
 # Reinforcement Learning for the Vehicle Routing Problem
 
-My project compares reinforcement learning methods for the vehicle routing problem (VRP) with more traditional methods. This is currently implemented for the standard capacitated VRP (CVRP) and for the variant with time windows (CVRP-TW).
+My project compares reinforcement learning methods for the vehicle routing problem (VRP) with more traditional methods. This is carried out for the standard capacitated VRP (CVRP) and for the variant with time windows (CVRP-TW).
 
 ## Instance generation
 
@@ -34,7 +34,7 @@ Additionally, the sweep heuristic is implemented through [sweep.py](methods/swee
 
 The first to be implemented is from the work of Nazari et al. and is based on [https://github.com/OptMLGroup/VRP-RL](https://github.com/OptMLGroup/VRP-RL). More information in [Nazari README](methods/nazari/README.md). There are issues with the validity of solutions returned by this method.
 
-The remaining RL methods are implemented via the rl4co module in [rl4co_run.py](methods/rl4co_run.py). The methods implemented are 'am', 'amppo', 'pomo', 'symnco' and 'mdam'. Additionally, the customer nodes can first be clustered and then routed with travelling sales person (TSP) RL methods.
+The remaining RL methods are implemented via the rl4co module in [rl4co_run.py](methods/rl4co_run.py). The methods implemented are 'am', 'amppo', 'pomo', 'symnco' and 'mdam'. Additionally, the customer nodes can first be clustered and then routed with travelling sales person (TSP) RL methods by specifying the method as 'rl4co_tsp'.
 
 ## Analysis
 
@@ -50,3 +50,8 @@ There is additional code to conduct analysis of the results.
 * [am_epochs.py](analysis/am_epochs.py) has code for comparing results with different numbers of epochs in training
 * [plots_graphs.py](analysis/plots_graphs.py) has code for plotting various graphs of results
 * [plots_instances.py](analysis/plots_instances.py) has code for drawing the routes produced by various methods
+* [vehicles.py](analysis/vehicles.py) collects data on the number of vehicles used in the solutions provided by different methods
+
+## Running code
+
+Training and testing the models or baselines is done using [main.py](main.py). This can be run in the command line, with the experimental details set based on the information in parse_experiment() in [utils.py](utils.py).

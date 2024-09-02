@@ -1,3 +1,5 @@
+"""Code for using the sweep method, and any further methods that might be developed."""
+
 from methods.cw_savings import CWSavings
 
 

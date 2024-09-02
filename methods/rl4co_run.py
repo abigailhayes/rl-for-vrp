@@ -1,3 +1,5 @@
+"""Code for using the RL4CO module for RL models."""
+
 import torch
 from einops import repeat
 from itertools import pairwise
@@ -30,6 +32,7 @@ class RL4CO:
             self.env = CVRPTWEnv(generator_params={"num_loc": self.customers})
 
     def set_model(self):
+        """Establish model settings."""
         if self.init_method == "am":
             self.model = AttentionModel(
                 self.env,
@@ -74,6 +77,7 @@ class RL4CO:
             )
 
     def train_model(self):
+        """Set training settings and run."""
         if self.method in ["rl4co", "rl4co_tsp"]:
             if self.init_method == "deepaco":
                 epochs = 1
@@ -106,6 +110,7 @@ class RL4CO:
         return coord_scaled
 
     def routing(self, out):
+        """Extract route from model output."""
         # Routing
         self.routes = []
         current = []
@@ -131,13 +136,6 @@ class RL4CO:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         policy = self.model.policy
         policy = policy.to(device)
-
-        # Print tensor shapes
-        # print(f"coords: {coords.shape}")
-        # print(f"coords_norm: {coords_norm.shape}")
-        # print(f"demand: {demand.shape}")
-        # print(f"durations: {durations.shape if self.problem == 'CVRPTW' else 'N/A'}")
-        # print(f"time_windows: {time_windows.shape if self.problem == 'CVRPTW' else 'N/A'}")
 
         # Prepare the tensordict
         if self.problem == "CVRP":
@@ -166,16 +164,6 @@ class RL4CO:
             td["action_mask"] = action_mask
             td["depot"] = coords[0].unsqueeze(0)
             td["current_loc"] = coords[0].unsqueeze(0)
-            # print(td)
-
-        # Print the tensordict to debug
-        # print(f"td['locs']: {td['locs'].shape}")
-        # print(f"td['demand']: {td['demand'].shape}")
-        # print(f"td['visited']: {td['visited'].shape}")
-        # print(f"td['action_mask']: {td['action_mask'].shape}")
-        # if self.problem == "CVRPTW":
-        #    print(f"td['durations']: {td['durations'].shape}")
-        #    print(f"td['time_windows']: {td['time_windows'].shape}")
 
         # Get the solution from the policy
         with torch.no_grad():

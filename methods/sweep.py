@@ -1,3 +1,5 @@
+"""Code for implementing the Sweep heuristic."""
+
 import methods.utils as utils
 import numpy as np
 
